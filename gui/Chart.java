@@ -97,6 +97,7 @@ public class Chart extends JPanel {
         g2.draw( new Rectangle2D.Double( xx- 5, 0.65* d.height,
                                          d.width- 150+ day_width,
                                          0.2* d.height));
+        g2.setPaint( Color.lightGray);
         // draw 3 strings and a line
         g2.drawString( String.format( "%,.0fK", max_vol/ 1000),
                        ( float) ( d.width- 95+ day_width),
@@ -106,6 +107,7 @@ public class Chart extends JPanel {
                        ( float) ( 0.75* d.height+ 0.25* fm.getHeight()));
         g2.drawString( "0", ( float) ( d.width- 95+ day_width),
                        ( float) ( 0.85* d.height+ 0.25* fm.getHeight()));
+        g2.setPaint( Color.darkGray);
         g2.draw( new Line2D.Double( xx- 5, 0.75* d.height,
                                     d.width- 100+ day_width, 0.75* d.height));
 
@@ -115,10 +117,12 @@ public class Chart extends JPanel {
         double step= 0;
         for( ix= 0; ix<= 10; ix++) {
             step= 0.1* d.height+ 0.05* ix* d.height;
+            g2.setPaint( Color.lightGray);
             g2.drawString( String.format( "%.2f",
                                           ( max_price- ix* price_rg/ 10)),
                            ( float) ( d.width- 95+ day_width),
                            ( float) ( step+ 0.25* fm.getHeight()));
+	    g2.setPaint( Color.darkGray);
             g2.draw( new Line2D.Double( xx, step, d.width- 100+ day_width,
                                         step));
         }
@@ -129,6 +133,7 @@ public class Chart extends JPanel {
                                             xx+ eps, 0.6* d.height));
                 g2.draw( new Line2D.Double( xx+ eps, 0.65* d.height,
                                             xx+ eps, yy));
+                g2.setPaint( Color.lightGray);
                 g2.drawString( labels.get( ix),
                                ( float)( xx- fm.charWidth( '1')*
                                          ( labels.get( ix).length()/ 2- 1)),
@@ -175,7 +180,7 @@ public class Chart extends JPanel {
         }
 
         g2.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 16));
-        g2.setPaint( Color.gray);
+        g2.setPaint( Color.lightGray);
         g2.drawString( stk_name.toUpperCase(), d.width/2- 50, 15);         
     }
     

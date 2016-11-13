@@ -101,10 +101,10 @@ public class ACtx implements KeyListener, ActionListener {
         fc.setCurrentDirectory( new File( "C:/users/ctin/python/out"));
         open_b= new JButton( "Open");
         open_b.addActionListener(this);
-        addC( jpu, open_b, 15, 625, 160, 20);
+        addC( jpu, open_b, 15, 925, 160, 20);
         int hd11= 2* resX/ 3;
         jld= new JLDisplay( hd11- 10, 220, 10);
-        addC( jpu, jld, 5, 85, resX- hd11- 40, 530);
+        addC( jpu, jld, 5, 85, resX- hd11- 40, 830);
         jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
         JSplitPane jspu= new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
                                          jtp_jl, jpu);

@@ -104,10 +104,11 @@ public class JLDisplay extends JScrollPane {
             if( ix== jlr.s)
                 append( String.format( "%8.2f", jlr.c),
                         fCol( jlr.s, jlr.p), bCol( jlr.s, jlr.p), jlr.p);
-            else append( "       ");
+            else append( "        ");
             append( "|");
         } 
-        append( " "); append( name);
+        append( " ");
+        append( String.format( "%6.2f", jlr.arg));
     }
      
     public void printRecBody2( StxJL jlr) { 
@@ -116,10 +117,11 @@ public class JLDisplay extends JScrollPane {
                 append( String.format( "%8.2f", jlr.c2),
                         fCol( jlr.s2, jlr.p2),
                         bCol( jlr.s2, jlr.p2), jlr.p2);
-            else append( "       ");
+            else append( "        ");
             append( "|");
         } 
-        append( " "); append( name);
+        append( " ");
+        append( String.format( "%6.2f", jlr.arg));
     }
     public void printBody( StxJL jlr) { 
         int ix;
@@ -129,7 +131,8 @@ public class JLDisplay extends JScrollPane {
                         fCol( jlr.s, jlr.p), bCol( jlr.s, jlr.p), jlr.p);
             else append( "      ");
             append( "|");
-        } 
+        }
+        append( String.format( "%6.2f", jlr.arg));
     }
      
     public void printBody2( StxJL jlr) { 
@@ -141,6 +144,7 @@ public class JLDisplay extends JScrollPane {
             else append( "      ");
             append( "|");
         } 
+        append( String.format( "%6.2f", jlr.arg));
     }
     public void printRec( StxJL jlr) { printRec( jlr, 0); }
     public void printRec( StxJL jlr, int pos) {
@@ -221,7 +225,7 @@ public class JLDisplay extends JScrollPane {
     }
 
     public void printSmallRec2( StxJL jlr) { 
-    	printSmallRec2( jlr, false);
+        printSmallRec2( jlr, false);
     }
     
     public void printSmallRec2( StxJL jlr, boolean piv_only) { 
@@ -255,9 +259,11 @@ public class JLDisplay extends JScrollPane {
         sjl.jl( ed);
         List<Integer> pivots= sjl.pivots( pivs, false);
         for( int piv: pivots)
-            printSmallRec2( sjl.data( piv));
+            printRec( sjl.data( piv));
+            // printSmallRec2( sjl.data( piv));
         for( int ix= pivots.get( pivots.size()- 1)+ 1; ix< sjl.size(); ++ix)
-            printSmallRec2( sjl.data( ix));
+            printRec( sjl.data( ix));
+            // printSmallRec2( sjl.data( ix));
         printLastLine( sjl.lastDay(), sjl.avgRg()); append("\n");
     }
 }
