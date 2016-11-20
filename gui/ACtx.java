@@ -32,10 +32,11 @@ public class ACtx implements KeyListener, ActionListener {
     static JFrame jf; 
     private JTabbedPane jtp_jl;
     private JPanel jpu;
-    private JTextField etf, ntf, dtf, jlf, jlp;
+    private JTextField etf, ntf, dtf, jlf1, jlf2, jlp;
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
     private JButton open_b, fwd, bak;
-    private JLDisplay jld;
+    private JLDisplay jld1, jld2;
+    private JLabel jlfl1, jlfl2;
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
     JFileChooser fc;
@@ -61,7 +62,10 @@ public class ACtx implements KeyListener, ActionListener {
         etf.setName( "ETF"); etf.addKeyListener( this);
         ntf= new JTextField(); ntf.setCaretColor( Color.lightGray);
         dtf= new JTextField( "20"); dtf.setCaretColor( Color.lightGray);
-        jlf= new JTextField( "1.5"); jlf.setCaretColor( Color.lightGray);
+        jlf1= new JTextField( "0.5"); jlf1.setCaretColor( Color.lightGray);
+        jlf2= new JTextField( "1.5"); jlf2.setCaretColor( Color.lightGray);
+	jlfl1= new JLabel("Factor: "+ jlf1.getText());
+	jlfl2= new JLabel("Factor: "+ jlf2.getText());
         jlp= new JTextField( "16"); jlp.setCaretColor( Color.lightGray);
         jpu= new JPanel( null);
         jpu.setBackground( Color.black);
@@ -103,17 +107,22 @@ public class ACtx implements KeyListener, ActionListener {
         jball.addActionListener( this);
         addC( jpu, jball, 455, 35, 55, 15);
         addC( jpu, new JLabel("JL: "), 15, 55, 25, 20);
-        addC( jpu, jlf, 40, 55, 75, 20);
-        addC( jpu, jlp, 115, 55, 50, 20);
+        addC( jpu, jlf1,  40, 55, 50, 20);
+        addC( jpu, jlf2,  90, 55, 50, 20);
+	addC( jpu, jlp,  140, 55, 50, 20);
 
         fc = new JFileChooser();
         fc.setCurrentDirectory( new File( "C:/users/ctin/python/out"));
         open_b= new JButton( "Open");
         open_b.addActionListener(this);
-        addC( jpu, open_b, 15, 925, 160, 20);
+        addC( jpu, open_b, 15, 975, 160, 20);
         int hd11= 2* resX/ 3;
-        jld= new JLDisplay( hd11- 10, 220, 10);
-        addC( jpu, jld, 5, 85, resX- hd11- 40, 830);
+        addC( jpu, jlfl1,  5, 85, 80, 20);
+        jld1= new JLDisplay( hd11- 10, 220, 10);
+        addC( jpu, jld1, 5, 105, resX- hd11- 40, 420);
+        addC( jpu, jlfl2,  5, 525, 80, 20);
+        jld2= new JLDisplay( hd11- 10, 220, 10);
+        addC( jpu, jld2, 5, 545, resX- hd11- 40, 420);
         jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
         JSplitPane jspu= new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
                                          jtp_jl, jpu);
@@ -168,8 +177,10 @@ public class ACtx implements KeyListener, ActionListener {
         String jls, s, e= etf.getText();
         String n= ntf.getText();
         int idx, w= 20, p= Integer.parseInt( jlp.getText());
-        float f= Float.parseFloat( jlf.getText());
-
+        float f1= Float.parseFloat( jlf1.getText());
+        float f2= Float.parseFloat( jlf2.getText());
+	jlfl1.setText("Factor: "+ jlf1.getText());
+	jlfl2.setText("Factor: "+ jlf2.getText());
         if( StxCal.isBusDay( e)== false)
             e= StxCal.nextBusDay( e);
         jls= ( StxCal.year( e)- 2)+ "-01-01";
@@ -181,8 +192,10 @@ public class ACtx implements KeyListener, ActionListener {
         chrt.setScale( last_scale);
         jtp_jl.add( n, chrt);
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
-        jld.runJL( n, jls, e, f, w, p);
-        jld.append( analysis( e));
+        jld1.runJL( n, jls, e, f1, w, p);
+        jld1.append( analysis( e));
+        jld2.runJL( n, jls, e, f2, w, p);
+        jld2.append( analysis( e));
     }
 
     private String analysis( String ed) {
@@ -258,7 +271,7 @@ public class ACtx implements KeyListener, ActionListener {
             }
         }
         br.close();
-        jld.append( "\nSuccessfully loaded "+ file.getAbsolutePath()+ "\n");
+        jld1.append( "\nSuccessfully loaded "+ file.getAbsolutePath()+ "\n");
     }
 
     private void moveDate( int sign) {
