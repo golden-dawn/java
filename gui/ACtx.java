@@ -64,8 +64,8 @@ public class ACtx implements KeyListener, ActionListener {
         dtf= new JTextField( "20"); dtf.setCaretColor( Color.lightGray);
         jlf1= new JTextField( "0.5"); jlf1.setCaretColor( Color.lightGray);
         jlf2= new JTextField( "1.5"); jlf2.setCaretColor( Color.lightGray);
-	jlfl1= new JLabel("Factor: "+ jlf1.getText());
-	jlfl2= new JLabel("Factor: "+ jlf2.getText());
+        jlfl1= new JLabel("Factor: "+ jlf1.getText());
+        jlfl2= new JLabel("Factor: "+ jlf2.getText());
         jlp= new JTextField( "16"); jlp.setCaretColor( Color.lightGray);
         jpu= new JPanel( null);
         jpu.setBackground( Color.black);
@@ -109,7 +109,7 @@ public class ACtx implements KeyListener, ActionListener {
         addC( jpu, new JLabel("JL: "), 15, 55, 25, 20);
         addC( jpu, jlf1,  40, 55, 50, 20);
         addC( jpu, jlf2,  90, 55, 50, 20);
-	addC( jpu, jlp,  140, 55, 50, 20);
+        addC( jpu, jlp,  140, 55, 50, 20);
 
         fc = new JFileChooser();
         fc.setCurrentDirectory( new File( "C:/users/ctin/python/out"));
@@ -179,8 +179,8 @@ public class ACtx implements KeyListener, ActionListener {
         int idx, w= 20, p= Integer.parseInt( jlp.getText());
         float f1= Float.parseFloat( jlf1.getText());
         float f2= Float.parseFloat( jlf2.getText());
-	jlfl1.setText("Factor: "+ jlf1.getText());
-	jlfl2.setText("Factor: "+ jlf2.getText());
+        jlfl1.setText("Factor: "+ jlf1.getText());
+        jlfl2.setText("Factor: "+ jlf2.getText());
         if( StxCal.isBusDay( e)== false)
             e= StxCal.nextBusDay( e);
         jls= ( StxCal.year( e)- 2)+ "-01-01";

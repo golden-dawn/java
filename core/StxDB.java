@@ -14,15 +14,19 @@ import java.util.TreeMap;
 
 public class StxDB {
 
-    private Statement s;
+    static private Statement s;
     private SimpleDateFormat sdf;
     
     public StxDB( String db_name) throws Exception {
-        Class.forName( "com.mysql.jdbc.Driver").newInstance();
-        String urlStr= "jdbc:mysql://127.0.0.1:3306/"+ db_name+
-            "?autoReconnect=true";
-        s= DriverManager.getConnection( urlStr, "root", "m1y2s3q7l8").
-            createStatement();
+        try {
+            s.getConnection();
+        } catch( Exception ex) {
+            Class.forName( "com.mysql.jdbc.Driver").newInstance();
+            String urlStr= "jdbc:mysql://127.0.0.1:3306/"+ db_name+
+                "?autoReconnect=true";
+            s= DriverManager.getConnection( urlStr, "root", "m1y2s3q7l8").
+                createStatement();
+        }
         sdf= new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss");
     }
 
@@ -88,24 +92,24 @@ public class StxDB {
     public static void main( String[] args) throws Exception {
         StxDB sdb= new StxDB( "goldendawn");
         ResultSet rset= sdb.get( "SELECT * FROM `eod` WHERE stk='NFLX'");
-//        ResultSet rset= sdb.get( "SELECT MAX(dt) FROM `options` s WHERE s.und='MSFT'");
-//        String dres= null;
+        //        ResultSet rset= sdb.get( "SELECT MAX(dt) FROM `options` s WHERE s.und='MSFT'");
+        //        String dres= null;
         String dt = null;
         float o = 0, h = 0, l = 0, c = 0, v = 0;
         while( rset.next()) {
-        	dt = rset.getString(2);
-        	o = rset.getFloat(3);
-        	h = rset.getFloat(4);
-        	l = rset.getFloat(5);
-        	c = rset.getFloat(6);
-        	v = rset.getFloat(7);
-        	StxRec sr = new StxRec(dt, o, h, l, c, v);
-        	System.err.print(sr.toString());
-        	
+            dt = rset.getString(2);
+            o = rset.getFloat(3);
+            h = rset.getFloat(4);
+            l = rset.getFloat(5);
+            c = rset.getFloat(6);
+            v = rset.getFloat(7);
+            StxRec sr = new StxRec(dt, o, h, l, c, v);
+            System.err.print(sr.toString());
+                
         }
-//            dres= rset.getString( "max(dt)");
-//        if( dres!= null)
-//            System.err.printf( "dres= %s\n", dres);
+        //            dres= rset.getString( "max(dt)");
+        //        if( dres!= null)
+        //            System.err.printf( "dres= %s\n", dres);
         // String wfn= StxTS.dbDataDir+ "test.txt";
         // PrintWriter pw= new PrintWriter( new FileWriter( wfn, false), false);
         // pw.write( "AA\t2010-10-10\tsector\tindustry\t1\n");
