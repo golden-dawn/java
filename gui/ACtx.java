@@ -33,7 +33,8 @@ public class ACtx implements KeyListener, ActionListener {
     private JTabbedPane jtp_jl;
     private JPanel jpu;
     private JTextField etf, ntf, dtf, jlf, jlp;
-    private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jball, open_b, fwd, bak;
+    private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
+    private JButton open_b, fwd, bak;
     private JLDisplay jld;
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
@@ -89,10 +90,18 @@ public class ACtx implements KeyListener, ActionListener {
         jbjl= new JButton( "JL");
         jbjl.addActionListener( this);
         addC( jpu, jbjl, 235, 35, 55, 15);
+        jb2y = new JButton( "2Y");
+        jb2y.addActionListener( this);
+        addC( jpu, jb2y, 290, 35, 55, 15);
+        jb3y= new JButton( "3Y");
+        jb3y.addActionListener( this);
+        addC( jpu, jb3y, 345, 35, 55, 15);
+        jb5y= new JButton( "5Y");
+        jb5y.addActionListener( this);
+        addC( jpu, jb5y, 400, 35, 55, 15);
         jball= new JButton( "All");
         jball.addActionListener( this);
-        addC( jpu, jball, 290, 35, 55, 15);
-
+        addC( jpu, jball, 455, 35, 55, 15);
         addC( jpu, new JLabel("JL: "), 15, 55, 25, 20);
         addC( jpu, jlf, 40, 55, 75, 20);
         addC( jpu, jlp, 115, 55, 50, 20);
@@ -272,7 +281,9 @@ public class ACtx implements KeyListener, ActionListener {
         Chart cc= ( Chart) jtp_jl.getSelectedComponent();
         if( cmd_name.equals( "1M")|| cmd_name.equals( "3M")||
             cmd_name.equals( "6M")|| cmd_name.equals( "1Y")||
-            cmd_name.equals( "JL")|| cmd_name.equals( "All")) {
+            cmd_name.equals( "JL")|| cmd_name.equals( "2Y")||
+            cmd_name.equals( "3Y")|| cmd_name.equals( "5Y")||
+            cmd_name.equals( "All")) {
             cc.setScale( cmd_name);
             last_scale= cmd_name;
         }

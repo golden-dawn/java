@@ -68,8 +68,10 @@ public class Chart extends JPanel {
         HashMap<Integer, String> labels= null;
         if( days<= 60)
             labels= setWeeklyLabels();
-        else
+        else if( days<= 756)
             labels= setMonthlyLabels();
+        else
+            labels= setYearlyLabels();
         setBackground( Color.black);
         g.setColor( getBackground());
         g.fillRect( 0, 0, d.width, d.height);
@@ -122,7 +124,7 @@ public class Chart extends JPanel {
                                           ( max_price- ix* price_rg/ 10)),
                            ( float) ( d.width- 95+ day_width),
                            ( float) ( step+ 0.25* fm.getHeight()));
-	    g2.setPaint( Color.darkGray);
+            g2.setPaint( Color.darkGray);
             g2.draw( new Line2D.Double( xx, step, d.width- 100+ day_width,
                                         step));
         }
@@ -220,6 +222,17 @@ public class Chart extends JPanel {
         return lbls;
     }
 
+    HashMap<Integer, String> setYearlyLabels() {
+        HashMap<Integer, String> lbls= new HashMap<Integer, String>();
+        for( int ix= start; ix<= end; ix++) {
+            int mm= StxCal.month( ts.get( ix).date);
+            if(( mm== 1)&& ( StxCal.month( ts.get( ix- 1).date)!= mm))
+                lbls.put( ix, new Integer( StxCal.year( ts.get( ix).date)).toString());
+        }
+        return lbls;
+    }
+
+    
     public void setScale( String scale) {
         if( scale.compareTo( "1M")== 0)
             start= end- 22;
@@ -230,7 +243,13 @@ public class Chart extends JPanel {
         else if( scale.compareTo( "1Y")== 0)
             start= end- 252;
         else if( scale.compareTo( "JL")== 0)
-            start= start0;
+            start= end- 400;
+        else if( scale.compareTo( "2Y")== 0)
+            start= end- 504;
+        else if( scale.compareTo( "3Y")== 0)
+            start= end- 756;
+        else if( scale.compareTo( "5Y")== 0)
+            start= end- 1260;
         else
             start= 0;
         if( start< 0) start= 0;
