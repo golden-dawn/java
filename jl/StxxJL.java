@@ -55,7 +55,7 @@ public class StxxJL {
 
     
     public float avgRange( List<StxRec> data, int ix, int w) {
-        float res= 0; int s= ix- w; if( s< 0) s= 0; int ww= ix- s+ 1;
+        float res= 0; int s= ix- w + 1; if( s< 0) s= 0; int ww= ix- s + 1;
         for( int ixx= s; ixx<= ix; ++ixx)
             res+= data.get( ixx).trueRange(( ixx== 0)? null: data.get( ixx- 1));
         return res/ ww;
