@@ -224,7 +224,7 @@ public class Chart extends JPanel {
 
     HashMap<Integer, String> setYearlyLabels() {
         HashMap<Integer, String> lbls= new HashMap<Integer, String>();
-        for( int ix= start; ix<= end; ix++) {
+        for( int ix= start + 1; ix<= end; ix++) {
             int mm= StxCal.month( ts.get( ix).date);
             if(( mm== 1)&& ( StxCal.month( ts.get( ix- 1).date)!= mm))
                 lbls.put( ix, new Integer( StxCal.year( ts.get( ix).date)).toString());
