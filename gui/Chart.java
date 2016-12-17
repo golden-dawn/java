@@ -36,10 +36,11 @@ public class Chart extends JPanel {
     }
 
     public Chart( String stk_name, String sd, String ed,
-                  boolean adjust, TreeMap<String, Integer> trend) {
+                  boolean adjust, String eod_tbl, String split_tbl,
+                  TreeMap<String, Integer> trend) {
         super( null);
         this.stk_name= stk_name;
-        ts= StxTS.loadEod( stk_name, null, null);        
+        ts= StxTS.loadEod( stk_name, null, null, eod_tbl, split_tbl);        
         start= ts.find( sd, 1); start0= start;
         end= ts.find( ed, -1);
         ts.setDay( ed, -1, 1);

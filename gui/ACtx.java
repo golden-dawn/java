@@ -32,7 +32,7 @@ public class ACtx implements KeyListener, ActionListener {
     static JFrame jf; 
     private JTabbedPane jtp_jl;
     private JPanel jpu;
-    private JTextField etf, ntf, dtf, jlf1, jlf2, jlp;
+    private JTextField etf, ntf, dtf, dbetf, dbstf, jlf1, jlf2, jlp;
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
     private JButton open_b, fwd, bak;
     private JLDisplay jld1, jld2;
@@ -62,6 +62,8 @@ public class ACtx implements KeyListener, ActionListener {
         etf.setName( "ETF"); etf.addKeyListener( this);
         ntf= new JTextField(); ntf.setCaretColor( Color.lightGray);
         dtf= new JTextField( "20"); dtf.setCaretColor( Color.lightGray);
+        dbetf= new JTextField( "eod"); dbetf.setCaretColor( Color.lightGray);
+        dbstf= new JTextField( "split"); dbstf.setCaretColor( Color.lightGray);
         jlf1= new JTextField( "0.5"); jlf1.setCaretColor( Color.lightGray);
         jlf2= new JTextField( "1.5"); jlf2.setCaretColor( Color.lightGray);
         jlfl1= new JLabel("Factor: "+ jlf1.getText());
@@ -78,6 +80,8 @@ public class ACtx implements KeyListener, ActionListener {
         addC( jpu, fwd, 175, 12, 50, 15);
         addC( jpu, bak, 225, 12, 50, 15);
         addC( jpu, dtf, 275, 7, 50, 25);
+        addC( jpu, dbetf, 325, 7, 50, 25);
+        addC( jpu, dbstf, 375, 7, 50, 25);
 
         jb1m= new JButton( "1M");
         jb1m.addActionListener( this);
@@ -188,7 +192,8 @@ public class ACtx implements KeyListener, ActionListener {
         idx= jtp_jl.indexOfTab( n);
         if( idx!= -1)
             jtp_jl.remove( idx); 
-        chrt= new Chart( n, s, e, true, trend_map);
+        chrt= new Chart( n, s, e, true, dbetf.getText(), dbstf.getText(), 
+                         trend_map);
         chrt.setScale( last_scale);
         jtp_jl.add( n, chrt);
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));

@@ -13,7 +13,7 @@ public class StxTS<T extends StxRecord> {
     public static String dbDataDir=
         "/Program Files/MySQL/MySQL Server 5.7/data/goldendawn/";
     //"/ProgramData/MySQL/MySQL Server 5.6/data/goldendawn/";
-    private String stk, sd, ed, d_1;
+    private String stk, sd, ed, d_1, eod_tbl, split_tbl;
     private TreeMap<Integer, Integer> gaps;
     private TreeMap<String, Integer> adj_splits;
     private List<T> data;
@@ -24,7 +24,18 @@ public class StxTS<T extends StxRecord> {
     private static StxCal cal= null;
 
     public StxTS( String stk, String sd, String ed) {
+        init(stk, sd, ed, "eod", "split");
+    }
+
+    public StxTS( String stk, String sd, String ed, String eod_tbl, 
+                  String split_tbl ) {
+        init(stk, sd, ed, eod_tbl, split_tbl);
+    }
+
+    private void init(String stk, String sd, String ed, String eod_tbl, 
+                      String split_tbl) {
         this.stk= stk; this.sd= sd; this.ed= ed;
+        this.eod_tbl = eod_tbl; this.split_tbl = split_tbl;
         if( cal== null) {
             cal= new StxCal( new GregorianCalendar().get( Calendar.YEAR)+ 2);
             System.err.println( "Created new StxCal");
@@ -39,7 +50,8 @@ public class StxTS<T extends StxRecord> {
     public void loadSplitsDivis() {
         splits= new TreeMap<String, Float>();
         //divis= new TreeMap<String, Float>();
-        StringBuilder q1= new StringBuilder( "SELECT * FROM split WHERE ");
+        StringBuilder q1= new StringBuilder( "SELECT * FROM ");
+        q1.append(this.split_tbl).append(" WHERE ");
         //StringBuilder q2=new StringBuilder("SELECT t FROM Dividend t WHERE ");
         q1.append( "stk='").append( stk).append( "' ");
         // q2.append( "t.id.stk='").append( stk).append( "' ");
@@ -230,15 +242,20 @@ public class StxTS<T extends StxRecord> {
     }
 
     static public StxTS<StxRec> loadEod( String stk) {
-        return loadEod( stk, null, null);
+        return loadEod( stk, null, null, "eod", "split");
     }
     static public StxTS<StxRec> loadEod( String stk, String s_date) {
-        return loadEod( stk, s_date, null);
+        return loadEod( stk, s_date, null, "eod", "split");
     }
     static public StxTS<StxRec> loadEod( String stk, String sd, String ed) {
-        StxTS<StxRec> ts= new StxTS<StxRec>( stk, sd, ed);
+        return loadEod( stk, sd, ed, "eod", "split");
+    }
+    static public StxTS<StxRec> loadEod( String stk, String sd, String ed, 
+                                         String eod_tbl, String split_tbl) {
+        StxTS<StxRec> ts= new StxTS<StxRec>( stk, sd, ed, eod_tbl, split_tbl);
         try {
-            StringBuilder q= new StringBuilder( "SELECT * FROM eod WHERE ");
+            StringBuilder q= new StringBuilder( "SELECT * FROM ");
+            q.append(eod_tbl).append(" WHERE ");
             q.append( "stk='").append( stk).append( "'");
             if( sd!= null) 
                 q.append( " AND dt>='"+ sd+ "'");
