@@ -251,10 +251,10 @@ public class JLDisplay extends JScrollPane {
     }
     public void setTextPanelBackground( Color col) { jtp.setBackground( col);}
     public void runJL( String stk, String sd, String ed, float ff, int w, 
-                       int pivs) {
+                       int pivs, String eod_tbl, String split_tbl) {
         clear();
         int vw= 1;              
-        StxxJL sjl= new StxxJL( stk, sd, ed, ff, w, vw);
+        StxxJL sjl= new StxxJL( stk, sd, ed, ff, w, vw, eod_tbl, split_tbl);
         sjl.jl( ed);
         List<Integer> pivots= sjl.pivots( pivs, false);
         for( int piv: pivots)

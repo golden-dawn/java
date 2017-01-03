@@ -20,8 +20,9 @@ public class StxxJL {
     private StxHL<StxRec> hl; private String stk;
     private float _f, f, avg_rg, vi; private int c= -1, w;
 
-    public StxxJL( String stk, String sd, String ed, float f, int w, int vw) {
-        data= StxTS.loadEod( stk, sd, ed);
+    public StxxJL( String stk, String sd, String ed, float f, int w, int vw,
+                   String eod_tbl, String split_tbl) {
+        data= StxTS.loadEod( stk, sd, ed, eod_tbl, split_tbl);
         this.f= f; this.w= w; this.stk= stk;
         recs= new StxData<StxJL>();
     }
@@ -298,9 +299,9 @@ public class StxxJL {
             else if( args[ ix].equals( "-date")&& ++ix< args.length)
                 run_date= args[ ix];
             else if( args[ ix].equals( "-ten")&& ++ix< args.length) {
-			}
+                        }
         }
-        StxxJL jl= new StxxJL( stk, start, end, f, w, vw);
+        StxxJL jl= new StxxJL( stk, start, end, f, w, vw, "eod", "split");
         jl.jl( run_date);
         System.err.println( jl.toString());
     }

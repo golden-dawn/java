@@ -197,9 +197,9 @@ public class ACtx implements KeyListener, ActionListener {
         chrt.setScale( last_scale);
         jtp_jl.add( n, chrt);
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
-        jld1.runJL( n, jls, e, f1, w, p);
+        jld1.runJL( n, jls, e, f1, w, p, dbetf.getText(), dbstf.getText());
         jld1.append( analysis( e));
-        jld2.runJL( n, jls, e, f2, w, p);
+        jld2.runJL( n, jls, e, f2, w, p, dbetf.getText(), dbstf.getText());
         jld2.append( analysis( e));
     }
 
