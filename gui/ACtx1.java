@@ -144,6 +144,7 @@ public class ACtx1 implements KeyListener, ActionListener {
     public void keyPressed( KeyEvent e) {
         try {
             int cd= e.getKeyCode(); String src= e.getComponent().getName();
+            System.err.println("cd = " + cd);
             if( src.equals( "ETF")) {
                 String ed= etf.getText();
                 if( cd== 40) etf.setText( StxCal.prevBusDay( ed));
@@ -152,45 +153,113 @@ public class ACtx1 implements KeyListener, ActionListener {
                 //if( cd== 34) etf.setText( getAnalysisDate( ed,  1));
                 if( cd== 10) go();
             } else if(src.equals("NTF")) {
-            	if(cd == 40) {
-            		if(++crt_pos >= entries.size())
-            			crt_pos = entries.size() - 1;
-            		ntf.setText(entries.get(crt_pos)[0]);
-            		etf.setText(entries.get(crt_pos)[1]);
-            		go();
-            	}
-            	if(cd == 38) {
-            		if(--crt_pos < 0)
-            			crt_pos = 0;
-            		ntf.setText(entries.get(crt_pos)[0]);
-            		etf.setText(entries.get(crt_pos)[1]);
-            		go();
-            	}
+                if(cd == 38) {
+                    if(++crt_pos >= entries.size())
+                        crt_pos = entries.size() - 1;
+                    ntf.setText(entries.get(crt_pos)[0]);
+                    etf.setText(entries.get(crt_pos)[1]);
+                    go();
+                }
+                if(cd == 40) {
+                    if(--crt_pos < 0)
+                        crt_pos = 0;
+                    ntf.setText(entries.get(crt_pos)[0]);
+                    etf.setText(entries.get(crt_pos)[1]);
+                    go();
+                }
+                if(cd == 34) {
+                    switch(last_scale) {
+                    case "1M":
+                    case "3M":
+                        last_scale = "1M";
+                    break;
+                    case "6M":
+                        last_scale = "3M";
+                        break;
+                    case "1Y":
+                        last_scale = "6M";
+                        break;
+                    case "JL":
+                        last_scale = "1Y";
+                        break;
+                    case "2Y":
+                        last_scale = "JL";
+                        break;
+                    case "3Y":
+                        last_scale = "2Y";
+                        break;
+                    case "5Y":
+                        last_scale = "3Y";
+                        break;
+                    case "All":
+                        last_scale = "5Y";
+                        break;
+                    }
+                    go();
+                }
+                if(cd == 33) {
+                    switch(last_scale) {
+                    case "1M":
+                        last_scale = "3M";
+                        break;
+                    case "3M":
+                        last_scale = "6M";
+                        break;
+                    case "6M":
+                        last_scale = "1Y";
+                        break;
+                    case "1Y":
+                        last_scale = "JL";
+                        break;
+                    case "JL":
+                        last_scale = "2Y";
+                        break;
+                    case "2Y":
+                        last_scale = "3Y";
+                        break;
+                    case "3Y":
+                        last_scale = "5Y";
+                        break;
+                    case "5Y":
+                    case "All":
+                        last_scale = "All";
+                    break;
+                    }
+                    go();
+                }
+                if(cd == 35 || cd == 36) {
+                    int num_bds = 20;
+                    try {
+                        num_bds = Integer.parseInt(dtf.getText());
+                    } catch(Exception ex) {}
+                    etf.setText(StxCal.moveBusDays(etf.getText(), (cd == 35)? num_bds: -num_bds));
+                    go();
+                }
             }
         } catch( Exception exc) {
             exc.printStackTrace( System.err);
         }
     }
-//    private String getAnalysisDate( String ed, int dir) {
-//        String res= ed;
-//        String[] current_values = entries.get(crt_pos);
-//        if( current_values== null)
-//            return res;
-//        boolean found= false;        
-//        SortedMap<String, String[]> smap= ( dir== 1)? 
-//            analysis_file.tailMap( StxCal.nextBusDay( ed)): 
-//            analysis_file.descendingMap().tailMap( StxCal.prevBusDay( ed));
-//        for( Map.Entry<String, String[]> entry: smap.entrySet()) {
-//            found= true; String[] values= entry.getValue();
-//            for( int ix: idxf) {
-//                if(values[ix].compareTo( current_values[ ix])!= 0) {
-//                    found= false; break;
-//                }
-//            }
-//            if( found== true) { res= entry.getKey(); break;}
-//        }
-//        return res;
-//    }
+    //    private String getAnalysisDate( String ed, int dir) {
+    //        String res= ed;
+    //        String[] current_values = entries.get(crt_pos);
+    //        if( current_values== null)
+    //            return res;
+    //        boolean found= false;        
+    //        SortedMap<String, String[]> smap= ( dir== 1)? 
+    //            analysis_file.tailMap( StxCal.nextBusDay( ed)): 
+    //            analysis_file.descendingMap().tailMap( StxCal.prevBusDay( ed));
+    //        for( Map.Entry<String, String[]> entry: smap.entrySet()) {
+    //            found= true; String[] values= entry.getValue();
+    //            for( int ix: idxf) {
+    //                if(values[ix].compareTo( current_values[ ix])!= 0) {
+    //                    found= false; break;
+    //                }
+    //            }
+    //            if( found== true) { res= entry.getKey(); break;}
+    //        }
+    //        return res;
+    //    }
     public void keyReleased(KeyEvent e) {}
     public void keyTyped(KeyEvent e) {}
 
@@ -221,20 +290,20 @@ public class ACtx1 implements KeyListener, ActionListener {
         //jld2.append( analysis( e));
     }
 
-//    private String analysis( String ed) {
-//        String[] values = analysis_file.get( ed);
-//        if( values== null)
-//            return "";
-//        StringBuilder sb= new StringBuilder(); char c= ' ';
-//        for( Map.Entry<Integer, String> entry: idxd.entrySet()) {
-//            int ix= entry.getKey(); 
-//            if( ix< values.length) 
-//                sb.append( String.format( "%12s=%12s%c", entry.getValue(),
-//                                          values[ix], c));
-//            if( c== ' ') c= '\n'; else c= ' ';
-//        }
-//        return sb.toString();
-//    }
+    //    private String analysis( String ed) {
+    //        String[] values = analysis_file.get( ed);
+    //        if( values== null)
+    //            return "";
+    //        StringBuilder sb= new StringBuilder(); char c= ' ';
+    //        for( Map.Entry<Integer, String> entry: idxd.entrySet()) {
+    //            int ix= entry.getKey(); 
+    //            if( ix< values.length) 
+    //                sb.append( String.format( "%12s=%12s%c", entry.getValue(),
+    //                                          values[ix], c));
+    //            if( c== ' ') c= '\n'; else c= ' ';
+    //        }
+    //        return sb.toString();
+    //    }
 
     public void addC( JPanel p, JComponent c, int x, int y,
                       int h, int w) {
@@ -253,8 +322,8 @@ public class ACtx1 implements KeyListener, ActionListener {
         while(( line= br.readLine())!= null) {
             if( line.trim()== "") continue;
             if( !read_hdrs) {
-            	read_hdrs = true;
-            	continue;
+                read_hdrs = true;
+                continue;
             }
             String[] tokens = line.split("\\s+");
             entries.add(tokens);
