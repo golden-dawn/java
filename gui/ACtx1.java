@@ -1,6 +1,7 @@
 package gui;
 
 import core.StxCal;
+import core.StxRec;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -32,11 +33,13 @@ public class ACtx1 implements KeyListener, ActionListener {
     static JFrame jf; 
     private JTabbedPane jtp_jl;
     private JPanel jpu;
-    private JTextField etf, ntf, dtf, dbetf, dbstf, jlf1, jlf2, jlp;
+    private JTextField etf, ntf, dtf, dbetf, dbstf; //, jlf1, jlf2, jlp;
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
     private JButton open_b, fwd, bak;
-    private JLDisplay jld1, jld2;
-    private JLabel jlfl1, jlfl2;
+    private JButton db_insert_b, db_update_b, db_delete_b;
+    private JTextField db_insert_tf, db_update_tf, db_delete_tf;
+    //private JLDisplay jld1, jld2;
+    //private JLabel jlfl1, jlfl2;
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
     JFileChooser fc;
@@ -67,11 +70,11 @@ public class ACtx1 implements KeyListener, ActionListener {
         dtf= new JTextField( "20"); dtf.setCaretColor( Color.lightGray);
         dbetf= new JTextField( "eod"); dbetf.setCaretColor( Color.lightGray);
         dbstf= new JTextField( "split"); dbstf.setCaretColor( Color.lightGray);
-        jlf1= new JTextField( "0.5"); jlf1.setCaretColor( Color.lightGray);
-        jlf2= new JTextField( "1.5"); jlf2.setCaretColor( Color.lightGray);
-        jlfl1= new JLabel("Factor: "+ jlf1.getText());
-        jlfl2= new JLabel("Factor: "+ jlf2.getText());
-        jlp= new JTextField( "16"); jlp.setCaretColor( Color.lightGray);
+        //jlf1= new JTextField( "0.5"); jlf1.setCaretColor( Color.lightGray);
+        //jlf2= new JTextField( "1.5"); jlf2.setCaretColor( Color.lightGray);
+        //jlfl1= new JLabel("Factor: "+ jlf1.getText());
+        //jlfl2= new JLabel("Factor: "+ jlf2.getText());
+        //jlp= new JTextField( "16"); jlp.setCaretColor( Color.lightGray);
         jpu= new JPanel( null);
         jpu.setBackground( Color.black);
         jpu.setForeground( Color.lightGray);
@@ -113,23 +116,44 @@ public class ACtx1 implements KeyListener, ActionListener {
         jball= new JButton( "All");
         jball.addActionListener( this);
         addC( jpu, jball, 455, 35, 55, 15);
-        addC( jpu, new JLabel("JL: "), 15, 55, 25, 20);
-        addC( jpu, jlf1,  40, 55, 50, 20);
-        addC( jpu, jlf2,  90, 55, 50, 20);
-        addC( jpu, jlp,  140, 55, 50, 20);
+        //addC( jpu, new JLabel("JL: "), 15, 55, 25, 20);
+        //addC( jpu, jlf1,  40, 55, 50, 20);
+        //addC( jpu, jlf2,  90, 55, 50, 20);
+        //addC( jpu, jlp,  140, 55, 50, 20);
 
         fc = new JFileChooser();
-        fc.setCurrentDirectory( new File( "C:/users/ctin/python/out"));
+        fc.setCurrentDirectory( new File( "C:/goldendawn"));
         open_b= new JButton( "Open");
         open_b.addActionListener(this);
-        addC( jpu, open_b, 15, 975, 160, 20);
+        addC( jpu, open_b, 15, 55, 160, 20);
+        db_insert_b= new JButton( "DB Insert");
+        db_insert_b.addActionListener(this);
+        addC( jpu, db_insert_b, 15, 85, 100, 20);
+        db_insert_tf = new JTextField("");
+        db_insert_tf.setName( "DBInsert");
+        db_insert_tf.addKeyListener( this);
+        addC( jpu, db_insert_tf, 125, 85, 450, 25);
+        db_update_b= new JButton( "DB Update");
+        db_update_b.addActionListener(this);
+        addC( jpu, db_update_b, 15, 115, 100, 20);
+        db_update_tf = new JTextField("");
+        db_update_tf.setName( "DBUpdate");
+        db_update_tf.addKeyListener( this);
+        addC( jpu, db_update_tf, 125, 115, 450, 25);
+        db_delete_b= new JButton( "DB Delete");
+        db_delete_b.addActionListener(this);
+        addC( jpu, db_delete_b, 15, 145, 100, 20);
+        db_delete_tf = new JTextField("");
+        db_delete_tf.setName( "DBDelete");
+        db_delete_tf.addKeyListener( this);
+        addC( jpu, db_delete_tf, 125, 145, 450, 25);
         int hd11= 2* resX/ 3;
-        addC( jpu, jlfl1,  5, 85, 80, 20);
-        jld1= new JLDisplay( hd11- 10, 220, 10);
-        addC( jpu, jld1, 5, 105, resX- hd11- 40, 420);
-        addC( jpu, jlfl2,  5, 525, 80, 20);
-        jld2= new JLDisplay( hd11- 10, 220, 10);
-        addC( jpu, jld2, 5, 545, resX- hd11- 40, 420);
+        //addC( jpu, jlfl1,  5, 85, 80, 20);
+        //jld1= new JLDisplay( hd11- 10, 220, 10);
+        //addC( jpu, jld1, 5, 105, resX- hd11- 40, 420);
+        //addC( jpu, jlfl2,  5, 525, 80, 20);
+        //jld2= new JLDisplay( hd11- 10, 220, 10);
+        //addC( jpu, jld2, 5, 545, resX- hd11- 40, 420);
         jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
         JSplitPane jspu= new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
                                          jtp_jl, jpu);
@@ -267,11 +291,11 @@ public class ACtx1 implements KeyListener, ActionListener {
 
         String jls, s, e= etf.getText();
         String n= ntf.getText();
-        int idx, w= 20, p= Integer.parseInt( jlp.getText());
-        float f1= Float.parseFloat( jlf1.getText());
-        float f2= Float.parseFloat( jlf2.getText());
-        jlfl1.setText("Factor: "+ jlf1.getText());
-        jlfl2.setText("Factor: "+ jlf2.getText());
+        int idx, w= 20; //, p= Integer.parseInt( jlp.getText());
+        //float f1= Float.parseFloat( jlf1.getText());
+        //float f2= Float.parseFloat( jlf2.getText());
+        //jlfl1.setText("Factor: "+ jlf1.getText());
+        //jlfl2.setText("Factor: "+ jlf2.getText());
         if( StxCal.isBusDay( e)== false)
             e= StxCal.nextBusDay( e);
         jls= ( StxCal.year( e)- 2)+ "-01-01";
@@ -284,9 +308,21 @@ public class ACtx1 implements KeyListener, ActionListener {
         chrt.setScale( last_scale);
         jtp_jl.add( n, chrt);
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
-        jld1.runJL( n, jls, e, f1, w, p, dbetf.getText(), dbstf.getText());
+        String dt = etf.getText(), prev_dt = StxCal.prevBusDay(dt);
+        StxRec sr = chrt.getSR(dt), sr_1 = chrt.getSR(prev_dt);
+        String stk = ntf.getText();
+        db_insert_tf.setText
+            (String.format("insert into split values ('%s', '%s', %.4f, 0)",
+                           stk, prev_dt, sr.o / sr_1.c));
+        db_update_tf.setText
+            (String.format
+             ("update split set dt='%s' where stk='%s' and dt='%s'",
+              prev_dt, stk, dt));
+        db_delete_tf.setText(String.format
+                             ("delete from eod where stk='%s'", stk));
+        //jld1.runJL( n, jls, e, f1, w, p, dbetf.getText(), dbstf.getText());
         //jld1.append( analysis( e));
-        jld2.runJL( n, jls, e, f2, w, p, dbetf.getText(), dbstf.getText());
+        //jld2.runJL( n, jls, e, f2, w, p, dbetf.getText(), dbstf.getText());
         //jld2.append( analysis( e));
     }
 
@@ -330,7 +366,7 @@ public class ACtx1 implements KeyListener, ActionListener {
         }
         br.close();
         crt_pos = 0;
-        jld1.append( "\nSuccessfully loaded "+ file.getAbsolutePath()+ "\n");
+        //jld1.append( "\nSuccessfully loaded "+ file.getAbsolutePath()+ "\n");
     }
 
     private void moveDate( int sign) {
