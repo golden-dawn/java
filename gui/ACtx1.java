@@ -1,8 +1,5 @@
 package gui;
 
-import core.StxCal;
-import core.StxRec;
-
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +8,9 @@ import java.awt.event.KeyListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -23,11 +23,13 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+
+import core.StxCal;
+import core.StxRec;
 
 public class ACtx1 implements KeyListener, ActionListener {
     static JFrame jf; 
@@ -404,6 +406,29 @@ public class ACtx1 implements KeyListener, ActionListener {
                 e.printStackTrace( System.err);
             }
         }
+        if((ae.getSource() == db_insert_b) ||
+           (ae.getSource() == db_update_b) ||
+           (ae.getSource() == db_delete_b)) {
+            try {
+                updateDatabaseActionFile(ae);
+            } catch( Exception e) {
+                e.printStackTrace( System.err);
+            }
+        }
+    }
+
+    private void updateDatabaseActionFile(ActionEvent ae) throws IOException {
+        String db_str = "stxdb.db_write_cmd(\"{DB_CMD}\")";
+        if(ae.getSource() == db_insert_b)
+            db_str = db_str.replace("{DB_CMD}", db_insert_tf.getText());
+        else if(ae.getSource() == db_update_b)
+            db_str = db_str.replace("{DB_CMD}", db_update_tf.getText());
+        else if(ae.getSource() == db_delete_b)
+            db_str = db_str.replace("{DB_CMD}", db_delete_tf.getText());
+        PrintWriter pw = new PrintWriter
+            (new FileWriter("C:/users/ctin/python/db.py", true));
+        pw.println(db_str);
+        pw.close();
     }
 
     public static void main( String[] args) {
