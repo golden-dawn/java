@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 //import java.util.Map;
 //import java.util.SortedMap;
 import java.util.TreeMap;
@@ -30,6 +31,7 @@ import javax.swing.JTextField;
 
 import core.StxCal;
 import core.StxRec;
+import core.StxTS;
 
 public class ACtx1 implements KeyListener, ActionListener {
     static JFrame jf; 
@@ -40,6 +42,7 @@ public class ACtx1 implements KeyListener, ActionListener {
     private JButton open_b, fwd, bak;
     private JButton db_insert_b, db_update_b, db_delete_b;
     private JTextField db_insert_tf, db_update_tf, db_delete_tf;
+    private JLDisplay jld;
     //private JLDisplay jld1, jld2;
     //private JLabel jlfl1, jlfl2;
     private int resX= 1920, resY= 1080, yr;
@@ -151,6 +154,8 @@ public class ACtx1 implements KeyListener, ActionListener {
         addC( jpu, db_delete_tf, 125, 145, 450, 25);
         int hd11= 2* resX/ 3;
         //addC( jpu, jlfl1,  5, 85, 80, 20);
+        jld= new JLDisplay( hd11- 10, 220, 14);
+        addC( jpu, jld, 5, 180, resX- hd11- 40, 820);
         //jld1= new JLDisplay( hd11- 10, 220, 10);
         //addC( jpu, jld1, 5, 105, resX- hd11- 40, 420);
         //addC( jpu, jlfl2,  5, 525, 80, 20);
@@ -170,7 +175,7 @@ public class ACtx1 implements KeyListener, ActionListener {
     public void keyPressed( KeyEvent e) {
         try {
             int cd= e.getKeyCode(); String src= e.getComponent().getName();
-            System.err.println("cd = " + cd);
+            //System.err.println("cd = " + cd);
             if( src.equals( "ETF")) {
                 String ed= etf.getText();
                 if( cd== 40) etf.setText( StxCal.prevBusDay( ed));
@@ -180,6 +185,8 @@ public class ACtx1 implements KeyListener, ActionListener {
                 if( cd== 10) go();
             } else if(src.equals("NTF")) {
                 if(cd == 38) {
+                    if(entries.size() == 0)
+                        return;
                     if(++crt_pos >= entries.size())
                         crt_pos = entries.size() - 1;
                     ntf.setText(entries.get(crt_pos)[0]);
@@ -187,6 +194,8 @@ public class ACtx1 implements KeyListener, ActionListener {
                     go();
                 }
                 if(cd == 40) {
+                    if(entries.size() == 0)
+                        return;
                     if(--crt_pos < 0)
                         crt_pos = 0;
                     ntf.setText(entries.get(crt_pos)[0]);
@@ -258,8 +267,22 @@ public class ACtx1 implements KeyListener, ActionListener {
                     try {
                         num_bds = Integer.parseInt(dtf.getText());
                     } catch(Exception ex) {}
-                    etf.setText(StxCal.moveBusDays(etf.getText(), (cd == 35)? num_bds: -num_bds));
+                    etf.setText(StxCal.moveBusDays(etf.getText(), (cd == 35)?
+                                                   num_bds: -num_bds));
                     go();
+                }
+                if(cd == 112) {
+                    int sz = entries.size();
+                    if(sz == 0) return;
+                    crt_pos = 0;
+                    while(crt_pos < sz && entries.get(crt_pos)[0].compareTo
+                          (ntf.getText()) != 0)
+                        ++crt_pos;
+                    if(crt_pos == sz) crt_pos = 0;
+                    ntf.setText(entries.get(crt_pos)[0]);
+                    etf.setText(entries.get(crt_pos)[1]);
+                    go();
+                        
                 }
             }
         } catch( Exception exc) {
@@ -322,6 +345,17 @@ public class ACtx1 implements KeyListener, ActionListener {
               prev_dt, stk, dt));
         db_delete_tf.setText(String.format
                              ("delete from eod where stk='%s'", stk));
+        StxTS<StxRec> ts = chrt.ts;
+        jld.clear();
+        TreeMap<String, Float> splits = ts.getSplits();
+        jld.append("Splits\n======\n");
+        for( Map.Entry<String, Float> entry: splits.entrySet())
+            jld.append(String.format("%s: %7.4f\n", entry.getKey(),
+                                     entry.getValue()));
+        int end = ts.find(dt, 0), start = end >= 40? end - 40: 0;
+        jld.append("\nEOD\n===\n");
+        for(int ix = start; ix<= end; ++ix)
+            jld.append(ts.get(ix).toString());
         //jld1.runJL( n, jls, e, f1, w, p, dbetf.getText(), dbstf.getText());
         //jld1.append( analysis( e));
         //jld2.runJL( n, jls, e, f2, w, p, dbetf.getText(), dbstf.getText());
