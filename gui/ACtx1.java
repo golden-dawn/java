@@ -59,7 +59,7 @@ public class ACtx1 implements KeyListener, ActionListener {
     int idx= -1;
 
     public ACtx1() {
-    	Font font = new Font("Arial", Font.PLAIN,14);
+    	Font font = new Font("Courrier", Font.PLAIN, 14);
         Calendar c= new GregorianCalendar();
         yr= c.get( Calendar.YEAR);
         String d= String.format( "%d-%02d-%02d", yr,
@@ -76,6 +76,13 @@ public class ACtx1 implements KeyListener, ActionListener {
         dtf= new JTextField( "20"); dtf.setCaretColor( Color.lightGray);
         dbetf= new JTextField( "eod"); dbetf.setCaretColor( Color.lightGray);
         dbstf= new JTextField( "split"); dbstf.setCaretColor( Color.lightGray);
+        ntf.setFont(font);
+        etf.setFont(font);
+        dtf.setFont(font);
+        dbetf.setFont(font);
+        dbstf.setFont(font);
+        dtf.setCaretColor(Color.white);
+
         //jlf1= new JTextField( "0.5"); jlf1.setCaretColor( Color.lightGray);
         //jlf2= new JTextField( "1.5"); jlf2.setCaretColor( Color.lightGray);
         //jlfl1= new JLabel("Factor: "+ jlf1.getText());
@@ -86,14 +93,14 @@ public class ACtx1 implements KeyListener, ActionListener {
         jpu.setForeground( Color.lightGray);
  
         addC( jpu, ntf, 40, 7, 60, 25);
-        addC( jpu, etf, 100, 7, 75, 25);
+        addC( jpu, etf, 100, 7, 85, 25);
         fwd= new JButton( "+"); fwd.addActionListener( this);
         bak= new JButton( "-"); bak.addActionListener( this);
-        addC( jpu, fwd, 175, 12, 50, 15);
-        addC( jpu, bak, 225, 12, 50, 15);
-        addC( jpu, dtf, 275, 7, 50, 25);
-        addC( jpu, dbetf, 325, 7, 50, 25);
-        addC( jpu, dbstf, 375, 7, 50, 25);
+        addC( jpu, fwd, 185, 12, 50, 15);
+        addC( jpu, bak, 235, 12, 50, 15);
+        addC( jpu, dtf, 285, 7, 50, 25);
+        addC( jpu, dbetf, 335, 7, 80, 25);
+        addC( jpu, dbstf, 415, 7, 100, 25);
 
         jb1m= new JButton( "1M");
         jb1m.addActionListener( this);
@@ -155,6 +162,9 @@ public class ACtx1 implements KeyListener, ActionListener {
         db_delete_tf.setName( "DBDelete");
         db_delete_tf.setFont(font);
         db_delete_tf.addKeyListener( this);
+        db_insert_tf.setCaretColor(Color.white);
+        db_update_tf.setCaretColor(Color.white);
+        db_delete_tf.setCaretColor(Color.white);
         addC( jpu, db_delete_tf, 125, 145, 450, 25);
         int hd11= 2* resX/ 3;
         //addC( jpu, jlfl1,  5, 85, 80, 20);
