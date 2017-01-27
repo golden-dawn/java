@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -58,7 +59,7 @@ public class ACtx1 implements KeyListener, ActionListener {
     int idx= -1;
 
     public ACtx1() {
-        
+    	Font font = new Font("Arial", Font.PLAIN,14);
         Calendar c= new GregorianCalendar();
         yr= c.get( Calendar.YEAR);
         String d= String.format( "%d-%02d-%02d", yr,
@@ -136,6 +137,7 @@ public class ACtx1 implements KeyListener, ActionListener {
         addC( jpu, db_insert_b, 15, 85, 100, 20);
         db_insert_tf = new JTextField("");
         db_insert_tf.setName( "DBInsert");
+        db_insert_tf.setFont(font);
         db_insert_tf.addKeyListener( this);
         addC( jpu, db_insert_tf, 125, 85, 450, 25);
         db_update_b= new JButton( "DB Update");
@@ -143,6 +145,7 @@ public class ACtx1 implements KeyListener, ActionListener {
         addC( jpu, db_update_b, 15, 115, 100, 20);
         db_update_tf = new JTextField("");
         db_update_tf.setName( "DBUpdate");
+        db_update_tf.setFont(font);
         db_update_tf.addKeyListener( this);
         addC( jpu, db_update_tf, 125, 115, 450, 25);
         db_delete_b= new JButton( "DB Delete");
@@ -150,6 +153,7 @@ public class ACtx1 implements KeyListener, ActionListener {
         addC( jpu, db_delete_b, 15, 145, 100, 20);
         db_delete_tf = new JTextField("");
         db_delete_tf.setName( "DBDelete");
+        db_delete_tf.setFont(font);
         db_delete_tf.addKeyListener( this);
         addC( jpu, db_delete_tf, 125, 145, 450, 25);
         int hd11= 2* resX/ 3;
