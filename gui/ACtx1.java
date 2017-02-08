@@ -328,16 +328,15 @@ public class ACtx1 implements KeyListener, ActionListener {
 
     public void go() throws Exception {
 
-        String jls, s, e= etf.getText();
+        String s, e= etf.getText();
         String n= ntf.getText();
-        int idx, w= 20; //, p= Integer.parseInt( jlp.getText());
+        int idx; //, p= Integer.parseInt( jlp.getText());
         //float f1= Float.parseFloat( jlf1.getText());
         //float f2= Float.parseFloat( jlf2.getText());
         //jlfl1.setText("Factor: "+ jlf1.getText());
         //jlfl2.setText("Factor: "+ jlf2.getText());
         if( StxCal.isBusDay( e)== false)
             e= StxCal.nextBusDay( e);
-        jls= ( StxCal.year( e)- 2)+ "-01-01";
         s= "1962-01-01";
         idx= jtp_jl.indexOfTab( n);
         if( idx!= -1)
