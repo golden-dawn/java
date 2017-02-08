@@ -1,7 +1,5 @@
 package gui;
 
-import core.StxCal;
-
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 import javax.swing.JButton;
@@ -27,6 +23,8 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+
+import core.StxCal;
 
 public class ACtx implements KeyListener, ActionListener {
     static JFrame jf; 
@@ -41,9 +39,8 @@ public class ACtx implements KeyListener, ActionListener {
     private Chart chrt;
     JFileChooser fc;
     String last_scale= "3M";
-    TreeMap<String, String[]> analysis_file= new TreeMap<String, String[]>();
-    List<Integer> idxf= new ArrayList<Integer>();
-    TreeMap<Integer, String> idxd= new TreeMap<Integer, String>();
+    List<String[]> entries = new ArrayList<String[]>();
+    int crt_pos = 0;
     TreeMap<String, Integer> trend_map= new TreeMap<String, Integer>();
     int idx= -1;
 
@@ -58,17 +55,18 @@ public class ACtx implements KeyListener, ActionListener {
         if( StxCal.isBusDay( d)== false)
             d= StxCal.prevBusDay( d);
         jf= new JFrame( "ACTX");
-        etf= new JTextField( d); etf.setCaretColor( Color.lightGray);
+        etf= new JTextField( d); etf.setCaretColor( Color.white);
         etf.setName( "ETF"); etf.addKeyListener( this);
-        ntf= new JTextField(); ntf.setCaretColor( Color.lightGray);
-        dtf= new JTextField( "20"); dtf.setCaretColor( Color.lightGray);
-        dbetf= new JTextField( "eod"); dbetf.setCaretColor( Color.lightGray);
-        dbstf= new JTextField( "split"); dbstf.setCaretColor( Color.lightGray);
-        jlf1= new JTextField( "0.5"); jlf1.setCaretColor( Color.lightGray);
-        jlf2= new JTextField( "1.5"); jlf2.setCaretColor( Color.lightGray);
+        ntf= new JTextField(); ntf.setCaretColor( Color.white);
+        ntf.setName( "NTF"); ntf.addKeyListener( this);
+        dtf= new JTextField( "20"); dtf.setCaretColor( Color.white);
+        dbetf= new JTextField( "eod"); dbetf.setCaretColor( Color.white);
+        dbstf= new JTextField( "split"); dbstf.setCaretColor( Color.white);
+        jlf1= new JTextField( "0.5"); jlf1.setCaretColor( Color.white);
+        jlf2= new JTextField( "1.5"); jlf2.setCaretColor( Color.white);
         jlfl1= new JLabel("Factor: "+ jlf1.getText());
         jlfl2= new JLabel("Factor: "+ jlf2.getText());
-        jlp= new JTextField( "16"); jlp.setCaretColor( Color.lightGray);
+        jlp= new JTextField( "16"); jlp.setCaretColor( Color.white);
         jpu= new JPanel( null);
         jpu.setBackground( Color.black);
         jpu.setForeground( Color.lightGray);
@@ -116,8 +114,11 @@ public class ACtx implements KeyListener, ActionListener {
         addC( jpu, jlp,  140, 55, 50, 20);
 
         fc = new JFileChooser();
-        fc.setCurrentDirectory( new File( "C:/users/ctin/python/out"));
-        open_b= new JButton( "Open");
+        fc.setCurrentDirectory( new File( "C:/users/ctin/python/"));
+	fc.setAcceptAllFileFilterUsed(false);
+	fc.setMultiSelectionEnabled(false);
+	//fc.setfsetFileFilter((new FileNameExtensionFilter(wordExtDesc, ".csv"));
+	open_b= new JButton( "Open");
         open_b.addActionListener(this);
         addC( jpu, open_b, 15, 975, 160, 20);
         int hd11= 2* resX/ 3;
@@ -145,34 +146,135 @@ public class ACtx implements KeyListener, ActionListener {
                 String ed= etf.getText();
                 if( cd== 40) etf.setText( StxCal.prevBusDay( ed));
                 if( cd== 38) etf.setText( StxCal.nextBusDay( ed));
-                if( cd== 33) etf.setText( getAnalysisDate( ed, -1));
-                if( cd== 34) etf.setText( getAnalysisDate( ed,  1));
+                // if( cd== 33) etf.setText( getAnalysisDate( ed, -1));
+                // if( cd== 34) etf.setText( getAnalysisDate( ed,  1));
                 if( cd== 10) go();
+            } else if(src.equals("NTF")) {
+                if(cd == 38) {
+                    if(entries.size() == 0)
+                        return;
+                    if(++crt_pos >= entries.size())
+                        crt_pos = entries.size() - 1;
+                    ntf.setText(entries.get(crt_pos)[0]);
+                    etf.setText(entries.get(crt_pos)[1]);
+                    go();
+                }
+                if(cd == 40) {
+                    if(entries.size() == 0)
+                        return;
+                    if(--crt_pos < 0)
+                        crt_pos = 0;
+                    ntf.setText(entries.get(crt_pos)[0]);
+                    etf.setText(entries.get(crt_pos)[1]);
+                    go();
+                }
+                if(cd == 34) {
+                    switch(last_scale) {
+                    case "1M":
+                    case "3M":
+                        last_scale = "1M";
+                    break;
+                    case "6M":
+                        last_scale = "3M";
+                        break;
+                    case "1Y":
+                        last_scale = "6M";
+                        break;
+                    case "JL":
+                        last_scale = "1Y";
+                        break;
+                    case "2Y":
+                        last_scale = "JL";
+                        break;
+                    case "3Y":
+                        last_scale = "2Y";
+                        break;
+                    case "5Y":
+                        last_scale = "3Y";
+                        break;
+                    case "All":
+                        last_scale = "5Y";
+                        break;
+                    }
+                    go();
+                }
+                if(cd == 33) {
+                    switch(last_scale) {
+                    case "1M":
+                        last_scale = "3M";
+                        break;
+                    case "3M":
+                        last_scale = "6M";
+                        break;
+                    case "6M":
+                        last_scale = "1Y";
+                        break;
+                    case "1Y":
+                        last_scale = "JL";
+                        break;
+                    case "JL":
+                        last_scale = "2Y";
+                        break;
+                    case "2Y":
+                        last_scale = "3Y";
+                        break;
+                    case "3Y":
+                        last_scale = "5Y";
+                        break;
+                    case "5Y":
+                    case "All":
+                        last_scale = "All";
+                    break;
+                    }
+                    go();
+                }
+                if(cd == 35 || cd == 36) {
+                    int num_bds = 20;
+                    try {
+                        num_bds = Integer.parseInt(dtf.getText());
+                    } catch(Exception ex) {}
+                    etf.setText(StxCal.moveBusDays(etf.getText(), (cd == 35)?
+                                                   num_bds: -num_bds));
+                    go();
+                }
+                if(cd == 112) {
+                    int sz = entries.size();
+                    if(sz == 0) return;
+                    crt_pos = 0;
+                    while(crt_pos < sz && entries.get(crt_pos)[0].compareTo
+                          (ntf.getText()) != 0)
+                        ++crt_pos;
+                    if(crt_pos == sz) crt_pos = 0;
+                    ntf.setText(entries.get(crt_pos)[0]);
+                    etf.setText(entries.get(crt_pos)[1]);
+                    go();
+                        
+                }
             }
         } catch( Exception exc) {
             exc.printStackTrace( System.err);
         }
     }
-    private String getAnalysisDate( String ed, int dir) {
-        String res= ed;
-        String[] current_values = analysis_file.get( ed);
-        if( current_values== null)
-            return res;
-        boolean found= false;        
-        SortedMap<String, String[]> smap= ( dir== 1)? 
-            analysis_file.tailMap( StxCal.nextBusDay( ed)): 
-            analysis_file.descendingMap().tailMap( StxCal.prevBusDay( ed));
-        for( Map.Entry<String, String[]> entry: smap.entrySet()) {
-            found= true; String[] values= entry.getValue();
-            for( int ix: idxf) {
-                if(values[ix].compareTo( current_values[ ix])!= 0) {
-                    found= false; break;
-                }
-            }
-            if( found== true) { res= entry.getKey(); break;}
-        }
-        return res;
-    }
+    // private String getAnalysisDate( String ed, int dir) {
+    //     String res= ed;
+    //     String[] current_values = analysis_file.get( ed);
+    //     if( current_values== null)
+    //         return res;
+    //     boolean found= false;        
+    //     SortedMap<String, String[]> smap= ( dir== 1)? 
+    //         analysis_file.tailMap( StxCal.nextBusDay( ed)): 
+    //         analysis_file.descendingMap().tailMap( StxCal.prevBusDay( ed));
+    //     for( Map.Entry<String, String[]> entry: smap.entrySet()) {
+    //         found= true; String[] values= entry.getValue();
+    //         for( int ix: idxf) {
+    //             if(values[ix].compareTo( current_values[ ix])!= 0) {
+    //                 found= false; break;
+    //             }
+    //         }
+    //         if( found== true) { res= entry.getKey(); break;}
+    //     }
+    //     return res;
+    // }
     public void keyReleased(KeyEvent e) {}
     public void keyTyped(KeyEvent e) {}
 
@@ -198,25 +300,25 @@ public class ACtx implements KeyListener, ActionListener {
         jtp_jl.add( n, chrt);
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
         jld1.runJL( n, jls, e, f1, w, p, dbetf.getText(), dbstf.getText());
-        jld1.append( analysis( e));
+        // jld1.append( analysis( e));
         jld2.runJL( n, jls, e, f2, w, p, dbetf.getText(), dbstf.getText());
-        jld2.append( analysis( e));
+        // jld2.append( analysis( e));
     }
 
-    private String analysis( String ed) {
-        String[] values = analysis_file.get( ed);
-        if( values== null)
-            return "";
-        StringBuilder sb= new StringBuilder(); char c= ' ';
-        for( Map.Entry<Integer, String> entry: idxd.entrySet()) {
-            int ix= entry.getKey(); 
-            if( ix< values.length) 
-                sb.append( String.format( "%12s=%12s%c", entry.getValue(),
-                                          values[ix], c));
-            if( c== ' ') c= '\n'; else c= ' ';
-        }
-        return sb.toString();
-    }
+    // private String analysis( String ed) {
+    //     String[] values = analysis_file.get( ed);
+    //     if( values== null)
+    //         return "";
+    //     StringBuilder sb= new StringBuilder(); char c= ' ';
+    //     for( Map.Entry<Integer, String> entry: idxd.entrySet()) {
+    //         int ix= entry.getKey(); 
+    //         if( ix< values.length) 
+    //             sb.append( String.format( "%12s=%12s%c", entry.getValue(),
+    //                                       values[ix], c));
+    //         if( c== ' ') c= '\n'; else c= ' ';
+    //     }
+    //     return sb.toString();
+    // }
 
     public void addC( JPanel p, JComponent c, int x, int y,
                       int h, int w) {
@@ -228,54 +330,21 @@ public class ACtx implements KeyListener, ActionListener {
     private void loadAnalysisFile() throws Exception {
         int ret_val= fc.showOpenDialog(jf);
         if( ret_val!= JFileChooser.APPROVE_OPTION) return;
-        idxf.clear(); idxd.clear(); analysis_file.clear();
         File file= fc.getSelectedFile();
         String line= null;
-        String tcol= null; int trend_ix= -1;
-        String[] fcols= null; String[] dcols= null;
         BufferedReader br= new BufferedReader( new FileReader( file));
-        boolean read_fcols= false, read_dcols= false, read_tcols= false, 
-            read_hdrs= false;
+        boolean read_hdrs= false;
         while(( line= br.readLine())!= null) {
             if( line.trim()== "") continue;
-            if( !read_fcols) {
-                fcols= line.trim().split( ",");
-                read_fcols= true;
-            } else if( !read_dcols) {
-                dcols= line.trim().split( ",");
-                read_dcols= true;
-            } else if( !read_tcols) {
-                String[] tcols= line.trim().split( ",");
-                tcol= tcols[0].trim();
-                read_tcols= true;
-            } else if( !read_hdrs) {
-                TreeMap<String, Integer> hdrs_d=
-                    new TreeMap<String, Integer>();
-                String[] hdrs= line.trim().split( ",");
-                int ix= 0;
-                for( String hdr: hdrs) hdrs_d.put( hdr, ix++);
-                for( String col: fcols) {
-                    Integer ixf= hdrs_d.get( col);
-                    if( ixf!= null) idxf.add( ixf);
-                }
-                for( String col: dcols) {
-                    Integer ixd= hdrs_d.get( col);
-                    if( ixd!= null) idxd.put( ixd, col);
-                }
-                if( hdrs_d.get( tcol)!= null) trend_ix= hdrs_d.get( tcol);
-                read_hdrs= true;
-            } else {
-                String[] tokens= line.trim().split( ",");
-                analysis_file.put( tokens[ 0], tokens);
-                int trnd= 0;
-                if( trend_ix>= 0&& trend_ix< tokens.length) {
-                    try{ trnd= Integer.parseInt( tokens[ trend_ix]);}
-                    catch( Exception ex) {}
-                }
-                trend_map.put( tokens[ 0], trnd);
+            if( !read_hdrs) {
+                read_hdrs = true;
+                continue;
             }
+            String[] tokens = line.split(",");
+            entries.add(tokens);
         }
         br.close();
+        crt_pos = 0;
         jld1.append( "\nSuccessfully loaded "+ file.getAbsolutePath()+ "\n");
     }
 
