@@ -34,7 +34,7 @@ public class ACtx implements KeyListener, ActionListener {
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
     private JButton open_b, fwd, bak;
     private JLDisplay jld1, jld2;
-    private JLabel jlfl1, jlfl2;
+    private JLabel jlfl1, jlfl2, jstp;
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
     JFileChooser fc;
@@ -66,6 +66,7 @@ public class ACtx implements KeyListener, ActionListener {
         jlf2= new JTextField( "1.5"); jlf2.setCaretColor( Color.white);
         jlfl1= new JLabel("Factor: "+ jlf1.getText());
         jlfl2= new JLabel("Factor: "+ jlf2.getText());
+        jstp = new JLabel("");
         jlp= new JTextField( "16"); jlp.setCaretColor( Color.white);
         jpu= new JPanel( null);
         jpu.setBackground( Color.black);
@@ -115,19 +116,20 @@ public class ACtx implements KeyListener, ActionListener {
 
         fc = new JFileChooser();
         fc.setCurrentDirectory( new File( "C:/users/ctin/python/"));
-	fc.setAcceptAllFileFilterUsed(false);
-	fc.setMultiSelectionEnabled(false);
-	//fc.setfsetFileFilter((new FileNameExtensionFilter(wordExtDesc, ".csv"));
-	open_b= new JButton( "Open");
+        fc.setAcceptAllFileFilterUsed(false);
+        fc.setMultiSelectionEnabled(false);
+        //fc.setfsetFileFilter((new FileNameExtensionFilter(wordExtDesc, ".csv"));
+        open_b= new JButton( "Open");
         open_b.addActionListener(this);
-        addC( jpu, open_b, 15, 975, 160, 20);
+        addC( jpu, open_b, 15, 1000, 160, 20);
         int hd11= 2* resX/ 3;
-        addC( jpu, jlfl1,  5, 85, 80, 20);
+        addC( jpu, jstp, 5, 85, 420, 20);
+        addC( jpu, jlfl1, 5, 110, 80, 20);
         jld1= new JLDisplay( hd11- 10, 220, 10);
-        addC( jpu, jld1, 5, 105, resX- hd11- 40, 420);
-        addC( jpu, jlfl2,  5, 525, 80, 20);
+        addC( jpu, jld1, 5, 130, resX- hd11- 40, 420);
+        addC( jpu, jlfl2,  5, 550, 80, 20);
         jld2= new JLDisplay( hd11- 10, 220, 10);
-        addC( jpu, jld2, 5, 545, resX- hd11- 40, 420);
+        addC( jpu, jld2, 5, 570, resX- hd11- 40, 420);
         jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
         JSplitPane jspu= new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
                                          jtp_jl, jpu);
@@ -287,6 +289,7 @@ public class ACtx implements KeyListener, ActionListener {
         float f2= Float.parseFloat( jlf2.getText());
         jlfl1.setText("Factor: "+ jlf1.getText());
         jlfl2.setText("Factor: "+ jlf2.getText());
+	updateSetupLabel();
         if( StxCal.isBusDay( e)== false)
             e= StxCal.nextBusDay( e);
         jls= ( StxCal.year( e)- 2)+ "-01-01";
@@ -303,6 +306,57 @@ public class ACtx implements KeyListener, ActionListener {
         // jld1.append( analysis( e));
         jld2.runJL( n, jls, e, f2, w, p, dbetf.getText(), dbstf.getText());
         // jld2.append( analysis( e));
+    }
+
+    private void updateSetupLabel() {
+	String res = "";
+        if(entries.size() == 0) {
+	    jstp.setText(res);
+	    return;
+	}
+	StringBuffer sb = new StringBuffer();
+	int ix = 0;
+	for(String str: entries.get(crt_pos)) {
+	    switch(ix) {
+	    case 0:
+	    case 1:
+	    case 3:
+	    case 4:
+	    case 9:
+	    case 11:
+	    case 16:
+	    case 21:
+		sb.append(str).append(' ');
+		break;
+	    case 5:
+	    case 6:
+	    case 7:
+	    case 8:
+	    case 10:
+	    case 12:
+	    case 13:
+	    case 14:
+	    case 15:
+		float val = Float.parseFloat(str);
+		sb.append(String.format("%.2f", val)).append(' ');
+		break;
+	    case 17:
+	    case 18:
+	    case 19:
+	    case 20:
+		try {
+		    float val = Float.parseFloat(str);
+		    sb.append(String.format("%.2f", val)).append(' ');
+		} catch(Exception ex) {
+		    sb.append('   ');
+		}
+		break;
+	    default:
+		break;
+	    }
+	    ix++;
+	}
+	jstp.setText(sb.toString());
     }
 
     // private String analysis( String ed) {
