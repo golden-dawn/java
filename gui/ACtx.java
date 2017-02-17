@@ -148,10 +148,21 @@ public class ACtx implements KeyListener, ActionListener {
                 String ed= etf.getText();
                 if( cd== 40) etf.setText( StxCal.prevBusDay( ed));
                 if( cd== 38) etf.setText( StxCal.nextBusDay( ed));
-                // if( cd== 33) etf.setText( getAnalysisDate( ed, -1));
-                // if( cd== 34) etf.setText( getAnalysisDate( ed,  1));
+                if(cd == 34) {
+                    decreaseScale();
+                    go();
+                }
+                if(cd == 33) {
+                    increaseScale();
+                    go();
+                }
+                if(cd == 35 || cd == 36) {
+                    move(cd);
+                    go();
+                }
                 if( cd== 10) go();
             } else if(src.equals("NTF")) {
+                if( cd== 10) go();
                 if(cd == 38) {
                     if(entries.size() == 0)
                         return;
@@ -171,72 +182,15 @@ public class ACtx implements KeyListener, ActionListener {
                     go();
                 }
                 if(cd == 34) {
-                    switch(last_scale) {
-                    case "1M":
-                    case "3M":
-                        last_scale = "1M";
-                    break;
-                    case "6M":
-                        last_scale = "3M";
-                        break;
-                    case "1Y":
-                        last_scale = "6M";
-                        break;
-                    case "JL":
-                        last_scale = "1Y";
-                        break;
-                    case "2Y":
-                        last_scale = "JL";
-                        break;
-                    case "3Y":
-                        last_scale = "2Y";
-                        break;
-                    case "5Y":
-                        last_scale = "3Y";
-                        break;
-                    case "All":
-                        last_scale = "5Y";
-                        break;
-                    }
+                    decreaseScale();
                     go();
                 }
                 if(cd == 33) {
-                    switch(last_scale) {
-                    case "1M":
-                        last_scale = "3M";
-                        break;
-                    case "3M":
-                        last_scale = "6M";
-                        break;
-                    case "6M":
-                        last_scale = "1Y";
-                        break;
-                    case "1Y":
-                        last_scale = "JL";
-                        break;
-                    case "JL":
-                        last_scale = "2Y";
-                        break;
-                    case "2Y":
-                        last_scale = "3Y";
-                        break;
-                    case "3Y":
-                        last_scale = "5Y";
-                        break;
-                    case "5Y":
-                    case "All":
-                        last_scale = "All";
-                    break;
-                    }
+                    increaseScale();
                     go();
                 }
                 if(cd == 35 || cd == 36) {
-                    int num_bds = 20;
-                    try {
-                        num_bds = Integer.parseInt(dtf.getText());
-                    } catch(Exception ex) {}
-                    etf.setText(StxCal.moveBusDays(etf.getText(), (cd == 35)?
-                                                   num_bds: -num_bds));
+                    move(cd);
                     go();
                 }
                 if(cd == 112) {
@@ -256,6 +210,75 @@ public class ACtx implements KeyListener, ActionListener {
         } catch( Exception exc) {
             exc.printStackTrace( System.err);
         }
+    }
+
+    private void decreaseScale() {
+        switch(last_scale) {
+        case "1M":
+        case "3M":
+            last_scale = "1M";
+        break;
+        case "6M":
+            last_scale = "3M";
+            break;
+        case "1Y":
+            last_scale = "6M";
+            break;
+        case "JL":
+            last_scale = "1Y";
+            break;
+        case "2Y":
+            last_scale = "JL";
+            break;
+        case "3Y":
+            last_scale = "2Y";
+            break;
+        case "5Y":
+            last_scale = "3Y";
+            break;
+        case "All":
+            last_scale = "5Y";
+            break;
+        }
+    }
+
+    private void increaseScale() {
+        switch(last_scale) {
+        case "1M":
+            last_scale = "3M";
+            break;
+        case "3M":
+            last_scale = "6M";
+            break;
+        case "6M":
+            last_scale = "1Y";
+            break;
+        case "1Y":
+            last_scale = "JL";
+            break;
+        case "JL":
+            last_scale = "2Y";
+            break;
+        case "2Y":
+            last_scale = "3Y";
+            break;
+        case "3Y":
+            last_scale = "5Y";
+            break;
+        case "5Y":
+        case "All":
+            last_scale = "All";
+        break;
+        }
+    }
+
+    private void move(int cd) {
+        int num_bds = 20;
+        try {
+            num_bds = Integer.parseInt(dtf.getText());
+        } catch(Exception ex) {}
+        etf.setText(StxCal.moveBusDays(etf.getText(), (cd == 35)?
+                                       num_bds: -num_bds));
     }
     // private String getAnalysisDate( String ed, int dir) {
     //     String res= ed;
@@ -309,7 +332,7 @@ public class ACtx implements KeyListener, ActionListener {
     }
 
     private void updateSetupPanel() {
-	jld3.clear();
+        jld3.clear();
         if(entries.size() == 0)
             return;
         int ix = 0;
