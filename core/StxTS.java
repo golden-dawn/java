@@ -260,7 +260,7 @@ public class StxTS<T extends StxRecord> {
             if( sd!= null) 
                 q.append( " AND dt>='"+ sd+ "'");
             else
-                q.append( " AND dt>='1962-01-02'");
+                q.append( " AND dt>='1901-01-02'");
             if( ed!= null) q.append( " AND dt<='"+ ed+ "'"); 
             StxDB sdb = new StxDB("goldendawn");
             ResultSet rset = sdb.get(q.toString());

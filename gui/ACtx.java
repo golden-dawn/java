@@ -316,7 +316,7 @@ public class ACtx implements KeyListener, ActionListener {
         if( StxCal.isBusDay( e)== false)
             e= StxCal.nextBusDay( e);
         jls= ( StxCal.year( e)- 2)+ "-01-01";
-        s= "1962-01-01";
+        s= "1901-01-02";
         idx= jtp_jl.indexOfTab( n);
         if( idx!= -1)
             jtp_jl.remove( idx); 
