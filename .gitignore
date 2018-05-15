@@ -1,2 +1,8 @@
 # Ignore emacs backup files
 *~
+
+# Ignore .env file
+.env
+
+# Ignore output directory
+output
