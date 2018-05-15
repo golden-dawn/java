@@ -24,7 +24,7 @@ public class StxTS<T extends StxRecord> {
     private static StxCal cal= null;
 
     public StxTS( String stk, String sd, String ed) {
-        init(stk, sd, ed, "eod", "split");
+        init(stk, sd, ed, "eods", "dividends");
     }
 
     public StxTS( String stk, String sd, String ed, String eod_tbl, 
@@ -56,15 +56,15 @@ public class StxTS<T extends StxRecord> {
         q1.append( "stk='").append( stk).append( "' ");
         // q2.append( "t.id.stk='").append( stk).append( "' ");
         if( sd!= null) {
-            q1.append( "AND dt>='").append( sd).append( "' "); 
+            q1.append( "AND date>='").append( sd).append( "' "); 
             //   q2.append( "AND t.id.dt>='").append( sd).append( "' "); 
         }
         if( ed!= null) {
-            q1.append( "AND dt<='").append( ed).append( "'"); 
+            q1.append( "AND date<='").append( ed).append( "'"); 
             //   q2.append( "AND t.id.dt<='").append( ed).append( "'"); 
         }
         try {
-            StxDB sdb = new StxDB("goldendawn");
+            StxDB sdb = new StxDB("stx_ng");
             ResultSet rset = sdb.get(q1.toString());
             while(rset.next())
                 splits.put( StxCal.nextBusDay(rset.getString(2)),
@@ -258,11 +258,11 @@ public class StxTS<T extends StxRecord> {
             q.append(eod_tbl).append(" WHERE ");
             q.append( "stk='").append( stk).append( "'");
             if( sd!= null) 
-                q.append( " AND dt>='"+ sd+ "'");
+                q.append( " AND date>='"+ sd+ "'");
             else
-                q.append( " AND dt>='1901-01-02'");
-            if( ed!= null) q.append( " AND dt<='"+ ed+ "'"); 
-            StxDB sdb = new StxDB("goldendawn");
+                q.append( " AND date>='1901-01-02'");
+            if( ed!= null) q.append( " AND date<='"+ ed+ "'"); 
+            StxDB sdb = new StxDB("stx_ng");
             ResultSet rset = sdb.get(q.toString());
             int s_gap= 0, l_gap= 0, ix= 0;
             while(rset.next()) {
