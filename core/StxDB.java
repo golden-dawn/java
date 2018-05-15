@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
+import java.util.Properties;
 import java.util.TreeMap;
 
 public class StxDB {
@@ -21,10 +22,12 @@ public class StxDB {
         try {
             s.getConnection();
         } catch( Exception ex) {
-            Class.forName( "com.mysql.jdbc.Driver").newInstance();
-            String urlStr= "jdbc:mysql://127.0.0.1:3306/"+ db_name+
-                "?autoReconnect=true";
-            s= DriverManager.getConnection( urlStr, "root", "m1y2s3q7l8").
+            Class.forName( "org.postgresql.Driver").newInstance();
+            String urlStr= "jdbc:postgresql://127.0.0.1:5432/"+ db_name;
+	    Properties props = new Properties();
+	    props.setProperty("user", System.getenv("DB_USER"));
+	    props.setProperty("password", System.getenv("DB_PASSWORD"));
+            s= DriverManager.getConnection( urlStr, props).
                 createStatement();
         }
         sdf= new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss");
