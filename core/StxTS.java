@@ -261,7 +261,8 @@ public class StxTS<T extends StxRecord> {
                 q.append( " AND date>='"+ sd+ "'");
             else
                 q.append( " AND date>='1901-01-02'");
-            if( ed!= null) q.append( " AND date<='"+ ed+ "'"); 
+            if( ed!= null) q.append( " AND date<='"+ ed+ "'");
+	    q.append(" ORDER BY date");
             StxDB sdb = new StxDB("stx_ng");
             ResultSet rset = sdb.get(q.toString());
             int s_gap= 0, l_gap= 0, ix= 0;
