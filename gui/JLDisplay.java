@@ -250,8 +250,8 @@ public class JLDisplay extends JScrollPane {
         return d.getText( 0, d.getLength());
     }
     public void setTextPanelBackground( Color col) { jtp.setBackground( col);}
-    public void runJL( String stk, String sd, String ed, float ff, int w, 
-                       int pivs, String eod_tbl, String split_tbl) {
+    public StxxJL runJL( String stk, String sd, String ed, float ff, int w, 
+			 int pivs, String eod_tbl, String split_tbl) {
         clear();
         int vw= 1;              
         StxxJL sjl= new StxxJL( stk, sd, ed, ff, w, vw, eod_tbl, split_tbl);
@@ -264,5 +264,6 @@ public class JLDisplay extends JScrollPane {
             printRec( sjl.data( ix));
             // printSmallRec2( sjl.data( ix));
         printLastLine( sjl.lastDay(), sjl.avgRg()); append("\n");
+	return sjl;
     }
 }
