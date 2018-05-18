@@ -215,7 +215,8 @@ public class Chart extends JPanel {
             mm= StxCal.month( ts.get( ix).date);
             if(( ix> 0)&& ( StxCal.month( ts.get( ix- 1).date)!= mm)) {
                 if( mm== 1)
-                    lbls.put( ix, new Integer( StxCal.year( ts.get( ix).date)).toString());
+                    lbls.put( ix, new Integer( StxCal.year( ts.get( ix).date)).
+			      toString());
                 else
                     lbls.put( ix, months.get( mm));
             }
@@ -228,7 +229,8 @@ public class Chart extends JPanel {
         for( int ix= start + 1; ix<= end; ix++) {
             int mm= StxCal.month( ts.get( ix).date);
             if(( mm== 1)&& ( StxCal.month( ts.get( ix- 1).date)!= mm))
-                lbls.put( ix, new Integer( StxCal.year( ts.get( ix).date)).toString());
+                lbls.put( ix, new Integer( StxCal.year( ts.get( ix).date)).
+			  toString());
         }
         return lbls;
     }
