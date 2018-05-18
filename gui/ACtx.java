@@ -25,16 +25,17 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
 import core.StxCal;
+import jl.StxxJL;
 
 public class ACtx implements KeyListener, ActionListener {
     static JFrame jf; 
     private JTabbedPane jtp_jl;
     private JPanel jpu;
-    private JTextField etf, ntf, dtf, dbetf, dbstf, jlf1, jlf2, jlp;
+    private JTextField etf, ntf, dtf, dbetf, dbstf, jlf1, jlf2, jlf3, jlp;
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
     private JButton open_b, fwd, bak;
     private JLDisplay jld1, jld2, jld3;
-    private JLabel jlfl1, jlfl2;
+    private JLabel jlfl1, jlfl2, jlfl3;
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
     JFileChooser fc;
@@ -62,10 +63,12 @@ public class ACtx implements KeyListener, ActionListener {
         dtf= new JTextField( "20"); dtf.setCaretColor( Color.white);
         dbetf= new JTextField( "eods"); dbetf.setCaretColor( Color.white);
         dbstf= new JTextField( "dividends"); dbstf.setCaretColor( Color.white);
-        jlf1= new JTextField( "0.6"); jlf1.setCaretColor( Color.white);
-        jlf2= new JTextField( "1.6"); jlf2.setCaretColor( Color.white);
-        jlfl1= new JLabel("Factor: "+ jlf1.getText());
-        jlfl2= new JLabel("Factor: "+ jlf2.getText());
+        jlf1 = new JTextField( "0.6"); jlf1.setCaretColor( Color.white);
+        jlf2 = new JTextField( "1.1"); jlf2.setCaretColor( Color.white);
+        jlf3 = new JTextField( "1.6"); jlf3.setCaretColor( Color.white);
+        jlfl1 = new JLabel("Factor: "+ jlf1.getText());
+        jlfl2 = new JLabel("Factor: "+ jlf2.getText());
+        jlfl3 = new JLabel("Factor: "+ jlf3.getText());
         jlp= new JTextField( "16"); jlp.setCaretColor( Color.white);
         jpu= new JPanel( null);
         jpu.setBackground( Color.black);
@@ -80,6 +83,9 @@ public class ACtx implements KeyListener, ActionListener {
         addC( jpu, dtf, 275, 7, 50, 25);
         addC( jpu, dbetf, 325, 7, 50, 25);
         addC( jpu, dbstf, 375, 7, 50, 25);
+        open_b= new JButton( "Open");
+        open_b.addActionListener(this);
+        addC( jpu, open_b, 430, 10, 100, 20);
 
         jb1m= new JButton( "1M");
         jb1m.addActionListener( this);
@@ -111,25 +117,24 @@ public class ACtx implements KeyListener, ActionListener {
         addC( jpu, new JLabel("JL: "), 15, 55, 25, 20);
         addC( jpu, jlf1,  40, 55, 50, 20);
         addC( jpu, jlf2,  90, 55, 50, 20);
-        addC( jpu, jlp,  140, 55, 50, 20);
+        addC( jpu, jlf3,  140, 55, 50, 20);
+        addC( jpu, jlp,  190, 55, 50, 20);
 
         fc = new JFileChooser();
         fc.setCurrentDirectory( new File( "C:/users/ctin/python/"));
         fc.setAcceptAllFileFilterUsed(false);
         fc.setMultiSelectionEnabled(false);
         //fc.setfsetFileFilter((new FileNameExtensionFilter(wordExtDesc, ".csv"));
-        open_b= new JButton( "Open");
-        open_b.addActionListener(this);
-        addC( jpu, open_b, 15, 1000, 160, 20);
         int hd11= 2* resX/ 3;
-        addC( jpu, jlfl1, 5, 110, 80, 20);
-        jld1= new JLDisplay( hd11- 10, 220, 10);
-        addC( jpu, jld1, 5, 130, resX- hd11- 180, 420);
-        addC( jpu, jlfl2,  5, 550, 80, 20);
-        jld2= new JLDisplay( hd11- 10, 220, 10);
-        addC( jpu, jld2, 5, 570, resX- hd11- 180, 420);
+        addC( jpu, jlfl1, 5, 90, 80, 20);
+        jld1= new JLDisplay( hd11 + 40, 220, 12);
+        addC( jpu, jld1, 5, 110, resX- hd11- 80, 290);
+        addC( jpu, jlfl2,  5, 400, 80, 20);
+        jld2= new JLDisplay( hd11- 10, 220, 12);
+        addC( jpu, jld2, 5, 420, resX- hd11- 80, 290);
+        addC( jpu, jlfl3,  5, 710, 80, 20);
         jld3= new JLDisplay( hd11- 10, 220, 12);
-        addC( jpu, jld3, resX- hd11- 180, 130, 140, 860);
+        addC( jpu, jld3, 5, 730, resX- hd11- 80, 290);
         jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
         JSplitPane jspu= new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
                                          jtp_jl, jpu);
@@ -310,6 +315,8 @@ public class ACtx implements KeyListener, ActionListener {
         int idx, w= 20, p= Integer.parseInt( jlp.getText());
         float f1= Float.parseFloat( jlf1.getText());
         float f2= Float.parseFloat( jlf2.getText());
+        float f3= Float.parseFloat( jlf3.getText());
+	StxxJL jl1, jl2, jl3;
         jlfl1.setText("Factor: "+ jlf1.getText());
         jlfl2.setText("Factor: "+ jlf2.getText());
         updateSetupPanel();
@@ -320,15 +327,19 @@ public class ACtx implements KeyListener, ActionListener {
         idx= jtp_jl.indexOfTab( n);
         if( idx!= -1)
             jtp_jl.remove( idx); 
+        jl1 = jld1.runJL( n, jls, e, f1, w, p, dbetf.getText(),
+			  dbstf.getText());
+        // jld1.append( analysis( e));
+        jl2 = jld2.runJL( n, jls, e, f2, w, p, dbetf.getText(),
+			  dbstf.getText());
+        // jld2.append( analysis( e));
+        jl3 = jld3.runJL( n, jls, e, f3, w, p, dbetf.getText(),
+			  dbstf.getText());
         chrt= new Chart( n, s, e, true, dbetf.getText(), dbstf.getText(), 
                          trend_map);
         chrt.setScale( last_scale);
         jtp_jl.add( n, chrt);
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
-        jld1.runJL( n, jls, e, f1, w, p, dbetf.getText(), dbstf.getText());
-        // jld1.append( analysis( e));
-        jld2.runJL( n, jls, e, f2, w, p, dbetf.getText(), dbstf.getText());
-        // jld2.append( analysis( e));
     }
 
     private void updateSetupPanel() {
