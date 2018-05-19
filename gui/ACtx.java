@@ -335,8 +335,10 @@ public class ACtx implements KeyListener, ActionListener {
         // jld2.append( analysis( e));
         jl3 = jld3.runJL( n, jls, e, f3, w, p, dbetf.getText(),
 			  dbstf.getText());
-        chrt= new Chart( n, s, e, true, dbetf.getText(), dbstf.getText(), 
-                         trend_map);
+        chrt= new Chart(n, s, e, true, dbetf.getText(), dbstf.getText(), 
+			jl1, jl2, jl3);
+        // chrt= new Chart( n, s, e, true, dbetf.getText(), dbstf.getText(), 
+        //                  trend_map);
         chrt.setScale( last_scale);
         jtp_jl.add( n, chrt);
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
