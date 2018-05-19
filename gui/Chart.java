@@ -3,6 +3,8 @@ package gui;
 import core.StxCal;
 import core.StxRec;
 import core.StxTS;
+import jl.StxJL;
+import jl.StxxJL;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -12,7 +14,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeMap;
 
 import javax.swing.JPanel;
@@ -24,7 +28,8 @@ public class Chart extends JPanel {
     int start, end, start0;
     FontMetrics fm;
     TreeMap<String, Integer> trend= null;
-    String stk_name;
+    StxxJL jl1, jl2, jl3;
+    String stk_name, ed;
 
     public Chart( String stk_name, String sd, String ed) {
         super( null);
@@ -32,6 +37,7 @@ public class Chart extends JPanel {
         ts= StxTS.loadEod( stk_name, null, null);
         start = ts.find( sd, 1); start0= start;
         end= ts.find( ed, -1);
+	this.ed = ed;
         repaint();
     }
 
@@ -46,6 +52,22 @@ public class Chart extends JPanel {
         ts.setDay( ed, -1, 1);
         start= end- 60; if( start< 0) start= 0;
         this.trend= trend;
+        repaint();
+    }
+
+    public Chart( String stk_name, String sd, String ed,
+                  boolean adjust, String eod_tbl, String split_tbl,
+                  StxxJL jl1, StxxJL jl2, StxxJL jl3) {
+        super(null);
+        this.stk_name= stk_name;
+        ts= StxTS.loadEod( stk_name, null, null, eod_tbl, split_tbl);        
+        start= ts.find( sd, 1); start0= start;
+        end= ts.find( ed, -1);
+        ts.setDay( ed, -1, 1);
+        start= end- 60; if( start< 0) start= 0;
+        this.jl1 = jl1;
+        this.jl2 = jl2;
+        this.jl3 = jl3;
         repaint();
     }
 
@@ -94,6 +116,8 @@ public class Chart extends JPanel {
         double bar_height= 0.2* d.height, hh= 0;
         double yyp= 0.6* d.height, price_height= 0.5* d.height;
         double hho= 0, hhh= 0, hhl= 0, hhc= 0, eps= 4* bar_width/ 9;
+	double last_day_x = xx + day_width * (days + 0.25);
+
         g2.setPaint( Color.darkGray);
         fm = g2.getFontMetrics();
 
@@ -181,6 +205,53 @@ public class Chart extends JPanel {
             g2.draw( new Line2D.Double( xx+ eps, hh, xx+ eps, yy));
             xx+= day_width;
         }
+	if(jl1 != null) {
+	    List<Double> x_lst = new ArrayList<Double>();
+	    List<Double> y_lst = new ArrayList<Double>();
+	    List<Integer> pivots = jl1.pivots(4, false);
+	    for(int piv: pivots) {
+		StxJL rec = jl1.data(piv);
+		x_lst.add(last_day_x - day_width * (jl1.size() - piv - 1));
+		y_lst.add(yyp - price_height * (rec.c - min_price) / price_rg);
+		if(rec.p2) {
+		    x_lst.add(last_day_x - day_width * (jl1.size() - piv));
+		    y_lst.add(yyp - price_height *
+			      (rec.c2 - min_price) / price_rg);
+		}
+	    }
+	    if(x_lst.size() == 4) {
+		g2.setPaint( Color.magenta);
+		double x1 = x_lst.get(0), y1 = y_lst.get(0), a, b;
+		double x2 = x_lst.get(2), y2 = y_lst.get(2);
+		a = (y1 - y2) / (x1 - x2);
+		b = (x1 * y2 - x2 * y1) / (x1 - x2);
+		double last_day_y = a * last_day_x + b;
+		g2.draw(new Line2D.Double(x1, y1, last_day_x, last_day_y));
+		g2.draw(new Line2D.Double(x_lst.get(1), y_lst.get(1),
+					  x_lst.get(3), y_lst.get(3)));
+		g2.setPaint( Color.darkGray);
+	    }
+	    StringBuffer sb = new StringBuffer("JL1 -- ");
+	    for(int piv: pivots) {
+		sb.append(jl1.data(piv).date).append(": ").
+		    append(jl1.data(piv).c).append("  ");
+	    }
+	    g2.drawString(sb.toString(), d.width / 2 + 50, 15);
+
+
+	    // for( int piv: pivots)
+	    // 	printRec( sjl.data( piv));
+	}
+	if(jl2 != null) {
+	    List<Integer> pivots = jl2.pivots(4, false);
+	    g2.drawString(String.format("JL2: %d pivots", pivots.size()),
+			  d.width / 2 + 50, 35);
+	}
+	if(jl3 != null) {
+	    List<Integer> pivots = jl3.pivots(4, false);
+	    g2.drawString(String.format("JL3: %d pivots", pivots.size()),
+			  d.width / 2 + 50, 55);
+	}
 
         g2.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 16));
         g2.setPaint( Color.lightGray);
