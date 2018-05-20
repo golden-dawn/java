@@ -206,56 +206,88 @@ public class Chart extends JPanel {
             xx+= day_width;
         }
 	if(jl1 != null) {
-	    List<Double> x_lst = new ArrayList<Double>();
-	    List<Double> y_lst = new ArrayList<Double>();
-	    List<Integer> pivots = jl1.pivots(4, false);
-	    for(int piv: pivots) {
-		StxJL rec = jl1.data(piv);
-		x_lst.add(last_day_x - day_width * (jl1.size() - piv - 1));
-		y_lst.add(yyp - price_height * (rec.c - min_price) / price_rg);
-		if(rec.p2) {
-		    x_lst.add(last_day_x - day_width * (jl1.size() - piv));
-		    y_lst.add(yyp - price_height *
-			      (rec.c2 - min_price) / price_rg);
-		}
-	    }
-	    if(x_lst.size() == 4) {
+	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
+					  price_height, min_price, price_rg);
+	    if(pts != null) {
 		g2.setPaint( Color.magenta);
-		double x1 = x_lst.get(0), y1 = y_lst.get(0), a, b;
-		double x2 = x_lst.get(2), y2 = y_lst.get(2);
-		a = (y1 - y2) / (x1 - x2);
-		b = (x1 * y2 - x2 * y1) / (x1 - x2);
-		double last_day_y = a * last_day_x + b;
-		g2.draw(new Line2D.Double(x1, y1, last_day_x, last_day_y));
-		g2.draw(new Line2D.Double(x_lst.get(1), y_lst.get(1),
-					  x_lst.get(3), y_lst.get(3)));
+		g2.draw(new Line2D.Double(pts.get(0), pts.get(1),
+					  pts.get(2), pts.get(3)));
+		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
+					  pts.get(6), pts.get(7)));
 		g2.setPaint( Color.darkGray);
 	    }
-	    StringBuffer sb = new StringBuffer("JL1 -- ");
-	    for(int piv: pivots) {
-		sb.append(jl1.data(piv).date).append(": ").
-		    append(jl1.data(piv).c).append("  ");
-	    }
-	    g2.drawString(sb.toString(), d.width / 2 + 50, 15);
-
-
-	    // for( int piv: pivots)
-	    // 	printRec( sjl.data( piv));
 	}
 	if(jl2 != null) {
-	    List<Integer> pivots = jl2.pivots(4, false);
-	    g2.drawString(String.format("JL2: %d pivots", pivots.size()),
-			  d.width / 2 + 50, 35);
+	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
+					  price_height, min_price, price_rg);
+	    if(pts != null) {
+		g2.setPaint( Color.cyan);
+		g2.draw(new Line2D.Double(pts.get(0), pts.get(1),
+					  pts.get(2), pts.get(3)));
+		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
+					  pts.get(6), pts.get(7)));
+		g2.setPaint( Color.darkGray);
+	    }
 	}
 	if(jl3 != null) {
-	    List<Integer> pivots = jl3.pivots(4, false);
-	    g2.drawString(String.format("JL3: %d pivots", pivots.size()),
-			  d.width / 2 + 50, 55);
+	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
+					  price_height, min_price, price_rg);
+	    if(pts != null) {
+		g2.setPaint( Color.white);
+		g2.draw(new Line2D.Double(pts.get(0), pts.get(1),
+					  pts.get(2), pts.get(3)));
+		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
+					  pts.get(6), pts.get(7)));
+		g2.setPaint( Color.darkGray);
+	    }
 	}
 
         g2.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 16));
         g2.setPaint( Color.lightGray);
         g2.drawString( stk_name.toUpperCase(), d.width/2- 50, 15);         
+    }
+
+    List<Double> getChannel(StxxJL jl1, double last_day_x, double day_width,
+			    double yyp, double price_height,
+			    float min_price, float price_rg) {
+	List<Double> x_lst = new ArrayList<Double>();
+	List<Double> y_lst = new ArrayList<Double>();
+	List<Integer> pivots = jl1.pivots(4, false);
+	for(int piv: pivots) {
+	    StxJL rec = jl1.data(piv);
+	    x_lst.add(last_day_x - day_width * (jl1.size() - piv - 1));
+	    y_lst.add(yyp - price_height * (rec.c - min_price) / price_rg);
+	    if(rec.p2) {
+		x_lst.add(last_day_x - day_width * (jl1.size() - piv));
+		y_lst.add(yyp - price_height * (rec.c2 - min_price) / price_rg);
+	    }
+	}
+	if(x_lst.size() < 4)
+	    return null;
+	List<Double> res = new ArrayList<Double>();
+	double x1 = x_lst.get(0), y1 = y_lst.get(0), a, b;
+	double x2 = x_lst.get(2), y2 = y_lst.get(2);
+	a = (y1 - y2) / (x1 - x2);
+	b = (x1 * y2 - x2 * y1) / (x1 - x2);
+	double last_day_y = a * last_day_x + b;
+	res.add(x1);
+	res.add(y1);
+	res.add(last_day_x);
+	res.add(last_day_y);
+
+	x1 = x_lst.get(1);
+	y1 = y_lst.get(1);
+	x2 = x_lst.get(3);
+	y2 = y_lst.get(3);
+	a = (y1 - y2) / (x1 - x2);
+	b = (x1 * y2 - x2 * y1) / (x1 - x2);
+	last_day_y = a * last_day_x + b;
+	res.add(x1);
+	res.add(y1);
+	res.add(last_day_x);
+	res.add(last_day_y);
+
+	return res;
     }
     
     HashMap<Integer, String> setWeeklyLabels() {
