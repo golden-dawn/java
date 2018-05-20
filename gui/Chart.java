@@ -218,7 +218,7 @@ public class Chart extends JPanel {
 	    }
 	}
 	if(jl2 != null) {
-	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
+	    List<Double> pts = getChannel(jl2, last_day_x, day_width, yyp,
 					  price_height, min_price, price_rg);
 	    if(pts != null) {
 		g2.setPaint( Color.cyan);
@@ -230,7 +230,7 @@ public class Chart extends JPanel {
 	    }
 	}
 	if(jl3 != null) {
-	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
+	    List<Double> pts = getChannel(jl3, last_day_x, day_width, yyp,
 					  price_height, min_price, price_rg);
 	    if(pts != null) {
 		g2.setPaint( Color.white);
