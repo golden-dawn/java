@@ -63,9 +63,9 @@ public class ACtx implements KeyListener, ActionListener {
         dtf= new JTextField( "20"); dtf.setCaretColor( Color.white);
         dbetf= new JTextField( "eods"); dbetf.setCaretColor( Color.white);
         dbstf= new JTextField( "dividends"); dbstf.setCaretColor( Color.white);
-        jlf1 = new JTextField( "0.6"); jlf1.setCaretColor( Color.white);
-        jlf2 = new JTextField( "1.1"); jlf2.setCaretColor( Color.white);
-        jlf3 = new JTextField( "1.6"); jlf3.setCaretColor( Color.white);
+        jlf1 = new JTextField( "1.0"); jlf1.setCaretColor( Color.white);
+        jlf2 = new JTextField( "1.5"); jlf2.setCaretColor( Color.white);
+        jlf3 = new JTextField( "2.0"); jlf3.setCaretColor( Color.white);
         jlfl1 = new JLabel("Factor: "+ jlf1.getText());
         jlfl2 = new JLabel("Factor: "+ jlf2.getText());
         jlfl3 = new JLabel("Factor: "+ jlf3.getText());

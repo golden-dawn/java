@@ -3,6 +3,7 @@ package gui;
 import core.StxCal;
 import core.StxRec;
 import core.StxTS;
+import indicators.StxUDV;
 import jl.StxJL;
 import jl.StxxJL;
 
@@ -205,6 +206,7 @@ public class Chart extends JPanel {
             g2.draw( new Line2D.Double( xx+ eps, hh, xx+ eps, yy));
             xx+= day_width;
         }
+	StxUDV udv = new StxUDV(ts);
 	if(jl1 != null) {
 	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
 					  price_height, min_price, price_rg);
@@ -214,8 +216,25 @@ public class Chart extends JPanel {
 					  pts.get(2), pts.get(3)));
 		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
 					  pts.get(6), pts.get(7)));
-		g2.setPaint( Color.darkGray);
 	    }
+	    List<Integer> pivots = jl1.pivots(4, false);
+	    int ixx = 1;
+	    StringBuffer udv_sb = new StringBuffer();
+	    for(int piv: pivots) {
+		StxJL rec = jl1.data(piv);
+		int start = ts.find(rec.date, 0);
+		List<Float> res = udv.udv(start, end);
+		udv_sb.append("     P").append(ixx).append(": ");
+		udv_sb.append(String.format("[%.2f, %.2f]", res.get(0), res.get(1)));
+		ixx++;
+		if(rec.p2) {
+		    udv_sb.append("P").append(ixx).append(": ");
+		    udv_sb.append(String.format("[%.2f, %.2f]", res.get(0), res.get(1)));
+		    ixx++;
+		}
+	    }
+	    g2.drawString(udv_sb.toString(), d.width / 2 + 50, 15);
+	    g2.setPaint( Color.darkGray);
 	}
 	if(jl2 != null) {
 	    List<Double> pts = getChannel(jl2, last_day_x, day_width, yyp,
@@ -226,8 +245,25 @@ public class Chart extends JPanel {
 					  pts.get(2), pts.get(3)));
 		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
 					  pts.get(6), pts.get(7)));
-		g2.setPaint( Color.darkGray);
 	    }
+	    List<Integer> pivots = jl2.pivots(4, false);
+	    int ixx = 1;
+	    StringBuffer udv_sb = new StringBuffer();
+	    for(int piv: pivots) {
+		StxJL rec = jl2.data(piv);
+		int start = ts.find(rec.date, 0);
+		List<Float> res = udv.udv(start, end);
+		udv_sb.append("     P").append(ixx).append(": ");
+		udv_sb.append(String.format("[%.2f, %.2f]", res.get(0), res.get(1)));
+		ixx++;
+		if(rec.p2) {
+		    udv_sb.append("P").append(ixx).append(": ");
+		    udv_sb.append(String.format("[%.2f, %.2f]", res.get(0), res.get(1)));
+		    ixx++;
+		}
+	    }
+	    g2.drawString(udv_sb.toString(), d.width / 2 + 50, 35);
+	    g2.setPaint( Color.darkGray);
 	}
 	if(jl3 != null) {
 	    List<Double> pts = getChannel(jl3, last_day_x, day_width, yyp,
@@ -238,8 +274,25 @@ public class Chart extends JPanel {
 					  pts.get(2), pts.get(3)));
 		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
 					  pts.get(6), pts.get(7)));
-		g2.setPaint( Color.darkGray);
 	    }
+	    List<Integer> pivots = jl3.pivots(4, false);
+	    int ixx = 1;
+	    StringBuffer udv_sb = new StringBuffer();
+	    for(int piv: pivots) {
+		StxJL rec = jl3.data(piv);
+		int start = ts.find(rec.date, 0);
+		List<Float> res = udv.udv(start, end);
+		udv_sb.append("     P").append(ixx).append(": ");
+		udv_sb.append(String.format("[%.2f, %.2f]", res.get(0), res.get(1)));
+		ixx++;
+		if(rec.p2) {
+		    udv_sb.append("P").append(ixx).append(": ");
+		    udv_sb.append(String.format("[%.2f, %.2f]", res.get(0), res.get(1)));
+		    ixx++;
+		}
+	    }
+	    g2.drawString(udv_sb.toString(), d.width / 2 + 50, 55);
+	    g2.setPaint( Color.darkGray);
 	}
 
         g2.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 16));
