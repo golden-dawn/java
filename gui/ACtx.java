@@ -8,6 +8,9 @@ import java.awt.event.KeyListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -30,20 +33,23 @@ import jl.StxxJL;
 public class ACtx implements KeyListener, ActionListener {
     static JFrame jf; 
     private JTabbedPane jtp_jl;
-    private JPanel jpu;
+    private JPanel jpu, jp_trd;
     private JTextField etf, ntf, dtf, dbetf, dbstf, jlf1, jlf2, jlf3, jlp;
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
     private JButton open_b, fwd, bak;
+    private JButton buy, sell, c_buy, c_sell;
     private JLDisplay jld1, jld2, jld3;
     private JLabel jlfl1, jlfl2, jlfl3;
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
+    private StxxJL jl1, jl2, jl3;
     JFileChooser fc;
     String last_scale= "3M";
     List<String[]> entries = new ArrayList<String[]>();
     int crt_pos = 0;
     TreeMap<String, Integer> trend_map= new TreeMap<String, Integer>();
     int idx= -1;
+    String log_fname;
 
     public ACtx() {
         
@@ -55,6 +61,7 @@ public class ACtx implements KeyListener, ActionListener {
         new StxCal( yr+ 2);
         if( StxCal.isBusDay( d)== false)
             d= StxCal.prevBusDay( d);
+	log_fname = String.format("../trades/%s.txt", d);
         jf= new JFrame( "ACTX");
         etf= new JTextField( d); etf.setCaretColor( Color.white);
         etf.setName( "ETF"); etf.addKeyListener( this);
@@ -70,11 +77,11 @@ public class ACtx implements KeyListener, ActionListener {
         jlfl2 = new JLabel("Factor: "+ jlf2.getText());
         jlfl3 = new JLabel("Factor: "+ jlf3.getText());
         jlp= new JTextField( "16"); jlp.setCaretColor( Color.white);
+
         jpu= new JPanel( null);
         jpu.setBackground( Color.black);
         jpu.setForeground( Color.lightGray);
- 
-        addC( jpu, ntf, 40, 7, 60, 25);
+         addC( jpu, ntf, 40, 7, 60, 25);
         addC( jpu, etf, 100, 7, 75, 25);
         fwd= new JButton( "+"); fwd.addActionListener( this);
         bak= new JButton( "-"); bak.addActionListener( this);
@@ -86,7 +93,6 @@ public class ACtx implements KeyListener, ActionListener {
         open_b= new JButton( "Open");
         open_b.addActionListener(this);
         addC( jpu, open_b, 430, 10, 100, 20);
-
         jb1m= new JButton( "1M");
         jb1m.addActionListener( this);
         addC( jpu, jb1m, 15, 35, 55, 15);
@@ -119,12 +125,25 @@ public class ACtx implements KeyListener, ActionListener {
         addC( jpu, jlf2,  90, 55, 50, 20);
         addC( jpu, jlf3,  140, 55, 50, 20);
         addC( jpu, jlp,  190, 55, 50, 20);
-
+	
         fc = new JFileChooser();
         fc.setCurrentDirectory( new File( "C:/users/ctin/python/"));
         fc.setAcceptAllFileFilterUsed(false);
         fc.setMultiSelectionEnabled(false);
         //fc.setfsetFileFilter((new FileNameExtensionFilter(wordExtDesc, ".csv"));
+	
+        jp_trd = new JPanel(null);
+        jp_trd.setBackground(Color.black);
+        jp_trd.setForeground(Color.lightGray);
+        buy = new JButton("BUY"); buy.addActionListener(this);
+        sell = new JButton( "SELL"); sell.addActionListener(this);
+        c_buy = new JButton( "CLOSE BUY"); c_buy.addActionListener(this);
+        c_sell = new JButton( "CLOSE SELL"); c_sell.addActionListener(this);
+        addC( jp_trd, buy, 25, 5, 150, 15);
+        addC( jp_trd, sell, 175, 5, 150, 15);
+        addC( jp_trd, c_buy, 325, 5, 150, 15);
+        addC( jp_trd, c_sell, 475, 5, 150, 15);
+
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
         jld1= new JLDisplay( hd11 + 40, 220, 12);
@@ -136,8 +155,15 @@ public class ACtx implements KeyListener, ActionListener {
         jld3= new JLDisplay( hd11- 10, 220, 12);
         addC( jpu, jld3, 5, 730, resX- hd11- 80, 290);
         jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
+
+	int vert_div = 17 * resY / 18;
+        JSplitPane jspv= new JSplitPane( JSplitPane.VERTICAL_SPLIT,
+                                         jtp_jl, jp_trd);
+        jspv.setOneTouchExpandable(true);
+        jspv.setDividerLocation(vert_div);
+	
         JSplitPane jspu= new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
-                                         jtp_jl, jpu);
+                                         jspv, jpu);
         jspu.setOneTouchExpandable( true);
         jspu.setDividerLocation( hd11);
         jf.pack();
@@ -316,7 +342,6 @@ public class ACtx implements KeyListener, ActionListener {
         float f1= Float.parseFloat( jlf1.getText());
         float f2= Float.parseFloat( jlf2.getText());
         float f3= Float.parseFloat( jlf3.getText());
-	StxxJL jl1, jl2, jl3;
         jlfl1.setText("Factor: "+ jlf1.getText());
         jlfl2.setText("Factor: "+ jlf2.getText());
         updateSetupPanel();
@@ -452,6 +477,25 @@ public class ACtx implements KeyListener, ActionListener {
                 e.printStackTrace( System.err);
             }
         }
+        if(cmd_name.equals("BUY") || cmd_name.equals("SELL") ||
+	   cmd_name.equals("CLOSE BUY") || cmd_name.equals("CLOSE SELL"))
+	    try {
+		log_trade(cmd_name);
+	    } catch(IOException ioe) {
+		System.err.println("Failed to log trade: ");
+		ioe.printStackTrace( System.err);
+	    }
+    }
+
+    private void log_trade(String cmd_name) throws IOException {
+	PrintWriter pw = new PrintWriter(new FileWriter(log_fname, true));
+	StringBuffer sb = new StringBuffer();
+	String ed = etf.getText();
+	sb.append(cmd_name).append(",").append(ntf.getText()).append(",").
+	    append(ed).append(",").append(chrt.getSR(ed).c).append(",").
+	    append(jl1.avgRg());
+	pw.println(sb.toString());
+	pw.close();
     }
 
     public static void main( String[] args) {
