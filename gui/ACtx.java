@@ -39,7 +39,7 @@ public class ACtx implements KeyListener, ActionListener {
     private JButton open_b, fwd, bak;
     private JButton buy, sell, c_buy, c_sell;
     private JLDisplay jld1, jld2, jld3;
-    private JLabel jlfl1, jlfl2, jlfl3;
+    private JLabel jlfl1, jlfl2, jlfl3, trade_status;
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
     private StxxJL jl1, jl2, jl3;
@@ -139,11 +139,13 @@ public class ACtx implements KeyListener, ActionListener {
         sell = new JButton( "SELL"); sell.addActionListener(this);
         c_buy = new JButton( "CLOSE BUY"); c_buy.addActionListener(this);
         c_sell = new JButton( "CLOSE SELL"); c_sell.addActionListener(this);
-        addC( jp_trd, buy, 25, 5, 150, 15);
-        addC( jp_trd, sell, 175, 5, 150, 15);
-        addC( jp_trd, c_buy, 325, 5, 150, 15);
-        addC( jp_trd, c_sell, 475, 5, 150, 15);
-
+	trade_status = new JLabel("GETTING STARTED . . .");
+        addC(jp_trd, buy, 25, 5, 150, 15);
+        addC(jp_trd, sell, 175, 5, 150, 15);
+        addC(jp_trd, c_buy, 325, 5, 150, 15);
+        addC(jp_trd, c_sell, 475, 5, 150, 15);
+	addC(jp_trd, trade_status, 625, 5, 550, 15);
+	
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
         jld1= new JLDisplay( hd11 + 40, 220, 12);
@@ -489,13 +491,16 @@ public class ACtx implements KeyListener, ActionListener {
 
     private void log_trade(String cmd_name) throws IOException {
 	PrintWriter pw = new PrintWriter(new FileWriter(log_fname, true));
-	StringBuffer sb = new StringBuffer();
+	StringBuffer sb = new StringBuffer(), sb1 = new StringBuffer();
 	String ed = etf.getText();
 	sb.append(cmd_name).append(",").append(ntf.getText()).append(",").
 	    append(ed).append(",").append(chrt.getSR(ed).c).append(",").
 	    append(jl1.avgRg());
 	pw.println(sb.toString());
 	pw.close();
+	sb1.append(cmd_name).append("  ").append(ed).append("  ").
+	    append(chrt.getSR(ed).c).append("  ").append(jl1.avgRg());
+	trade_status.setText(sb1.toString());
     }
 
     public static void main( String[] args) {
