@@ -45,6 +45,8 @@ public class ACtx implements KeyListener, ActionListener {
     private StxxJL jl1, jl2, jl3;
     JFileChooser fc;
     String last_scale= "3M";
+    private String trade_type = "", trade_date;
+    private float trade_price, trade_daily_range;
     List<String[]> entries = new ArrayList<String[]>();
     int crt_pos = 0;
     TreeMap<String, Integer> trend_map= new TreeMap<String, Integer>();
@@ -369,6 +371,7 @@ public class ACtx implements KeyListener, ActionListener {
         chrt.setScale( last_scale);
         jtp_jl.add( n, chrt);
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
+	updateTradeStatus();
     }
 
     private void updateSetupPanel() {
@@ -492,17 +495,45 @@ public class ACtx implements KeyListener, ActionListener {
     private void log_trade(String cmd_name) throws IOException {
 	PrintWriter pw = new PrintWriter(new FileWriter(log_fname, true));
 	StringBuffer sb = new StringBuffer(), sb1 = new StringBuffer();
-	String ed = etf.getText();
-	sb.append(cmd_name).append(",").append(ntf.getText()).append(",").
-	    append(ed).append(",").append(chrt.getSR(ed).c).append(",").
-	    append(jl1.avgRg());
+	float pnl = 0, in_price = trade_price, in_range = trade_daily_range;
+	int sgn = cmd_name.contains("BUY")? 1: -1;
+	trade_type = cmd_name;
+	trade_date = etf.getText();
+	trade_price = chrt.getSR(trade_date).c;
+	trade_daily_range = jl1.avgRg();
+	sb.append(trade_type).append(",").append(ntf.getText()).append(",").
+	    append(trade_date).append(",").append(trade_price);
+	sb1.append(trade_type).append("  ").append(trade_date).append("  ").
+	    append(trade_price);
+	if(trade_type.startsWith("CLOSE")) {
+	    pnl = sgn * (trade_price - in_price) / in_range - 1;
+	    if(pnl < -2)
+		pnl = -2;
+	    sb.append(",").append(String.format("%.2f", pnl));
+	    sb1.append("  P&L: ").append(String.format("%.2f", pnl));
+	} else {
+	    sb.append(",").append(trade_daily_range);
+	    sb1.append("  ").append(trade_daily_range);
+	}
 	pw.println(sb.toString());
 	pw.close();
-	sb1.append(cmd_name).append("  ").append(ed).append("  ").
-	    append(chrt.getSR(ed).c).append("  ").append(jl1.avgRg());
 	trade_status.setText(sb1.toString());
     }
 
+    private void updateTradeStatus() {
+	if((trade_type.compareTo("BUY") != 0) && 
+	   (trade_type.compareTo("SELL") != 0))
+	    return;
+	float pnl = 0, crt_price = chrt.getSR(etf.getText()).c;
+	int sgn = (trade_type.compareTo("BUY") == 0)? 1: -1;
+	StringBuffer sb = new StringBuffer();
+	pnl = sgn * (crt_price - trade_price) / trade_daily_range - 1;
+	sb.append(trade_type).append("  ").append(trade_date).append("  IN: ").
+	    append(trade_price).append("  PX: ").append(crt_price).
+	    append("  P&L: ").append(String.format("%.2f", pnl));	
+	trade_status.setText(sb.toString());
+    }
+    
     public static void main( String[] args) {
         try {
             new ACtx();
