@@ -168,7 +168,7 @@ public class ACtx1 implements KeyListener, ActionListener {
         addC( jpu, db_delete_tf, 125, 145, 450, 25);
         int hd11= 2* resX/ 3;
         //addC( jpu, jlfl1,  5, 85, 80, 20);
-        jld= new JLDisplay( hd11- 10, 220, 14);
+        jld= new JLDisplay( hd11- 10, 220, 14, false);
         addC( jpu, jld, 5, 180, resX- hd11- 40, 820);
         //jld1= new JLDisplay( hd11- 10, 220, 10);
         //addC( jpu, jld1, 5, 105, resX- hd11- 40, 420);
