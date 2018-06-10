@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -27,6 +28,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
+import core.StxRec;
 import core.StxCal;
 import jl.StxxJL;
 
@@ -36,14 +38,14 @@ public class ACtx implements KeyListener, ActionListener {
     private JPanel jpu, jp_trd;
     private JTextField etf, ntf, dtf, dbetf, dbstf, jlf1, jlf2, jlf3, jlp;
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
-    private JButton open_b, fwd, bak;
+    private JButton rewind, fwd, bak, pick_stk;
     private JButton buy, sell, c_buy, c_sell;
+    private JCheckBox invisible;
     private JLDisplay jld1, jld2, jld3;
     private JLabel jlfl1, jlfl2, jlfl3, trade_status;
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
     private StxxJL jl1, jl2, jl3;
-    JFileChooser fc;
     String last_scale= "3M";
     private String trade_type = "", trade_date;
     private float trade_price, trade_daily_range;
@@ -69,7 +71,7 @@ public class ACtx implements KeyListener, ActionListener {
         etf.setName( "ETF"); etf.addKeyListener( this);
         ntf= new JTextField(); ntf.setCaretColor( Color.white);
         ntf.setName( "NTF"); ntf.addKeyListener( this);
-        dtf= new JTextField( "20"); dtf.setCaretColor( Color.white);
+        dtf= new JTextField( "120"); dtf.setCaretColor( Color.white);
         dbetf= new JTextField( "eods"); dbetf.setCaretColor( Color.white);
         dbstf= new JTextField( "dividends"); dbstf.setCaretColor( Color.white);
         jlf1 = new JTextField( "1.0"); jlf1.setCaretColor( Color.white);
@@ -79,22 +81,27 @@ public class ACtx implements KeyListener, ActionListener {
         jlfl2 = new JLabel("Factor: "+ jlf2.getText());
         jlfl3 = new JLabel("Factor: "+ jlf3.getText());
         jlp= new JTextField( "16"); jlp.setCaretColor( Color.white);
-
+	invisible = new JCheckBox("Invisible");
+	invisible.setSelected(true);
         jpu= new JPanel( null);
         jpu.setBackground( Color.black);
         jpu.setForeground( Color.lightGray);
-         addC( jpu, ntf, 40, 7, 60, 25);
-        addC( jpu, etf, 100, 7, 75, 25);
+	addC( jpu, ntf, 15, 7, 60, 25);
+        addC( jpu, etf, 75, 7, 75, 25);
+        etf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
         fwd= new JButton( "+"); fwd.addActionListener( this);
         bak= new JButton( "-"); bak.addActionListener( this);
-        addC( jpu, fwd, 175, 12, 50, 15);
-        addC( jpu, bak, 225, 12, 50, 15);
-        addC( jpu, dtf, 275, 7, 50, 25);
-        addC( jpu, dbetf, 325, 7, 50, 25);
-        addC( jpu, dbstf, 375, 7, 50, 25);
-        open_b= new JButton( "Open");
-        open_b.addActionListener(this);
-        addC( jpu, open_b, 430, 10, 100, 20);
+        rewind = new JButton("<");
+        rewind.addActionListener(this);
+        addC( jpu, rewind, 150, 12, 50, 15);
+        addC( jpu, fwd, 200, 12, 50, 15);
+        addC( jpu, bak, 250, 12, 50, 15);
+        addC( jpu, dtf, 300, 7, 50, 25);
+        addC( jpu, invisible, 350, 7, 150, 25);
+        addC( jpu, invisible, 350, 7, 150, 25);
+        pick_stk = new JButton("R");
+        pick_stk.addActionListener(this);
+        addC( jpu, pick_stk, 500, 7, 50, 25);
         jb1m= new JButton( "1M");
         jb1m.addActionListener( this);
         addC( jpu, jb1m, 15, 35, 55, 15);
@@ -128,12 +135,6 @@ public class ACtx implements KeyListener, ActionListener {
         addC( jpu, jlf3,  140, 55, 50, 20);
         addC( jpu, jlp,  190, 55, 50, 20);
 	
-        fc = new JFileChooser();
-        fc.setCurrentDirectory( new File( "C:/users/ctin/python/"));
-        fc.setAcceptAllFileFilterUsed(false);
-        fc.setMultiSelectionEnabled(false);
-        //fc.setfsetFileFilter((new FileNameExtensionFilter(wordExtDesc, ".csv"));
-	
         jp_trd = new JPanel(null);
         jp_trd.setBackground(Color.black);
         jp_trd.setForeground(Color.lightGray);
@@ -150,13 +151,13 @@ public class ACtx implements KeyListener, ActionListener {
 	
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
-        jld1= new JLDisplay( hd11 + 40, 220, 12);
+        jld1= new JLDisplay( hd11 + 40, 220, 12, invisible.isSelected());
         addC( jpu, jld1, 5, 110, resX- hd11- 80, 290);
         addC( jpu, jlfl2,  5, 400, 80, 20);
-        jld2= new JLDisplay( hd11- 10, 220, 12);
+        jld2= new JLDisplay( hd11- 10, 220, 12, invisible.isSelected());
         addC( jpu, jld2, 5, 420, resX- hd11- 80, 290);
         addC( jpu, jlfl3,  5, 710, 80, 20);
-        jld3= new JLDisplay( hd11- 10, 220, 12);
+        jld3= new JLDisplay( hd11- 10, 220, 12, invisible.isSelected());
         addC( jpu, jld3, 5, 730, resX- hd11- 80, 290);
         jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
 
@@ -346,6 +347,8 @@ public class ACtx implements KeyListener, ActionListener {
         float f1= Float.parseFloat( jlf1.getText());
         float f2= Float.parseFloat( jlf2.getText());
         float f3= Float.parseFloat( jlf3.getText());
+	etf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
+	ntf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
         jlfl1.setText("Factor: "+ jlf1.getText());
         jlfl2.setText("Factor: "+ jlf2.getText());
         updateSetupPanel();
@@ -356,18 +359,16 @@ public class ACtx implements KeyListener, ActionListener {
         idx= jtp_jl.indexOfTab( n);
         if( idx!= -1)
             jtp_jl.remove( idx); 
-        jl1 = jld1.runJL( n, jls, e, f1, w, p, dbetf.getText(),
-			  dbstf.getText());
+        jl1 = jld1.runJL(n, jls, e, f1, w, p, dbetf.getText(),
+			 dbstf.getText());
         // jld1.append( analysis( e));
-        jl2 = jld2.runJL( n, jls, e, f2, w, p, dbetf.getText(),
-			  dbstf.getText());
+        jl2 = jld2.runJL(n, jls, e, f2, w, p, dbetf.getText(),
+			 dbstf.getText());
         // jld2.append( analysis( e));
-        jl3 = jld3.runJL( n, jls, e, f3, w, p, dbetf.getText(),
-			  dbstf.getText());
+        jl3 = jld3.runJL(n, jls, e, f3, w, p, dbetf.getText(),
+			 dbstf.getText());
         chrt= new Chart(n, s, e, true, dbetf.getText(), dbstf.getText(), 
-			jl1, jl2, jl3);
-        // chrt= new Chart( n, s, e, true, dbetf.getText(), dbstf.getText(), 
-        //                  trend_map);
+			jl1, jl2, jl3, invisible.isSelected());
         chrt.setScale( last_scale);
         jtp_jl.add( n, chrt);
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
@@ -404,47 +405,11 @@ public class ACtx implements KeyListener, ActionListener {
         }
     }
 
-    // private String analysis( String ed) {
-    //     String[] values = analysis_file.get( ed);
-    //     if( values== null)
-    //         return "";
-    //     StringBuilder sb= new StringBuilder(); char c= ' ';
-    //     for( Map.Entry<Integer, String> entry: idxd.entrySet()) {
-    //         int ix= entry.getKey(); 
-    //         if( ix< values.length) 
-    //             sb.append( String.format( "%12s=%12s%c", entry.getValue(),
-    //                                       values[ix], c));
-    //         if( c== ' ') c= '\n'; else c= ' ';
-    //     }
-    //     return sb.toString();
-    // }
-
     public void addC( JPanel p, JComponent c, int x, int y,
                       int h, int w) {
         p.add( c); c.setBounds( x, y, h, w);
         c.setBackground( Color.black);
         c.setForeground( Color.lightGray);
-    }
-
-    private void loadAnalysisFile() throws Exception {
-        int ret_val= fc.showOpenDialog(jf);
-        if( ret_val!= JFileChooser.APPROVE_OPTION) return;
-        File file= fc.getSelectedFile();
-        String line= null;
-        BufferedReader br= new BufferedReader( new FileReader( file));
-        boolean read_hdrs= false;
-        while(( line= br.readLine())!= null) {
-            if( line.trim()== "") continue;
-            if( !read_hdrs) {
-                read_hdrs = true;
-                continue;
-            }
-            String[] tokens = line.split(",");
-            entries.add(tokens);
-        }
-        br.close();
-        crt_pos = 0;
-        jld1.append( "\nSuccessfully loaded "+ file.getAbsolutePath()+ "\n");
     }
 
     private void moveDate( int sign) {
@@ -473,15 +438,17 @@ public class ACtx implements KeyListener, ActionListener {
             cc.setScale( cmd_name);
             last_scale= cmd_name;
         }
-        if( ae.getSource()== fwd) moveDate( 1);
-        if( ae.getSource()== bak) moveDate( -1);
-        if( ae.getSource()== open_b) {
-            try {
-                loadAnalysisFile();
-            } catch( Exception e) {
-                e.printStackTrace( System.err);
-            }
-        }
+        if( ae.getSource() == fwd) moveDate( 1);
+        if( ae.getSource() == bak) moveDate( -1);
+        if( ae.getSource() == rewind) {
+	    String rewind_date = cc.rewind();
+	    etf.setText(rewind_date);
+	    try {
+		go();
+	    } catch( Exception exc) {
+		exc.printStackTrace(System.err);
+	    }
+	}
         if(cmd_name.equals("BUY") || cmd_name.equals("SELL") ||
 	   cmd_name.equals("CLOSE BUY") || cmd_name.equals("CLOSE SELL"))
 	    try {
@@ -496,24 +463,31 @@ public class ACtx implements KeyListener, ActionListener {
 	PrintWriter pw = new PrintWriter(new FileWriter(log_fname, true));
 	StringBuffer sb = new StringBuffer(), sb1 = new StringBuffer();
 	float pnl = 0, in_price = trade_price, in_range = trade_daily_range;
+	String in_date = trade_date;
 	int sgn = cmd_name.contains("BUY")? 1: -1;
 	trade_type = cmd_name;
 	trade_date = etf.getText();
 	trade_price = chrt.getSR(trade_date).c;
 	trade_daily_range = jl1.avgRg();
-	sb.append(trade_type).append(",").append(ntf.getText()).append(",").
-	    append(trade_date).append(",").append(trade_price);
-	sb1.append(trade_type).append("  ").append(trade_date).append("  ").
-	    append(trade_price);
 	if(trade_type.startsWith("CLOSE")) {
 	    pnl = sgn * (trade_price - in_price) / in_range - 1;
 	    if(pnl < -2)
 		pnl = -2;
-	    sb.append(",").append(String.format("%.2f", pnl));
-	    sb1.append("  P&L: ").append(String.format("%.2f", pnl));
+	    sb.append(cmd_name).append(',').append(ntf.getText()).append(',').
+		append(in_date).append(',').append(in_price).append(',').
+		append(String.format("%.2f", in_range)).append(',').
+		append(trade_date).append(",").append(trade_price).append(",").
+		append(String.format("%.2f", pnl));
+	    sb1.append(cmd_name).append("  DAYS: ").
+		append(StxCal.numBusDays(in_date, trade_date)).append("  IN: ").
+		append(in_price).append("  OUT: ").append(trade_price).
+		append("  P&L: ").append(String.format("%.2f", pnl));
 	} else {
-	    sb.append(",").append(trade_daily_range);
-	    sb1.append("  ").append(trade_daily_range);
+	    sb.append(trade_type).append(",").append(ntf.getText()).append(",").
+		append(trade_date).append(",").append(trade_price).append(",").
+		append(trade_daily_range);
+	    sb1.append(trade_type).append("  DAYS: 0").append("  IN: ").
+		append(trade_price).append("  RG: ").append(trade_daily_range);
 	}
 	pw.println(sb.toString());
 	pw.close();
@@ -528,8 +502,10 @@ public class ACtx implements KeyListener, ActionListener {
 	int sgn = (trade_type.compareTo("BUY") == 0)? 1: -1;
 	StringBuffer sb = new StringBuffer();
 	pnl = sgn * (crt_price - trade_price) / trade_daily_range - 1;
-	sb.append(trade_type).append("  ").append(trade_date).append("  IN: ").
-	    append(trade_price).append("  PX: ").append(crt_price).
+	sb.append(trade_type).append("  ").
+	    append(StxCal.numBusDays(trade_date, etf.getText())).
+	    append("  IN: ").append(trade_price).
+	    append("  PX: ").append(crt_price).
 	    append("  P&L: ").append(String.format("%.2f", pnl));	
 	trade_status.setText(sb.toString());
     }
