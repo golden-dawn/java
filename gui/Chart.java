@@ -31,6 +31,7 @@ public class Chart extends JPanel {
     TreeMap<String, Integer> trend= null;
     StxxJL jl1, jl2, jl3;
     String stk_name, ed;
+    private boolean invisible = false;
 
     public Chart( String stk_name, String sd, String ed) {
         super( null);
@@ -58,10 +59,10 @@ public class Chart extends JPanel {
 
     public Chart( String stk_name, String sd, String ed,
                   boolean adjust, String eod_tbl, String split_tbl,
-                  StxxJL jl1, StxxJL jl2, StxxJL jl3) {
+                  StxxJL jl1, StxxJL jl2, StxxJL jl3, boolean invisible) {
         super(null);
         this.stk_name= stk_name;
-        ts= StxTS.loadEod( stk_name, null, null, eod_tbl, split_tbl);        
+        ts= StxTS.loadEod( stk_name, null, null, eod_tbl, split_tbl);      
         start= ts.find( sd, 1); start0= start;
         end= ts.find( ed, -1);
         ts.setDay( ed, -1, 1);
@@ -69,21 +70,11 @@ public class Chart extends JPanel {
         this.jl1 = jl1;
         this.jl2 = jl2;
         this.jl3 = jl3;
+	this.invisible = invisible;
         repaint();
     }
 
     public void paint( Graphics g) {
-        Color green1_transparent= new Color( 0f, 1f, 0f, 0.1f);
-        Color green2_transparent= new Color( 0.5f, 1f, 0.5f, 0.1f);
-        Color cyan1_transparent= new Color( 0f, 1f, 1f, 0.2f);
-        Color cyan2_transparent= new Color( 0.5f, 1f, 1f, 0.2f);
-        Color red1_transparent= new Color( 1f, 0f, 0f, 0.1f);
-        Color red2_transparent= new Color( 1f, 0.5f, 0.5f, 0.1f);
-        Color purple1_transparent= new Color( 1f, 0f, 1f, 0.1f);
-        Color purple2_transparent= new Color( 1f, 0.5f, 1f, 0.1f);
-        Color blue1_transparent= new Color( 0f, 0f, 1f, 0.1f);
-        Color blue2_transparent= new Color( 0.5f, 0.5f, 1f, 0.1f);
-        Color white_transparent= new Color( 1f, 1f, 1f, 0.1f);
         Graphics2D g2= ( Graphics2D) g;
         Dimension d= getSize();
         int days= end- start;
@@ -127,10 +118,10 @@ public class Chart extends JPanel {
                                          0.2* d.height));
         g2.setPaint( Color.lightGray);
         // draw 3 strings and a line
-        g2.drawString( String.format( "%,.0fK", max_vol/ 1000),
+        g2.drawString( String.format( "%,.0fK", max_vol),
                        ( float) ( d.width- 95+ day_width),
                        ( float) ( 0.65* d.height+ 0.25* fm.getHeight()));
-        g2.drawString( String.format( "%,.0fK", max_vol/ 2000),
+        g2.drawString( String.format( "%,.0fK", max_vol/ 2),
                        ( float) ( d.width- 95+ day_width),
                        ( float) ( 0.75* d.height+ 0.25* fm.getHeight()));
         g2.drawString( "0", ( float) ( d.width- 95+ day_width),
@@ -172,26 +163,6 @@ public class Chart extends JPanel {
             hhh= yyp- price_height* ( r.h- min_price)/ price_rg;
             hhl= yyp- price_height* ( r.l- min_price)/ price_rg;
             hhc= yyp- price_height* ( r.c- min_price)/ price_rg;
-            if( trend!= null) {
-                Integer trnd= trend.get( r.date);
-                if( trnd!= null&& trnd!= 0) {
-                    if( trnd== 1) g2.setPaint( green1_transparent);
-                    else if( trnd== -1) g2.setPaint( red1_transparent);
-                    else if( trnd== -2) g2.setPaint( red2_transparent);
-                    else if( trnd== -3) g2.setPaint( purple1_transparent);
-                    else if( trnd== -4) g2.setPaint( purple2_transparent);
-                    else if( trnd== -5) g2.setPaint( white_transparent);
-                    else if( trnd== 2) g2.setPaint( green2_transparent);
-                    else if( trnd== 3) g2.setPaint( blue1_transparent);
-                    else if( trnd== 4) g2.setPaint( blue2_transparent);
-                    else if( trnd== 5) g2.setPaint( cyan1_transparent);
-                    else if( trnd== 6) g2.setPaint( cyan2_transparent);
-                    g2.fill( new Rectangle2D.Double( xx- bar_width/ 2,
-                                                     0.1* d.height,
-                                                     2* bar_width,
-                                                     0.5* d.height));
-                }
-            }
             if( hho< hhc) {
                 g2.setPaint( Color.red);
                 g2.fill( new Rectangle2D.Double( xx, hho, bar_width, hhc- hho));
@@ -206,12 +177,13 @@ public class Chart extends JPanel {
             g2.draw( new Line2D.Double( xx+ eps, hh, xx+ eps, yy));
             xx+= day_width;
         }
+        g2.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 16));
 	StxUDV udv = new StxUDV(ts);
 	if(jl1 != null) {
 	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
 					  price_height, min_price, price_rg);
 	    if(pts != null) {
-		g2.setPaint( Color.magenta);
+		g2.setPaint( Color.yellow);
 		g2.draw(new Line2D.Double(pts.get(0), pts.get(1),
 					  pts.get(2), pts.get(3)));
 		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
@@ -224,16 +196,18 @@ public class Chart extends JPanel {
 		StxJL rec = jl1.data(piv);
 		int start = ts.find(rec.date, 0);
 		List<Float> res = udv.udv(start, end);
-		udv_sb.append("     P").append(ixx).append(": ");
-		udv_sb.append(String.format("[%.2f, %.2f]", res.get(0), res.get(1)));
+		udv_sb.append(" P").append(ixx).append(": ");
+		udv_sb.append(String.format("[%4.1f, %4.1f]", res.get(0),
+					    res.get(1)));
 		ixx++;
 		if(rec.p2) {
-		    udv_sb.append("P").append(ixx).append(": ");
-		    udv_sb.append(String.format("[%.2f, %.2f]", res.get(0), res.get(1)));
+		    udv_sb.append(" P").append(ixx).append(": ");
+		    udv_sb.append(String.format("[%4.1f, %4.1f]", res.get(0),
+						res.get(1)));
 		    ixx++;
 		}
 	    }
-	    g2.drawString(udv_sb.toString(), d.width / 2 + 50, 15);
+	    g2.drawString(udv_sb.toString(), d.width / 2 - 150, 15);
 	    g2.setPaint( Color.darkGray);
 	}
 	if(jl2 != null) {
@@ -253,16 +227,18 @@ public class Chart extends JPanel {
 		StxJL rec = jl2.data(piv);
 		int start = ts.find(rec.date, 0);
 		List<Float> res = udv.udv(start, end);
-		udv_sb.append("     P").append(ixx).append(": ");
-		udv_sb.append(String.format("[%.2f, %.2f]", res.get(0), res.get(1)));
+		udv_sb.append(" P").append(ixx).append(": ");
+		udv_sb.append(String.format("[%4.1f, %4.1f]", res.get(0),
+					    res.get(1)));
 		ixx++;
 		if(rec.p2) {
-		    udv_sb.append("P").append(ixx).append(": ");
-		    udv_sb.append(String.format("[%.2f, %.2f]", res.get(0), res.get(1)));
+		    udv_sb.append(" P").append(ixx).append(": ");
+		    udv_sb.append(String.format("[%4.1f, %4.1f]", res.get(0),
+						res.get(1)));
 		    ixx++;
 		}
 	    }
-	    g2.drawString(udv_sb.toString(), d.width / 2 + 50, 35);
+	    g2.drawString(udv_sb.toString(), d.width / 2 - 150, 35);
 	    g2.setPaint( Color.darkGray);
 	}
 	if(jl3 != null) {
@@ -282,22 +258,24 @@ public class Chart extends JPanel {
 		StxJL rec = jl3.data(piv);
 		int start = ts.find(rec.date, 0);
 		List<Float> res = udv.udv(start, end);
-		udv_sb.append("     P").append(ixx).append(": ");
-		udv_sb.append(String.format("[%.2f, %.2f]", res.get(0), res.get(1)));
+		udv_sb.append(" P").append(ixx).append(": ");
+		udv_sb.append(String.format("[%4.1f, %4.1f]", res.get(0),
+					    res.get(1)));
 		ixx++;
 		if(rec.p2) {
-		    udv_sb.append("P").append(ixx).append(": ");
-		    udv_sb.append(String.format("[%.2f, %.2f]", res.get(0), res.get(1)));
+		    udv_sb.append(" P").append(ixx).append(": ");
+		    udv_sb.append(String.format("[%4.1f, %4.1f]", res.get(0),
+						res.get(1)));
 		    ixx++;
 		}
 	    }
-	    g2.drawString(udv_sb.toString(), d.width / 2 + 50, 55);
+	    g2.drawString(udv_sb.toString(), d.width / 2 - 150, 55);
 	    g2.setPaint( Color.darkGray);
 	}
 
-        g2.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 16));
         g2.setPaint( Color.lightGray);
-        g2.drawString( stk_name.toUpperCase(), d.width/2- 50, 15);         
+	if(!invisible)
+	    g2.drawString( stk_name.toUpperCase(), 50, 15);         
     }
 
     List<Double> getChannel(StxxJL jl1, double last_day_x, double day_width,
@@ -344,49 +322,51 @@ public class Chart extends JPanel {
     }
     
     HashMap<Integer, String> setWeeklyLabels() {
-        HashMap<Integer, String> lbls= new HashMap<Integer, String>();
-        for( int ix= start; ix<= end; ix++)
-            if( StxCal.dow( ts.get( ix).date)== 1)
-                lbls.put( ix, ts.get( ix).date.substring( 5));
+        HashMap<Integer, String> lbls = new HashMap<Integer, String>();
+        for(int ix = start; ix <= end; ix++)
+            if(StxCal.dow(ts.get( ix).date) == 1)
+                lbls.put(ix, invisible? "Week": ts.get( ix).date.substring(5));
         return lbls;
     }
 
     HashMap<Integer, String> setMonthlyLabels() {
         HashMap<Integer, String> lbls= new HashMap<Integer, String>();
         HashMap<Integer, String> months= new HashMap<Integer, String>();
-        months.put( 1, "Jan");
-        months.put( 2, "Feb");
-        months.put( 3, "Mar");
-        months.put( 4, "Apr");
-        months.put( 5, "May");
-        months.put( 6, "Jun");
-        months.put( 7, "Jul");
-        months.put( 8, "Aug");
-        months.put( 9, "Sep");
-        months.put( 10, "Oct");
-        months.put( 11, "Nov");
-        months.put( 12, "Dec");
-        int mm= 0;
-        for( int ix= start; ix<= end; ix++) {
-            mm= StxCal.month( ts.get( ix).date);
-            if(( ix> 0)&& ( StxCal.month( ts.get( ix- 1).date)!= mm)) {
+        months.put(1, "Jan");
+        months.put(2, "Feb");
+        months.put(3, "Mar");
+        months.put(4, "Apr");
+        months.put(5, "May");
+        months.put(6, "Jun");
+        months.put(7, "Jul");
+        months.put(8, "Aug");
+        months.put(9, "Sep");
+        months.put(10, "Oct");
+        months.put(11, "Nov");
+        months.put(12, "Dec");
+        int mm = 0;
+        for(int ix = start; ix <= end; ix++) {
+            mm = StxCal.month(ts.get(ix).date);
+            if((ix > 0) && (StxCal.month(ts.get(ix - 1).date) != mm)) {
                 if( mm== 1)
-                    lbls.put( ix, new Integer( StxCal.year( ts.get( ix).date)).
-			      toString());
+                    lbls.put(ix, (invisible? "Month":
+				  new Integer(StxCal.year(ts.get(ix).date)).
+				  toString()));
                 else
-                    lbls.put( ix, months.get( mm));
+                    lbls.put(ix, invisible? "Month": months.get(mm));
             }
         }
         return lbls;
     }
 
     HashMap<Integer, String> setYearlyLabels() {
-        HashMap<Integer, String> lbls= new HashMap<Integer, String>();
-        for( int ix= start + 1; ix<= end; ix++) {
-            int mm= StxCal.month( ts.get( ix).date);
-            if(( mm== 1)&& ( StxCal.month( ts.get( ix- 1).date)!= mm))
-                lbls.put( ix, new Integer( StxCal.year( ts.get( ix).date)).
-			  toString());
+        HashMap<Integer, String> lbls = new HashMap<Integer, String>();
+        for(int ix = start + 1; ix <= end; ix++) {
+            int mm = StxCal.month(ts.get(ix).date);
+            if((mm == 1) && (StxCal.month(ts.get(ix - 1).date) != mm))
+                lbls.put(ix, (invisible? "Year":
+			      new Integer(StxCal.year(ts.get(ix).date)).
+			      toString()));
         }
         return lbls;
     }
@@ -425,6 +405,12 @@ public class Chart extends JPanel {
         return res;
     }
 
+    String rewind() {
+        StxRec res = ts.get(90);
+	ts.setDay(res.date, 0, 1);
+        return res.date;
+    }
+    
     //StxData<StxRec> data(){ return data; }
 
     //     public static void main( String args[]) {
