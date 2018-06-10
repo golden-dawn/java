@@ -16,6 +16,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -27,6 +28,10 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+
 
 import core.StxRec;
 import core.StxCal;
@@ -449,6 +454,23 @@ public class ACtx implements KeyListener, ActionListener {
 		exc.printStackTrace(System.err);
 	    }
 	}
+	if(ae.getSource() == pick_stk) {
+	    String stk = "NFLX";
+	    try {
+		List<String> lines = Files.readAllLines(new File("../liquid_stx.txt").toPath(),
+							Charset.defaultCharset());
+		stk = lines.get(ThreadLocalRandom.current().nextInt(0, lines.size()));
+	    } catch(IOException ioe) {
+		ioe.printStackTrace(System.err);
+	    }
+	    ntf.setText(stk);
+	    try {
+		go();
+	    } catch( Exception exc) {
+		exc.printStackTrace(System.err);
+	    }	    
+	}
+	
         if(cmd_name.equals("BUY") || cmd_name.equals("SELL") ||
 	   cmd_name.equals("CLOSE BUY") || cmd_name.equals("CLOSE SELL"))
 	    try {
