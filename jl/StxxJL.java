@@ -29,7 +29,7 @@ public class StxxJL {
 
     public StxData<StxJL> jl( String as_of_date) {
         recs.clear(); lns= null; ls= null; pns= null; ps= null;
-        c= data.find( as_of_date, -1); int start= data.start();
+        c = data.find( as_of_date, -1); int start= data.start();
         // c= data.setDay( as_of_date, -1, 1); int start= data.start();
         //System.err.println( "Running JL as of: "+ data.get( c).date);
         init(); for( int ix= start+ w; ix<= c; ++ix) next( ix);
