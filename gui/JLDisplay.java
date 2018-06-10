@@ -21,6 +21,8 @@ public class JLDisplay extends JScrollPane {
     private DefaultStyledDocument d= new DefaultStyledDocument();
     private SimpleAttributeSet a;
     private JTextPane jtp;
+    private boolean invisible;
+    private String first_date;
     static final Color lr= new Color( 255, 64, 64);
     static final Color lg= new Color( 127, 255, 127);
     static final Color lb= new Color( 191, 191, 255);
@@ -38,12 +40,13 @@ public class JLDisplay extends JScrollPane {
         a= new SimpleAttributeSet(); this.setViewportView( jtp);
         setPreferredSize( new Dimension( w, h));
     }
-    public JLDisplay( int w, int h, int fsz){ 
+    public JLDisplay(int w, int h, int fsz, boolean invisible) { 
         super(); jtp= new JTextPane(); jtp.setDocument( d); 
         jtp.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, fsz));
-        jtp.setBackground( Color.black); 
+        jtp.setBackground(Color.black); 
         a= new SimpleAttributeSet(); this.setViewportView( jtp);
         setPreferredSize( new Dimension( w, h));
+	this.invisible = invisible;
     }
     public JLDisplay( int w, int h, int fsz, String name){ 
         super(); jtp= new JTextPane(); jtp.setDocument( d); 
@@ -149,11 +152,11 @@ public class JLDisplay extends JScrollPane {
     public void printRec( StxJL jlr, int pos) {
         if( jlr.s== StxJL.None) return;
         if(( pos== 0)|| ( pos== 1)) {
-            append( String.format( "%10s|", jlr.date));
+            append( String.format( "%10s|", invisible? String.valueOf(StxCal.numBusDays(first_date, jlr.date)): jlr.date));
             printRecBody( jlr); append( "\n");                  
         }
         if(( jlr.c2!= 0)&& (( pos== 0)|| ( pos== 2))) {
-            append( String.format( "%10s|", jlr.date));
+            append( String.format( "%10s|", invisible? String.valueOf(StxCal.numBusDays(first_date, jlr.date)): jlr.date));
             printRecBody2( jlr);
             append( "\n");
         }
@@ -239,7 +242,8 @@ public class JLDisplay extends JScrollPane {
     }
     
     public void printLastLine( StxRec r, double f) {
-        append( String.format( "%s %.2f %.2f %.2f %.2f %,.0f  %.2f", r.date,
+        append( String.format( "%10s %.2f %.2f %.2f %.2f %,.0f  %.2f",
+			       invisible? String.valueOf(StxCal.numBusDays(first_date, r.date)): r.date,
                                r.o, r.h, r.l, r.c, r.v, f));
     }
 
@@ -256,6 +260,7 @@ public class JLDisplay extends JScrollPane {
         int vw= 1;              
         StxxJL sjl= new StxxJL( stk, sd, ed, ff, w, vw, eod_tbl, split_tbl);
         sjl.jl( ed);
+	first_date = sjl.data(0).date;
         List<Integer> pivots= sjl.pivots( pivs, false);
         for( int piv: pivots)
             printRec( sjl.data( piv));
