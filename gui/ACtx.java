@@ -457,8 +457,8 @@ public class ACtx implements KeyListener, ActionListener {
 	if(ae.getSource() == pick_stk) {
 	    String stk = "NFLX";
 	    try {
-		List<String> lines = Files.readAllLines(new File("../liquid_stx.txt").toPath(),
-							Charset.defaultCharset());
+		List<String> lines = Files.readAllLines(new File("../super_liquid_stx.txt").
+							toPath(), Charset.defaultCharset());
 		stk = lines.get(ThreadLocalRandom.current().nextInt(0, lines.size()));
 	    } catch(IOException ioe) {
 		ioe.printStackTrace(System.err);
@@ -504,6 +504,7 @@ public class ACtx implements KeyListener, ActionListener {
 		append(StxCal.numBusDays(in_date, trade_date)).append("  IN: ").
 		append(in_price).append("  OUT: ").append(trade_price).
 		append("  P&L: ").append(String.format("%.2f", pnl));
+	    pw.println(sb.toString());
 	} else {
 	    sb.append(trade_type).append(",").append(ntf.getText()).append(",").
 		append(trade_date).append(",").append(trade_price).append(",").
@@ -511,7 +512,6 @@ public class ACtx implements KeyListener, ActionListener {
 	    sb1.append(trade_type).append("  DAYS: 0").append("  IN: ").
 		append(trade_price).append("  RG: ").append(trade_daily_range);
 	}
-	pw.println(sb.toString());
 	pw.close();
 	trade_status.setText(sb1.toString());
     }
