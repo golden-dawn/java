@@ -197,13 +197,11 @@ public class Chart extends JPanel {
 		int start = ts.find(rec.date, 0);
 		List<Float> res = udv.udv(start, end);
 		udv_sb.append(" P").append(ixx).append(": ");
-		udv_sb.append(String.format("[%4.1f, %4.1f]", res.get(0),
-					    res.get(1)));
+		udv_sb.append(String.format("%5.2f", res.get(0)));
 		ixx++;
 		if(rec.p2) {
 		    udv_sb.append(" P").append(ixx).append(": ");
-		    udv_sb.append(String.format("[%4.1f, %4.1f]", res.get(0),
-						res.get(1)));
+		    udv_sb.append(String.format("%5.2f", res.get(0)));
 		    ixx++;
 		}
 	    }
@@ -228,13 +226,11 @@ public class Chart extends JPanel {
 		int start = ts.find(rec.date, 0);
 		List<Float> res = udv.udv(start, end);
 		udv_sb.append(" P").append(ixx).append(": ");
-		udv_sb.append(String.format("[%4.1f, %4.1f]", res.get(0),
-					    res.get(1)));
+		udv_sb.append(String.format("%5.2f", res.get(0)));
 		ixx++;
 		if(rec.p2) {
 		    udv_sb.append(" P").append(ixx).append(": ");
-		    udv_sb.append(String.format("[%4.1f, %4.1f]", res.get(0),
-						res.get(1)));
+		    udv_sb.append(String.format("%5.2f", res.get(0)));
 		    ixx++;
 		}
 	    }
@@ -259,13 +255,11 @@ public class Chart extends JPanel {
 		int start = ts.find(rec.date, 0);
 		List<Float> res = udv.udv(start, end);
 		udv_sb.append(" P").append(ixx).append(": ");
-		udv_sb.append(String.format("[%4.1f, %4.1f]", res.get(0),
-					    res.get(1)));
+		udv_sb.append(String.format("%5.2f", res.get(0)));
 		ixx++;
 		if(rec.p2) {
 		    udv_sb.append(" P").append(ixx).append(": ");
-		    udv_sb.append(String.format("[%4.1f, %4.1f]", res.get(0),
-						res.get(1)));
+		    udv_sb.append(String.format("%5.2f", res.get(0)));
 		    ixx++;
 		}
 	    }
