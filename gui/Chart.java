@@ -90,6 +90,7 @@ public class Chart extends JPanel {
         setBackground( Color.black);
         g.setColor( getBackground());
         g.fillRect( 0, 0, d.width, d.height);
+	double d_height = 95.0 * d.height / 85.0;
         float max_vol= 0, min_vol= 0, vol_rg= 0;
         float min_price= 1000000, max_price= 0, price_rg= 0;
         int ix;
@@ -104,38 +105,38 @@ public class Chart extends JPanel {
         vol_rg= max_vol- min_vol;
         price_rg= max_price- min_price;
 
-        double xx= 50, yy= 0.85* d.height;
-        double bar_height= 0.2* d.height, hh= 0;
-        double yyp= 0.6* d.height, price_height= 0.5* d.height;
+        double xx= 50, yy= 0.85* d_height;
+        double bar_height= 0.2* d_height, hh= 0;
+        double yyp= 0.6* d_height, price_height= 0.5* d_height;
         double hho= 0, hhh= 0, hhl= 0, hhc= 0, eps= 4* bar_width/ 9;
 	double last_day_x = xx + day_width * (days + 0.25);
 
         g2.setPaint( Color.darkGray);
         fm = g2.getFontMetrics();
 
-        g2.draw( new Rectangle2D.Double( xx- 5, 0.65* d.height,
+        g2.draw( new Rectangle2D.Double( xx- 5, 0.65* d_height,
                                          d.width- 150+ day_width,
-                                         0.2* d.height));
+                                         0.2* d_height));
         g2.setPaint( Color.lightGray);
         // draw 3 strings and a line
         g2.drawString( String.format( "%,.0fK", max_vol),
                        ( float) ( d.width- 95+ day_width),
-                       ( float) ( 0.65* d.height+ 0.25* fm.getHeight()));
+                       ( float) ( 0.65* d_height+ 0.25* fm.getHeight()));
         g2.drawString( String.format( "%,.0fK", max_vol/ 2),
                        ( float) ( d.width- 95+ day_width),
-                       ( float) ( 0.75* d.height+ 0.25* fm.getHeight()));
+                       ( float) ( 0.75* d_height+ 0.25* fm.getHeight()));
         g2.drawString( "0", ( float) ( d.width- 95+ day_width),
-                       ( float) ( 0.85* d.height+ 0.25* fm.getHeight()));
+                       ( float) ( 0.85* d_height+ 0.25* fm.getHeight()));
         g2.setPaint( Color.darkGray);
-        g2.draw( new Line2D.Double( xx- 5, 0.75* d.height,
-                                    d.width- 100+ day_width, 0.75* d.height));
+        g2.draw( new Line2D.Double( xx- 5, 0.75* d_height,
+                                    d.width- 100+ day_width, 0.75* d_height));
 
-        g2.draw( new Rectangle2D.Double( xx- 5, 0.1* d.height,
+        g2.draw( new Rectangle2D.Double( xx- 5, 0.1* d_height,
                                          d.width- 150+ day_width,
-                                         0.5* d.height));
+                                         0.5* d_height));
         double step= 0;
         for( ix= 0; ix<= 10; ix++) {
-            step= 0.1* d.height+ 0.05* ix* d.height;
+            step= 0.1* d_height+ 0.05* ix* d_height;
             g2.setPaint( Color.lightGray);
             g2.drawString( String.format( "%.2f",
                                           ( max_price- ix* price_rg/ 10)),
@@ -148,9 +149,9 @@ public class Chart extends JPanel {
         for( ix= start; ix<= end; ix++) {
             if( labels.get( ix)!= null) {
                 g2.setPaint( Color.darkGray);
-                g2.draw( new Line2D.Double( xx+ eps, 0.1* d.height,
-                                            xx+ eps, 0.6* d.height));
-                g2.draw( new Line2D.Double( xx+ eps, 0.65* d.height,
+                g2.draw( new Line2D.Double( xx+ eps, 0.1* d_height,
+                                            xx+ eps, 0.6* d_height));
+                g2.draw( new Line2D.Double( xx+ eps, 0.65* d_height,
                                             xx+ eps, yy));
                 g2.setPaint( Color.lightGray);
                 g2.drawString( labels.get( ix),
