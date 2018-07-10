@@ -1,23 +1,25 @@
 import static java.lang.Math.*;
+import core.StxTS;
+import core.StxRec;
 
 public class StxADX {
 
-    private StxData<StxRec> data; 
+    private StxTS<StxRec> data; 
     private int adxd;
 
 
-    public StxADX( StxData<StxRec> data) {
-        this.data= data;
-        adxd= 14;
+    public StxADX(StxTS<StxRec> data) {
+        this.data = data;
+        adxd = 14;
     }
 
-    public StxADX( StxData<StxRec> data, int adxd) {
-        this.data= data;
-        this.adxd= adxd;
+    public StxADX(StxTS<StxRec> data, int adxd) {
+        this.data = data;
+        this.adxd = adxd;
     }
-    public int adxi( int ix) { return ( int) adx( ix); }
+    public int adxi(int ix) { return (int) adx(ix); }
 
-    public float adx( int ix) {
+    public float adx(int ix) {
 
         StxRec sr= null, sr_1= null;
         /** The indicators to compute */
@@ -28,15 +30,15 @@ public class StxADX {
         float di_diff= 0, di_sum= 0;
         float dx= 0, ydx= 0, tdx= 0, tadx= 0, yadx= 0;
         /** for how many days have we already computed adx? */
-        int   dx_idx= -1;
+        int dx_idx = -1;
         /** utility index */
-        int   ixx;
-        for( ixx= 0; ixx<= ix; ixx++) {
+        int ixx;
+        for( ixx = 0; ixx <= ix; ixx++) {
             dx_idx++;
-            if( ixx== 0)
+            if( ixx == 0)
                 continue;
-            sr= data.get( ixx);
-            sr_1= data.get( ixx- 1);
+            sr = data.get(ixx);
+            sr_1 = data.get(ixx - 1);
             /** compute +DM and -DM */
             pdm= sr.h- sr_1.h;
             mdm= sr_1.l- sr.l;
