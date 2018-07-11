@@ -223,17 +223,19 @@ public class Chart extends JPanel {
 	    g2.setPaint( Color.darkGray);
 	}
 
-        g2.setPaint( Color.lightGray);
+        g2.setPaint(Color.lightGray);
 	if(!invisible)
-	    g2.drawString( stk_name.toUpperCase(), 50, 15);         
+	    g2.drawString(stk_name.toUpperCase(), 50, 15);         
     }
 
     String getUDV(StxxJL jl, StxUDV udv) {
 	List<Integer> pivots = jl.pivots(4, true);
 	StringBuffer udv_sb = new StringBuffer("");
+	// System.err.printf("GetUDV, factor = %.2f\n", jl.getFactor());
+	// System.err.printf("Got the following pivots:\n");
 	if(pivots.size() >= 5) {
 	    StxJL piv_0 = jl.data(pivots.get(0));
-	    // System.err.println(piv_0.date);
+	    // System.err.printf("P0.date = %s\n", piv_0.date);
 	    int ixx = 0, start = ts.find(piv_0.date, 0);
 	    for(int piv: pivots) {
 		if(ixx == 0) {
@@ -241,14 +243,15 @@ public class Chart extends JPanel {
 		    continue;
 		}
 		StxJL rec = jl.data(piv);
+		// System.err.printf("P%d date: %s\n", ixx, rec.date);
 		int udv_end = ts.find(rec.date, 0);
 		List<Float> res = udv.udv(start, udv_end);
 		udv_sb.append(" P").append(ixx).append(": ");
-		udv_sb.append(String.format("%5.2f", res.get(0)));
+		udv_sb.append(String.format("%6.0f", res.get(2)));
 		ixx++;
 		if(rec.p2) {
 		    udv_sb.append(" P").append(ixx).append(": ");
-		    udv_sb.append(String.format("%5.2f", res.get(0)));
+		    udv_sb.append(String.format("%6.0f", res.get(2)));
 		    ixx++;
 		}
 	    }
