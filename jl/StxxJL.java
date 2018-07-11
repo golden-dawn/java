@@ -269,7 +269,9 @@ public class StxxJL {
     }
 
     public void setFactor( float f) { this.f= f; }
-        
+    public float getFactor() {
+	return f;
+    }
 
     public static void main( String [] args) throws Exception {
         String start= "2001-01-01", end= "2013-12-31", stk= null;
@@ -304,5 +306,5 @@ public class StxxJL {
         StxxJL jl= new StxxJL( stk, start, end, f, w, vw, "eod", "split");
         jl.jl( run_date);
         System.err.println( jl.toString());
-    }
+    }    
 }
