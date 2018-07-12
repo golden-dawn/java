@@ -1,0 +1,66 @@
+Name                             | Trend | Pattern      | Probability
+Abandoned Baby                   | Up    | Reversal     | High
+Belt Hold                        | Up    | Reversal     | Low
+Breakaway                        | Up    | Reversal     | Moderate
+Concealing Baby Swallow          | Up    | Reversal     | High
+Doji Star                        | Up    | Reversal     | Moderate
+Engulfing                        | Up    | Reversal     | Moderate
+Hammer/Dragonfly Doji            | Up    | Reversal     | Low/Moderate
+Harami                           | Up    | Reversal     | Low
+Harami Cross                     | Up    | Reversal     | Low
+Homing Pigeon                    | Up    | Reversal     | Moderate
+Inverted Hammer/Gravestone Doji  | Up    | Reversal     | Low/Moderate
+Kicking                          | Up    | Reversal     | High
+Ladder Bottom                    | Up    | Reversal     | Moderate
+Mat Hold                         | Up    | Continuation | High
+Matching Low                     | Up    | Reversal     | Moderate
+Meeting Lines                    | Up    | Reversal     | Moderate
+Morning Doji Star                | Up    | Reversal     | High
+Morning Star                     | Up    | Reversal     | High
+Piercing Line                    | Up    | Reversal     | Moderate
+Rising Three Methods             | Up    | Continuation | High
+Separating Lines                 | Up    | Continuation | Low
+Side-by-Side White Lines         | Up    | Continuation | High
+Stick Sandwich                   | Up    | Reversal     | Moderate
+Three Inside Up                  | Up    | Reversal     | High
+Three Outside Up                 | Up    | Reversal     | High
+Three Stars In The South         | Up    | Reversal     | Moderate
+Three White Soldiers             | Up    | Reversal     | High
+Tri Star                         | Up    | Reversal     | Moderate
+Unique Three River Bottom        | Up    | Reversal     | Moderate
+Upside Gap Three Methods         | Up    | Continuation | Moderate
+Upside Tasuki Gap                | Up    | Continuation | Moderate
+Abandoned Baby			 | Down  | Reversal	| High
+Advance Block			 | Down  | Reversal	| Moderate
+Belt Hold			 | Down  | Reversal	| Low
+Breakaway			 | Down  | Reversal	| Moderate
+Dark Cloud Cover		 | Down  | Reversal	| High
+Deliberation			 | Down  | Reversal	| Moderate
+Downside Gap Three Methods	 | Down  | Continuation	| Moderate
+Downside Tasuki Gap		 | Down  | Continuation | Moderate
+Doji Star			 | Down  | Reversal	| Moderate
+Dragonfly Doji			 | Down  | Reversal	| Low/Moderate
+Engulfing			 | Down  | Reversal	| Moderate
+Evening Doji Star		 | Down  | Reversal	| High
+Evening Star			 | Down  | Reversal	| High
+Falling Three Methods		 | Down  | Continuation | High
+Gravestone Doji			 | Down  | Reversal	| Low/Moderate
+Hanging Man			 | Down  | Reversal	| Low/Moderate
+Harami				 | Down  | Reversal	| Low
+Harami Cross			 | Down  | Reversal	| Moderate
+Identical Three Crows		 | Down  | Reversal	| High
+In Neck	  			 | Down  | Continuation	| Moderate
+Kicking				 | Down  | Reversal	| High
+Meeting Lines			 | Down  | Reversal	| Moderate
+On Neck				 | Down  | Continuation | Moderate
+Separating Lines		 | Down  | Continuation | Low
+Shooting Star			 | Down  | Reversal	| Low/Moderate
+Side By Side White Lines	 | Down  | Continuation | Moderate
+Three Black Crows		 | Down  | Reversal	| High
+Three Inside Down		 | Down  | Reversal	| High
+Three Line Strike		 | Down  | Continuation | Low
+Three Outside Down		 | Down  | Reversal	| High
+Thrusting			 | Down  | Continuation | Low
+Tri Star			 | Down  | Reversal	| Moderate
+Two Crows			 | Down  | Reversal	| Moderate
+Upside Gap Two Crows		 | Down  | Reversal	| High
