@@ -146,6 +146,7 @@ public class Chart extends JPanel {
             g2.draw( new Line2D.Double( xx, step, d.width- 100+ day_width,
                                         step));
         }
+	List<Float> avg_volumes = avgVolumes(50);
         for( ix= start; ix<= end; ix++) {
             if( labels.get( ix)!= null) {
                 g2.setPaint( Color.darkGray);
@@ -176,6 +177,17 @@ public class Chart extends JPanel {
             g2.draw( new Line2D.Double( xx+ eps, hhl, xx+ eps, hhh));
             hh= yy- bar_height* ( r.v- min_vol)/vol_rg;
             g2.draw( new Line2D.Double( xx+ eps, hh, xx+ eps, yy));
+	    if(ix > start) {
+		g2.setPaint(Color.lightGray);
+		double av1 = yy - bar_height *
+		    (avg_volumes.get(ix - start - 1) - min_vol) / vol_rg;
+		double av2 = yy - bar_height *
+		    (avg_volumes.get(ix - start) - min_vol) / vol_rg;
+		// System.err.printf("Drawing line: %.2f, %.2f, %.2f, %.2f\n",
+		// 		  xx + eps - day_width, av1, xx + eps, av2);
+		g2.draw(new Line2D.Double(xx + eps - day_width, av1,
+					  xx + eps, av2));
+	    }
             xx+= day_width;
         }
         g2.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 16));
@@ -301,6 +313,22 @@ public class Chart extends JPanel {
 
 	return res;
     }
+
+    public List<Float> avgVolumes(int w) {
+	List<Float> res = new ArrayList<Float>();
+	for(int ix = start; ix <= end; ++ix) {
+	    float avg_vol = 0;
+	    int s = ix - w + 1;
+	    if(s < 0)
+		s = 0;
+	    int ww =  ix - s + 1;
+	    for(int ixx = s; ixx <= ix; ++ixx)
+		avg_vol += ts.get(ixx).v;
+	    res.add(avg_vol / ww);
+	}
+        return res;
+    }
+
     
     HashMap<Integer, String> setWeeklyLabels() {
         HashMap<Integer, String> lbls = new HashMap<Integer, String>();
