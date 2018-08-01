@@ -36,6 +36,7 @@ import java.nio.file.Files;
 import core.StxRec;
 import core.StxCal;
 import jl.StxxJL;
+import indicators.StxxSetups;
 
 public class ACtx implements KeyListener, ActionListener {
     static JFrame jf; 
@@ -47,7 +48,7 @@ public class ACtx implements KeyListener, ActionListener {
     private JButton buy, sell, c_buy, c_sell;
     private JCheckBox invisible;
     private JLDisplay jld1, jld2, jld3;
-    private JLabel jlfl1, jlfl2, jlfl3, trade_status;
+    private JLabel jlfl1, jlfl2, jlfl3, trade_status, candles;
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
     private StxxJL jl1, jl2, jl3;
@@ -59,6 +60,7 @@ public class ACtx implements KeyListener, ActionListener {
     TreeMap<String, Integer> trend_map= new TreeMap<String, Integer>();
     int idx= -1;
     String log_fname;
+    private StxxSetups sss;
 
     public ACtx() {
         
@@ -148,11 +150,13 @@ public class ACtx implements KeyListener, ActionListener {
         c_buy = new JButton( "CLOSE BUY"); c_buy.addActionListener(this);
         c_sell = new JButton( "CLOSE SELL"); c_sell.addActionListener(this);
 	trade_status = new JLabel("GETTING STARTED . . .");
+	candles = new JLabel("CANDLES . . .");
         addC(jp_trd, buy, 25, 5, 150, 15);
         addC(jp_trd, sell, 175, 5, 150, 15);
         addC(jp_trd, c_buy, 325, 5, 150, 15);
         addC(jp_trd, c_sell, 475, 5, 150, 15);
 	addC(jp_trd, trade_status, 625, 5, 550, 15);
+	addC(jp_trd, candles, 25, 25, 1000, 60);
 	
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
@@ -348,6 +352,8 @@ public class ACtx implements KeyListener, ActionListener {
 
         String jls, s, e= etf.getText();
         String n= ntf.getText();
+	if(sss == null || sss.getStk() != n)
+	    sss = new StxxSetups(n);
         int idx, w= 20, p= Integer.parseInt( jlp.getText());
         float f1= Float.parseFloat( jlf1.getText());
         float f2= Float.parseFloat( jlf2.getText());
@@ -376,6 +382,7 @@ public class ACtx implements KeyListener, ActionListener {
 			jl1, jl2, jl3, invisible.isSelected());
         chrt.setScale( last_scale);
         jtp_jl.add( n, chrt);
+	candles.setText(sss.getSetups(e));
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
 	updateTradeStatus();
     }
@@ -457,9 +464,11 @@ public class ACtx implements KeyListener, ActionListener {
 	if(ae.getSource() == pick_stk) {
 	    String stk = "NFLX";
 	    try {
-		List<String> lines = Files.readAllLines(new File("../super_liquid_stx.txt").
-							toPath(), Charset.defaultCharset());
-		stk = lines.get(ThreadLocalRandom.current().nextInt(0, lines.size()));
+		List<String> lines = Files.readAllLines
+		    (new File("../super_liquid_stx.txt").
+		     toPath(), Charset.defaultCharset());
+		stk = lines.get(ThreadLocalRandom.current().nextInt
+				(0, lines.size()));
 	    } catch(IOException ioe) {
 		ioe.printStackTrace(System.err);
 	    }
