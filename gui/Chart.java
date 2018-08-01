@@ -4,6 +4,7 @@ import core.StxCal;
 import core.StxRec;
 import core.StxTS;
 import indicators.StxUDV;
+import indicators.StxxSetups;
 import jl.StxJL;
 import jl.StxxJL;
 
@@ -203,7 +204,7 @@ public class Chart extends JPanel {
 					  pts.get(6), pts.get(7)));
 	    }
 	    String udv_str = getUDV(jl1, udv);
-	    g2.drawString(udv_str, d.width / 2 - 150, 15);
+	    g2.drawString(udv_str, d.width / 2 - 500, 15);
 	    g2.setPaint( Color.darkGray);
 	}
 	if(jl2 != null) {
@@ -217,7 +218,7 @@ public class Chart extends JPanel {
 					  pts.get(6), pts.get(7)));
 	    }
 	    String udv_str = getUDV(jl2, udv);
-	    g2.drawString(udv_str, d.width / 2 - 150, 35);
+	    g2.drawString(udv_str, d.width / 2 - 500, 35);
 	    g2.setPaint( Color.darkGray);
 	}
 	if(jl3 != null) {
@@ -231,7 +232,7 @@ public class Chart extends JPanel {
 					  pts.get(6), pts.get(7)));
 	    }
 	    String udv_str = getUDV(jl3, udv);
-	    g2.drawString(udv_str, d.width / 2 - 150, 55);
+	    g2.drawString(udv_str, d.width / 2 - 500, 55);
 	    g2.setPaint( Color.darkGray);
 	}
 
@@ -259,11 +260,13 @@ public class Chart extends JPanel {
 		int udv_end = ts.find(rec.date, 0);
 		List<Float> res = udv.udv(start, udv_end);
 		udv_sb.append(" P").append(ixx).append(": ");
-		udv_sb.append(String.format("%6.0f", res.get(2)));
+		udv_sb.append(String.format("%7.2f [%6.0f]", rec.c,
+					    res.get(2)));
 		ixx++;
 		if(rec.p2) {
 		    udv_sb.append(" P").append(ixx).append(": ");
-		    udv_sb.append(String.format("%6.0f", res.get(2)));
+		    udv_sb.append(String.format("%7.2f [%6.0f]", rec.c2,
+						res.get(2)));
 		    ixx++;
 		}
 	    }
