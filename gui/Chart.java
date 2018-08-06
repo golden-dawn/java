@@ -25,7 +25,6 @@ import javax.swing.JPanel;
 
 public class Chart extends JPanel {
     private static final long serialVersionUID = 1L;
-    HashMap<Integer, String> setups;
     StxTS<StxRec> ts;
     int start, end, start0;
     FontMetrics fm;
@@ -33,6 +32,7 @@ public class Chart extends JPanel {
     StxxJL jl1, jl2, jl3;
     String stk_name, ed;
     private boolean invisible = false;
+    private StxxSetups sss;
 
     public Chart( String stk_name, String sd, String ed) {
         super( null);
@@ -41,6 +41,8 @@ public class Chart extends JPanel {
         start = ts.find( sd, 1); start0= start;
         end= ts.find( ed, -1);
 	this.ed = ed;
+	if(sss == null || sss.getStk() != stk_name)
+	    sss = new StxxSetups(stk_name);
         repaint();
     }
 
@@ -72,6 +74,8 @@ public class Chart extends JPanel {
         this.jl2 = jl2;
         this.jl3 = jl3;
 	this.invisible = invisible;
+	if(sss == null || sss.getStk() != stk_name)
+	    sss = new StxxSetups(stk_name);
         repaint();
     }
 
@@ -191,7 +195,8 @@ public class Chart extends JPanel {
 	    }
             xx+= day_width;
         }
-        g2.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 16));
+        g2.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 14));
+	
 	StxUDV udv = new StxUDV(ts);
 	if(jl1 != null) {
 	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
@@ -204,7 +209,7 @@ public class Chart extends JPanel {
 					  pts.get(6), pts.get(7)));
 	    }
 	    String udv_str = getUDV(jl1, udv);
-	    g2.drawString(udv_str, d.width / 2 - 500, 15);
+	    g2.drawString(udv_str, d.width / 2 - 550, 15);
 	    g2.setPaint( Color.darkGray);
 	}
 	if(jl2 != null) {
@@ -218,7 +223,7 @@ public class Chart extends JPanel {
 					  pts.get(6), pts.get(7)));
 	    }
 	    String udv_str = getUDV(jl2, udv);
-	    g2.drawString(udv_str, d.width / 2 - 500, 35);
+	    g2.drawString(udv_str, d.width / 2 - 550, 35);
 	    g2.setPaint( Color.darkGray);
 	}
 	if(jl3 != null) {
@@ -232,10 +237,18 @@ public class Chart extends JPanel {
 					  pts.get(6), pts.get(7)));
 	    }
 	    String udv_str = getUDV(jl3, udv);
-	    g2.drawString(udv_str, d.width / 2 - 500, 55);
+	    g2.drawString(udv_str, d.width / 2 - 550, 55);
 	    g2.setPaint( Color.darkGray);
 	}
-
+	// System.err.printf("end = %d, ts size = %d\n", end, ts.data().size());
+	// System.err.printf("ts.get(end) = %s\n", ts.get(end).toString());
+	String cndls = sss.getSetups(ts.get(end).date);
+	String[] candles = cndls.split("\n");
+	if(candles.length == 3) {
+	    g2.setPaint(Color.white);
+	    for(int x = 0; x < 3; x++)
+		g2.drawString(candles[x], d.width / 2 + 150, 15 + 20 * x);
+	}
         g2.setPaint(Color.lightGray);
 	if(!invisible)
 	    g2.drawString(stk_name.toUpperCase(), 50, 15);         
