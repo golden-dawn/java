@@ -36,7 +36,7 @@ import java.nio.file.Files;
 import core.StxRec;
 import core.StxCal;
 import jl.StxxJL;
-import indicators.StxxSetups;
+// import indicators.StxxSetups;
 
 public class ACtx implements KeyListener, ActionListener {
     static JFrame jf; 
@@ -60,7 +60,7 @@ public class ACtx implements KeyListener, ActionListener {
     TreeMap<String, Integer> trend_map= new TreeMap<String, Integer>();
     int idx= -1;
     String log_fname;
-    private StxxSetups sss;
+    // private StxxSetups sss;
 
     public ACtx() {
         
@@ -352,8 +352,6 @@ public class ACtx implements KeyListener, ActionListener {
 
         String jls, s, e= etf.getText();
         String n= ntf.getText();
-	if(sss == null || sss.getStk() != n)
-	    sss = new StxxSetups(n);
         int idx, w= 20, p= Integer.parseInt( jlp.getText());
         float f1= Float.parseFloat( jlf1.getText());
         float f2= Float.parseFloat( jlf2.getText());
@@ -382,7 +380,7 @@ public class ACtx implements KeyListener, ActionListener {
 			jl1, jl2, jl3, invisible.isSelected());
         chrt.setScale( last_scale);
         jtp_jl.add( n, chrt);
-	candles.setText(sss.getSetups(e));
+	// candles.setText(sss.getSetups(e));
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
 	updateTradeStatus();
     }
