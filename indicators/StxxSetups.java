@@ -48,9 +48,9 @@ public class StxxSetups {
 	if(ix > 1)
 	    sb.append("T-2: ").append(recs.get(ix - 2).setups).append("\n");
 	if(ix > 0)
-	    sb.append("   T-1: ").append(recs.get(ix - 1).setups).append("\n");
+	    sb.append("T-1: ").append(recs.get(ix - 1).setups).append("\n");
 	if(ix >= 0)
-	    sb.append("   T: ").append(recs.get(ix).setups).append("\n");
+	    sb.append("  T: ").append(recs.get(ix).setups).append("\n");
 	return  sb.toString();
     }
 
