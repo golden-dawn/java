@@ -198,6 +198,7 @@ public class Chart extends JPanel {
         g2.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 14));
 	
 	StxUDV udv = new StxUDV(ts);
+	float last_avg_volume = avg_volumes.get(avg_volumes.size() - 1);
 	if(jl1 != null) {
 	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
 					  price_height, min_price, price_rg);
@@ -208,7 +209,7 @@ public class Chart extends JPanel {
 		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
 					  pts.get(6), pts.get(7)));
 	    }
-	    String udv_str = getUDV(jl1, udv);
+	    String udv_str = getUDV(jl1, udv, last_avg_volume);
 	    g2.drawString(udv_str, d.width / 2 - 550, 15);
 	    g2.setPaint( Color.darkGray);
 	}
@@ -222,7 +223,7 @@ public class Chart extends JPanel {
 		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
 					  pts.get(6), pts.get(7)));
 	    }
-	    String udv_str = getUDV(jl2, udv);
+	    String udv_str = getUDV(jl2, udv, last_avg_volume);
 	    g2.drawString(udv_str, d.width / 2 - 550, 35);
 	    g2.setPaint( Color.darkGray);
 	}
@@ -236,7 +237,7 @@ public class Chart extends JPanel {
 		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
 					  pts.get(6), pts.get(7)));
 	    }
-	    String udv_str = getUDV(jl3, udv);
+	    String udv_str = getUDV(jl3, udv, last_avg_volume);
 	    g2.drawString(udv_str, d.width / 2 - 550, 55);
 	    g2.setPaint( Color.darkGray);
 	}
@@ -254,7 +255,7 @@ public class Chart extends JPanel {
 	    g2.drawString(stk_name.toUpperCase(), 50, 15);         
     }
 
-    String getUDV(StxxJL jl, StxUDV udv) {
+    String getUDV(StxxJL jl, StxUDV udv, float last_avg_volume) {
 	List<Integer> pivots = jl.pivots(4, true);
 	StringBuffer udv_sb = new StringBuffer("");
 	// System.err.printf("GetUDV, factor = %.2f\n", jl.getFactor());
@@ -273,13 +274,13 @@ public class Chart extends JPanel {
 		int udv_end = ts.find(rec.date, 0);
 		List<Float> res = udv.udv(start, udv_end);
 		udv_sb.append(" P").append(ixx).append(": ");
-		udv_sb.append(String.format("%7.2f [%6.0f]", rec.c,
-					    res.get(2)));
+		udv_sb.append(String.format("%7.2f [%4.1f]", rec.c,
+					    res.get(2) / last_avg_volume));
 		ixx++;
 		if(rec.p2) {
 		    udv_sb.append(" P").append(ixx).append(": ");
-		    udv_sb.append(String.format("%7.2f [%6.0f]", rec.c2,
-						res.get(2)));
+		    udv_sb.append(String.format("%7.2f [%4.1f]", rec.c2,
+						res.get(2) / last_avg_volume));
 		    ixx++;
 		}
 	    }
