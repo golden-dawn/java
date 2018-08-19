@@ -150,7 +150,7 @@ public class ACtx implements KeyListener, ActionListener {
         c_buy = new JButton( "CLOSE BUY"); c_buy.addActionListener(this);
         c_sell = new JButton( "CLOSE SELL"); c_sell.addActionListener(this);
 	trade_status = new JLabel("GETTING STARTED . . .");
-	candles = new JLabel("CANDLES . . .");
+	candles = new JLabel("");
         addC(jp_trd, buy, 25, 5, 150, 15);
         addC(jp_trd, sell, 175, 5, 150, 15);
         addC(jp_trd, c_buy, 325, 5, 150, 15);
@@ -502,11 +502,17 @@ public class ACtx implements KeyListener, ActionListener {
 	    pnl = sgn * (trade_price - in_price) / in_range - 1;
 	    if(pnl < -2)
 		pnl = -2;
+	    pnl /= 2.0;
 	    sb.append(cmd_name).append(',').append(ntf.getText()).append(',').
 		append(in_date).append(',').append(in_price).append(',').
 		append(String.format("%.2f", in_range)).append(',').
 		append(trade_date).append(",").append(trade_price).append(",").
-		append(String.format("%.2f", pnl));
+		append(String.format("%.2f", pnl)).append(",").
+		append(in_date.substring(0, 4)).append(",");
+	    if(pnl > 0)
+		sb.append(String.format("1,%.2f,,", pnl));
+	    else
+		sb.append(String.format("0,,%.2f", pnl));
 	    sb1.append(cmd_name).append("  DAYS: ").
 		append(StxCal.numBusDays(in_date, trade_date)).append("  IN: ").
 		append(in_price).append("  OUT: ").append(trade_price).
