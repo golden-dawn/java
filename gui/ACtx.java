@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -32,11 +33,16 @@ import javax.swing.JTextField;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 
-
-import core.StxRec;
 import core.StxCal;
+import core.StxDB;
+import core.StxRec;
 import jl.StxxJL;
-// import indicators.StxxSetups;
+
+// TODO:
+// 1. Add a strike and an expiry text fields, as well as an OK button
+// 2. Replace BUY with CALL and SELL with PUT
+// 3. Get a text area with the option prices for the selected strike and expiry
+// 4. Write SQL code that gets the options from the database
 
 public class ACtx implements KeyListener, ActionListener {
     static JFrame jf; 
@@ -45,10 +51,11 @@ public class ACtx implements KeyListener, ActionListener {
     private JTextField etf, ntf, dtf, dbetf, dbstf, jlf1, jlf2, jlf3, jlp;
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
     private JButton rewind, fwd, bak, pick_stk;
-    private JButton buy, sell, c_buy, c_sell;
+    private JButton call, put, c_call, c_put, trade;
+    private JTextField exp, strike;
     private JCheckBox invisible;
-    private JLDisplay jld1, jld2, jld3;
-    private JLabel jlfl1, jlfl2, jlfl3, trade_status, candles;
+    private JLDisplay jld1, jld2, jld3, opts;
+    private JLabel jlfl1, jlfl2, jlfl3, trade_status;
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
     private StxxJL jl1, jl2, jl3;
@@ -145,18 +152,22 @@ public class ACtx implements KeyListener, ActionListener {
         jp_trd = new JPanel(null);
         jp_trd.setBackground(Color.black);
         jp_trd.setForeground(Color.lightGray);
-        buy = new JButton("BUY"); buy.addActionListener(this);
-        sell = new JButton( "SELL"); sell.addActionListener(this);
-        c_buy = new JButton( "CLOSE BUY"); c_buy.addActionListener(this);
-        c_sell = new JButton( "CLOSE SELL"); c_sell.addActionListener(this);
+        call = new JButton("CALL"); call.addActionListener(this);
+        put = new JButton( "PUT"); put.addActionListener(this);
+        c_call = new JButton( "CLOSE CALL"); c_call.addActionListener(this);
+        c_put = new JButton( "CLOSE PUT"); c_put.addActionListener(this);
+	trade = new JButton("TRADE"); trade.addActionListener(this);
+	strike = new JTextField("strike");
+	exp = new JTextField("expiry");
 	trade_status = new JLabel("GETTING STARTED . . .");
-	candles = new JLabel("");
-        addC(jp_trd, buy, 25, 5, 150, 15);
-        addC(jp_trd, sell, 175, 5, 150, 15);
-        addC(jp_trd, c_buy, 325, 5, 150, 15);
-        addC(jp_trd, c_sell, 475, 5, 150, 15);
-	addC(jp_trd, trade_status, 625, 5, 550, 15);
-	addC(jp_trd, candles, 25, 25, 1000, 60);
+        addC(jp_trd, call, 5, 5, 80, 15);
+        addC(jp_trd, put, 85, 5, 80, 15);
+        addC(jp_trd, c_call, 165, 5, 120, 15);
+        addC(jp_trd, c_put, 285, 5, 120, 15);
+	addC(jp_trd, strike, 405, 5, 80, 15);
+	addC(jp_trd, exp, 485, 5, 80, 15);
+	addC(jp_trd, trade, 565, 5, 80, 15);
+	addC(jp_trd, trade_status, 645, 5, 550, 15);
 	
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
@@ -380,7 +391,6 @@ public class ACtx implements KeyListener, ActionListener {
 			jl1, jl2, jl3, invisible.isSelected());
         chrt.setScale( last_scale);
         jtp_jl.add( n, chrt);
-	// candles.setText(sss.getSetups(e));
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
 	updateTradeStatus();
     }
@@ -477,9 +487,13 @@ public class ACtx implements KeyListener, ActionListener {
 		exc.printStackTrace(System.err);
 	    }	    
 	}
-	
-        if(cmd_name.equals("BUY") || cmd_name.equals("SELL") ||
-	   cmd_name.equals("CLOSE BUY") || cmd_name.equals("CLOSE SELL"))
+
+	// TODO: pushing call or put should retrieve all the relevant
+	// options pushing close call or close put should get some
+	// default open options there should also be a trade command,
+	// that happens when the trade button is pushed
+        if(cmd_name.equals("CALL") || cmd_name.equals("PUT") ||
+	   cmd_name.equals("CLOSE CALL") || cmd_name.equals("CLOSE PUT"))
 	    try {
 		log_trade(cmd_name);
 	    } catch(IOException ioe) {
