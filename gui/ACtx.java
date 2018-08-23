@@ -153,12 +153,13 @@ public class ACtx implements KeyListener, ActionListener {
         jp_trd.setBackground(Color.black);
         jp_trd.setForeground(Color.lightGray);
         call = new JButton("CALL"); call.addActionListener(this);
-        put = new JButton( "PUT"); put.addActionListener(this);
-        c_call = new JButton( "CLOSE CALL"); c_call.addActionListener(this);
-        c_put = new JButton( "CLOSE PUT"); c_put.addActionListener(this);
+        put = new JButton("PUT"); put.addActionListener(this);
+        c_call = new JButton("CLOSE CALL"); c_call.addActionListener(this);
+        c_put = new JButton("CLOSE PUT"); c_put.addActionListener(this);
 	trade = new JButton("TRADE"); trade.addActionListener(this);
 	strike = new JTextField("strike");
 	exp = new JTextField("expiry");
+	opts = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trade_status = new JLabel("GETTING STARTED . . .");
         addC(jp_trd, call, 5, 5, 80, 15);
         addC(jp_trd, put, 85, 5, 80, 15);
@@ -168,6 +169,8 @@ public class ACtx implements KeyListener, ActionListener {
 	addC(jp_trd, exp, 485, 5, 80, 15);
 	addC(jp_trd, trade, 565, 5, 80, 15);
 	addC(jp_trd, trade_status, 645, 5, 550, 15);
+	addC(jp_trd, opts, 5, 20, 1005, 115);
+	opts.append("This is a test\n");
 	
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
