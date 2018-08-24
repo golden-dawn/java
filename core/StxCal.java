@@ -499,6 +499,13 @@ public class StxCal {
         return res;
     }
 
+    static public List<String> expiries(String dt, int m) {
+        List<String> res = new ArrayList<String>();
+	for(int ix = 0; ix < m; ix++)
+	    res.add(getMonthlyExpiration(dt, ix + 1));
+        return res;
+    }
+
     public static void main( String [] args) {
     }
 }
