@@ -22,6 +22,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -46,7 +47,7 @@ import jl.StxxJL;
 //v4. Write SQL code that gets the options from the database
 // 5. Create another text area that shows the current open trades
 // 6. Create a trading activity label
-// 7. Replace the strike and expiry labels with dropdown menus
+//v7. Replace the strike and expiry labels with dropdown menus
 // 8. Adjust the logging to capture both spots, as well as option prices
 
 public class ACtx implements KeyListener, ActionListener {
@@ -57,9 +58,9 @@ public class ACtx implements KeyListener, ActionListener {
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
     private JButton rewind, fwd, bak, pick_stk;
     private JButton call, put, c_call, c_put, trade;
-    private JTextField exp, strike;
+    private JComboBox exp, strike;
     private JCheckBox invisible;
-    private JLDisplay jld1, jld2, jld3, opts;
+    private JLDisplay jld1, jld2, jld3, opts, trades;
     private JLabel jlfl1, jlfl2, jlfl3, trade_status;
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
@@ -72,7 +73,6 @@ public class ACtx implements KeyListener, ActionListener {
     TreeMap<String, Integer> trend_map= new TreeMap<String, Integer>();
     int idx= -1;
     String log_fname;
-    // private StxxSetups sss;
 
     public ACtx() {
         
@@ -162,19 +162,23 @@ public class ACtx implements KeyListener, ActionListener {
         c_call = new JButton("CLOSE CALL"); c_call.addActionListener(this);
         c_put = new JButton("CLOSE PUT"); c_put.addActionListener(this);
 	trade = new JButton("TRADE"); trade.addActionListener(this);
-	strike = new JTextField("strike");
-	exp = new JTextField("expiry");
-	opts = new JLDisplay(600, 100, 14, invisible.isSelected());
+	strike = new JComboBox<Float>();
+	strike.setEditable(true);
+	exp = new JComboBox<String>();
+	exp.setEditable(true);
+	opts = new JLDisplay(600, 100, 12, invisible.isSelected());
+	trades = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trade_status = new JLabel("GETTING STARTED . . .");
         addC(jp_trd, call, 5, 5, 80, 15);
         addC(jp_trd, put, 85, 5, 80, 15);
         addC(jp_trd, c_call, 165, 5, 120, 15);
         addC(jp_trd, c_put, 285, 5, 120, 15);
-	addC(jp_trd, strike, 405, 5, 80, 15);
-	addC(jp_trd, exp, 485, 5, 80, 15);
-	addC(jp_trd, trade, 565, 5, 80, 15);
-	addC(jp_trd, trade_status, 645, 5, 550, 15);
-	addC(jp_trd, opts, 5, 20, 705, 115);
+	addC(jp_trd, strike, 405, 0, 80, 20);
+	addC(jp_trd, exp, 485, 0, 120, 20);
+	addC(jp_trd, trade, 605, 5, 80, 15);
+	addC(jp_trd, trade_status, 725, 5, 550, 15);
+	addC(jp_trd, opts, 5, 20, 555, 115);
+	addC(jp_trd, trades, 560, 20, 555, 115);
 	
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
@@ -566,10 +570,6 @@ public class ACtx implements KeyListener, ActionListener {
 	    append("  P&L: ").append(String.format("%.2f", pnl));	
 	trade_status.setText(sb.toString());
     }
-
-    //2016-09-16                            2016-10-21
-    //C: 7.95/ 8.15 P: 3.55/ 3.65 | 160.00 | C:11.70/11.90 P: 1.61/ 1.68 
-
     
     private void getOptions() {
 	String und = ntf.getText(), ed = etf.getText();
@@ -579,7 +579,7 @@ public class ACtx implements KeyListener, ActionListener {
 	List<Float> strikes = new ArrayList<Float>();
 	float min_dist = 10000;
 	int atm_ix = -1, strike_ix = -1;
-	float cc = chrt.getSR(trade_date).c;
+	float cc = chrt.getSR(ed).c;
 	StringBuilder q1= new StringBuilder("SELECT DISTINCT strike FROM ");
 	q1.append("options WHERE und='").append(und).append("' AND date='").
 	    append(ed).append("' AND expiry='").append(expiries.get(1)).
@@ -589,9 +589,9 @@ public class ACtx implements KeyListener, ActionListener {
             ResultSet rset = sdb.get(q1.toString());
 	    while(rset.next()) {
 		strike_ix++;
-		float s = rset.getFloat(1);
-		if(Math.abs(s - cc) <= min_dist) {
-		    min_dist = Math.abs(s - cc);
+		float s = rset.getFloat(1), dist = Math.abs(s - cc);
+		if(dist <= min_dist) {
+		    min_dist = dist;
 		    atm_ix = strike_ix;
 		}
 		strikes.add(s);
@@ -600,8 +600,15 @@ public class ACtx implements KeyListener, ActionListener {
 	    System.err.println("Failed to get strikes for " + und + ":");
             ex.printStackTrace(System.err);
         }
-	opts.append(String.format("%s                            %s\n",
-				  expiries.get(0), expiries.get(1)));
+	trades.clear();
+	opts.clear();
+	if(invisible.isSelected())
+	    opts.append(String.format("%10d                            %10d\n",
+				      StxCal.numBusDays(ed, expiries.get(0)),
+				      StxCal.numBusDays(ed, expiries.get(1))));
+	else
+	    opts.append(String.format("%s                            %s\n",
+				      expiries.get(0), expiries.get(1)));
 	List<Float> sel_strikes = new ArrayList<Float>();
 	int len = strikes.size();
 	if(atm_ix > 1) sel_strikes.add(strikes.get(atm_ix - 2));
@@ -613,22 +620,22 @@ public class ACtx implements KeyListener, ActionListener {
 	    return;
 	HashMap<Float, HashMap<String, HashMap<String, String>>> opt_dct =
 	    new HashMap<Float, HashMap<String, HashMap<String, String>>>();
-	for(float strike: sel_strikes) {
+	for(float s: sel_strikes) {
 	    HashMap<String, HashMap<String, String>> strike_dct =
 		new HashMap<String, HashMap<String, String>>();
 	    for(String expiry: expiries) {
 		HashMap<String, String> exp_dct = new HashMap<String, String>();
-		exp_dct.put("C:", "            ");
-		exp_dct.put("P:", "            ");
+		exp_dct.put("c", "            ");
+		exp_dct.put("p", "            ");
 		strike_dct.put(expiry, exp_dct);
 	    }
-	    opt_dct.put(strike, strike_dct);
+	    opt_dct.put(s, strike_dct);
 	}
 	StringBuffer s_sb = new StringBuffer("(");
 	strike_ix = 0;
-	for(float strike: sel_strikes) {
+	for(float s: sel_strikes) {
 	    if(strike_ix > 0) s_sb.append(",");
-	    s_sb.append(strike);
+	    s_sb.append(s);
 	    ++strike_ix;
 	}
 	s_sb.append(")");
@@ -639,22 +646,38 @@ public class ACtx implements KeyListener, ActionListener {
 	    append(s_sb.toString()).append(" order by expiry, strike, cp");
 	try {
             StxDB sdb = new StxDB("stx_ng");
-            ResultSet rset = sdb.get(q1.toString());
+            ResultSet rset = sdb.get(q2.toString());
             while(rset.next()) {
-		String exp = rset.getString(1), cp = rset.getString(3);
-		float strike = rset.getFloat(4), bid = rset.getFloat(6),
+		String expiry = rset.getString(1), cp = rset.getString(3);
+		float s = rset.getFloat(4), bid = rset.getFloat(6),
 		    ask = rset.getFloat(7);
-		
-		// res.append(rset.getString(1)).append(" ").
-		//     append(rset.getString(3)).append(" ").
-		//     append(rset.getFloat(4)).append(" ").
-		//     append(rset.getFloat(6)).append(" ").
-		//     append(rset.getFloat(7)).append("\n");
+		opt_dct.get(s).get(expiry).
+		    put(cp, String.format("%5.2f/%5.2f ", bid, ask));
 	    }
         } catch( Exception ex) {
             System.err.println("Failed to get options for " + und + ":");
             ex.printStackTrace(System.err);
         }
+	exp.removeAllItems();
+	strike.removeAllItems();
+	for(float s: sel_strikes) {
+	    StringBuffer s_row = new StringBuffer();
+	    s_row.append("C:").
+		append(opt_dct.get(s).get(expiries.get(0)).get("c")).
+		append("P:").
+		append(opt_dct.get(s).get(expiries.get(0)).get("p")).
+		append(String.format(" | %6.2f | ", s)).
+		append("C:").
+		append(opt_dct.get(s).get(expiries.get(1)).get("c")).
+		append(" P:").
+		append(opt_dct.get(s).get(expiries.get(1)).get("p")).
+		append("\n");
+	    opts.append(s_row.toString());
+	    strike.addItem(s);
+	}
+	strike.setSelectedItem(strikes.get(atm_ix));
+	for(String expiry: expiries)
+	    exp.addItem(expiry);
     }
     
     public static void main( String[] args) {
