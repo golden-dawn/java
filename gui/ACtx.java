@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -39,10 +40,14 @@ import core.StxRec;
 import jl.StxxJL;
 
 // TODO:
-// 1. Add a strike and an expiry text fields, as well as an OK button
-// 2. Replace BUY with CALL and SELL with PUT
-// 3. Get a text area with the option prices for the selected strike and expiry
-// 4. Write SQL code that gets the options from the database
+//v1. Add a strike and an expiry text fields, as well as an OK button
+//v2. Replace BUY with CALL and SELL with PUT
+//v3. Get a text area with the option prices for the selected strike and expiry
+//v4. Write SQL code that gets the options from the database
+// 5. Create another text area that shows the current open trades
+// 6. Create a trading activity label
+// 7. Replace the strike and expiry labels with dropdown menus
+// 8. Adjust the logging to capture both spots, as well as option prices
 
 public class ACtx implements KeyListener, ActionListener {
     static JFrame jf; 
@@ -159,7 +164,7 @@ public class ACtx implements KeyListener, ActionListener {
 	trade = new JButton("TRADE"); trade.addActionListener(this);
 	strike = new JTextField("strike");
 	exp = new JTextField("expiry");
-	opts = new JLDisplay(600, 100, 12, invisible.isSelected());
+	opts = new JLDisplay(600, 100, 14, invisible.isSelected());
 	trade_status = new JLabel("GETTING STARTED . . .");
         addC(jp_trd, call, 5, 5, 80, 15);
         addC(jp_trd, put, 85, 5, 80, 15);
@@ -169,8 +174,7 @@ public class ACtx implements KeyListener, ActionListener {
 	addC(jp_trd, exp, 485, 5, 80, 15);
 	addC(jp_trd, trade, 565, 5, 80, 15);
 	addC(jp_trd, trade_status, 645, 5, 550, 15);
-	addC(jp_trd, opts, 5, 20, 1005, 115);
-	opts.append("This is a test\n");
+	addC(jp_trd, opts, 5, 20, 705, 115);
 	
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
@@ -392,9 +396,10 @@ public class ACtx implements KeyListener, ActionListener {
 			 dbstf.getText());
         chrt= new Chart(n, s, e, true, dbetf.getText(), dbstf.getText(), 
 			jl1, jl2, jl3, invisible.isSelected());
-        chrt.setScale( last_scale);
-        jtp_jl.add( n, chrt);
-        jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
+        chrt.setScale(last_scale);
+        jtp_jl.add(n, chrt);
+        jtp_jl.setSelectedIndex(jtp_jl.indexOfTab(n));
+	getOptions();
 	updateTradeStatus();
     }
 
@@ -560,6 +565,96 @@ public class ACtx implements KeyListener, ActionListener {
 	    append("  PX: ").append(crt_price).
 	    append("  P&L: ").append(String.format("%.2f", pnl));	
 	trade_status.setText(sb.toString());
+    }
+
+    //2016-09-16                            2016-10-21
+    //C: 7.95/ 8.15 P: 3.55/ 3.65 | 160.00 | C:11.70/11.90 P: 1.61/ 1.68 
+
+    
+    private void getOptions() {
+	String und = ntf.getText(), ed = etf.getText();
+	if(und == null || und.equals("") || ed == null || ed.equals(""))
+	    return;
+	List<String> expiries = StxCal.expiries(ed, 2);
+	List<Float> strikes = new ArrayList<Float>();
+	float min_dist = 10000;
+	int atm_ix = -1, strike_ix = -1;
+	float cc = chrt.getSR(trade_date).c;
+	StringBuilder q1= new StringBuilder("SELECT DISTINCT strike FROM ");
+	q1.append("options WHERE und='").append(und).append("' AND date='").
+	    append(ed).append("' AND expiry='").append(expiries.get(1)).
+	    append("' ").append("ORDER BY strike");
+ 	try {
+            StxDB sdb = new StxDB("stx_ng");
+            ResultSet rset = sdb.get(q1.toString());
+	    while(rset.next()) {
+		strike_ix++;
+		float s = rset.getFloat(1);
+		if(Math.abs(s - cc) <= min_dist) {
+		    min_dist = Math.abs(s - cc);
+		    atm_ix = strike_ix;
+		}
+		strikes.add(s);
+	    }
+        } catch( Exception ex) {
+	    System.err.println("Failed to get strikes for " + und + ":");
+            ex.printStackTrace(System.err);
+        }
+	opts.append(String.format("%s                            %s\n",
+				  expiries.get(0), expiries.get(1)));
+	List<Float> sel_strikes = new ArrayList<Float>();
+	int len = strikes.size();
+	if(atm_ix > 1) sel_strikes.add(strikes.get(atm_ix - 2));
+	if(atm_ix > 0) sel_strikes.add(strikes.get(atm_ix - 1));
+	if(atm_ix >= 0) sel_strikes.add(strikes.get(atm_ix));
+	if(atm_ix < len - 1) sel_strikes.add(strikes.get(atm_ix + 1));
+	if(atm_ix < len - 2) sel_strikes.add(strikes.get(atm_ix + 2));
+	if(sel_strikes.size() == 0)
+	    return;
+	HashMap<Float, HashMap<String, HashMap<String, String>>> opt_dct =
+	    new HashMap<Float, HashMap<String, HashMap<String, String>>>();
+	for(float strike: sel_strikes) {
+	    HashMap<String, HashMap<String, String>> strike_dct =
+		new HashMap<String, HashMap<String, String>>();
+	    for(String expiry: expiries) {
+		HashMap<String, String> exp_dct = new HashMap<String, String>();
+		exp_dct.put("C:", "            ");
+		exp_dct.put("P:", "            ");
+		strike_dct.put(expiry, exp_dct);
+	    }
+	    opt_dct.put(strike, strike_dct);
+	}
+	StringBuffer s_sb = new StringBuffer("(");
+	strike_ix = 0;
+	for(float strike: sel_strikes) {
+	    if(strike_ix > 0) s_sb.append(",");
+	    s_sb.append(strike);
+	    ++strike_ix;
+	}
+	s_sb.append(")");
+	StringBuilder q2= new StringBuilder("SELECT * FROM options WHERE ");
+        q2.append("und='").append(und).append( "' and date='").append(ed).
+	    append("' and expiry in ('").append(expiries.get(0)).append("', '").
+	    append(expiries.get(1)).append("') and strike in ").
+	    append(s_sb.toString()).append(" order by expiry, strike, cp");
+	try {
+            StxDB sdb = new StxDB("stx_ng");
+            ResultSet rset = sdb.get(q1.toString());
+            while(rset.next()) {
+		String exp = rset.getString(1), cp = rset.getString(3);
+		float strike = rset.getFloat(4), bid = rset.getFloat(6),
+		    ask = rset.getFloat(7);
+		
+		// res.append(rset.getString(1)).append(" ").
+		//     append(rset.getString(3)).append(" ").
+		//     append(rset.getFloat(4)).append(" ").
+		//     append(rset.getFloat(6)).append(" ").
+		//     append(rset.getFloat(7)).append("\n");
+	    }
+        } catch( Exception ex) {
+            System.err.println("Failed to get options for " + und + ":");
+            ex.printStackTrace(System.err);
+        }
     }
     
     public static void main( String[] args) {
