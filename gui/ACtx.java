@@ -65,6 +65,9 @@ public class ACtx implements KeyListener, ActionListener {
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
     private StxxJL jl1, jl2, jl3;
+    private HashMap<String, String> portfolio = new HashMap<String, String>();
+    // <cp, expiry, strike> =>
+    // <in_date, in_price, in_range, in_opt_px, crt_bid, crt_ask, crt_spot
     String last_scale= "3M";
     private String trade_type = "", trade_date;
     private float trade_price, trade_daily_range;
@@ -676,8 +679,12 @@ public class ACtx implements KeyListener, ActionListener {
 	    strike.addItem(s);
 	}
 	strike.setSelectedItem(strikes.get(atm_ix));
+
 	for(String expiry: expiries)
-	    exp.addItem(expiry);
+	    if(invisible.isSelected())
+		exp.addItem(String.format("%d", StxCal.numBusDays(ed, expiry)));
+	    else
+		exp.addItem(expiry);
     }
     
     public static void main( String[] args) {
