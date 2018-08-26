@@ -57,8 +57,8 @@ public class ACtx implements KeyListener, ActionListener {
     private JTextField etf, ntf, dtf, dbetf, dbstf, jlf1, jlf2, jlf3, jlp;
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
     private JButton rewind, fwd, bak, pick_stk;
-    private JButton call, put, c_call, c_put, trade;
-    private JComboBox exp, strike;
+    private JButton call, put, c_call, c_put;
+    private JComboBox exp, strike, capital;
     private JCheckBox invisible;
     private JLDisplay jld1, jld2, jld3, opts, trades;
     private JLabel jlfl1, jlfl2, jlfl3, trade_status;
@@ -165,11 +165,12 @@ public class ACtx implements KeyListener, ActionListener {
         put = new JButton("PUT"); put.addActionListener(this);
         c_call = new JButton("CLOSE CALL"); c_call.addActionListener(this);
         c_put = new JButton("CLOSE PUT"); c_put.addActionListener(this);
-	trade = new JButton("TRADE"); trade.addActionListener(this);
 	strike = new JComboBox<Float>();
 	strike.setEditable(true);
 	exp = new JComboBox<String>();
 	exp.setEditable(true);
+	capital = new JComboBox<Float>();
+	capital.setEditable(true);
 	opts = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trades = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trade_status = new JLabel("GETTING STARTED . . .");
@@ -179,7 +180,7 @@ public class ACtx implements KeyListener, ActionListener {
         addC(jp_trd, c_put, 285, 5, 120, 15);
 	addC(jp_trd, strike, 405, 0, 80, 20);
 	addC(jp_trd, exp, 485, 0, 120, 20);
-	addC(jp_trd, trade, 605, 5, 80, 15);
+	addC(jp_trd, capital, 605, 0, 80, 20);
 	addC(jp_trd, trade_status, 725, 5, 550, 15);
 	addC(jp_trd, opts, 5, 20, 555, 115);
 	addC(jp_trd, trades, 560, 20, 555, 115);
@@ -509,57 +510,71 @@ public class ACtx implements KeyListener, ActionListener {
 	// default open options there should also be a trade command,
 	// that happens when the trade button is pushed
         if(cmd_name.equals("CALL") || cmd_name.equals("PUT")) {
-	    StxTrade trd = new StxTrade(ntf.getText(), cmd_name, );
+	    String dt = etf.getText();
+	    String expiry =
+		StxCal.getMonthlyExpiration(dt, exp.getSelectedIndex() + 1);
+	    StxTrade trd = new StxTrade(ntf.getText(), cmd_name, expiry, dt,
+					(Float)strike.getSelectedItem(),
+					chrt.getSR(dt).c, jl1.avgRg(),
+					Float.parseFloat(capital.
+							 getSelectedItem().
+							 toString()));
+	    trade_ix.put(trd.key(), trade_list.size());
+	    trade_list.add(trd);
 	}
-	   cmd_name.equals("CLOSE CALL") || cmd_name.equals("CLOSE PUT"))
-	    try {
-		log_trade(cmd_name);
-	    } catch(IOException ioe) {
-		System.err.println("Failed to log trade: ");
-		ioe.printStackTrace( System.err);
-	    }
-    }
-
-    private void log_trade(String cmd_name) throws IOException {
-	PrintWriter pw = new PrintWriter(new FileWriter(log_fname, true));
-	StringBuffer sb = new StringBuffer(), sb1 = new StringBuffer();
-	float pnl = 0, in_price = trade_price, in_range = trade_daily_range;
-	String in_date = trade_date;
-	int sgn = cmd_name.contains("BUY")? 1: -1;
-	trade_type = cmd_name;
-	trade_date = etf.getText();
-	trade_price = chrt.getSR(trade_date).c;
-	trade_daily_range = jl1.avgRg();
-	if(trade_type.startsWith("CLOSE")) {
-	    pnl = sgn * (trade_price - in_price) / in_range - 1;
-	    if(pnl < -2)
-		pnl = -2;
-	    pnl /= 2.0;
-	    sb.append(cmd_name).append(',').append(ntf.getText()).append(',').
-		append(in_date).append(',').append(in_price).append(',').
-		append(String.format("%.2f", in_range)).append(',').
-		append(trade_date).append(",").append(trade_price).append(",").
-		append(String.format("%.2f", pnl)).append(",").
-		append(in_date.substring(0, 4)).append(",");
-	    if(pnl > 0)
-		sb.append(String.format("1,%.2f,,", pnl));
-	    else
-		sb.append(String.format("0,,%.2f", pnl));
-	    sb1.append(cmd_name).append("  DAYS: ").
-		append(StxCal.numBusDays(in_date, trade_date)).append("  IN: ").
-		append(in_price).append("  OUT: ").append(trade_price).
-		append("  P&L: ").append(String.format("%.2f", pnl));
-	    pw.println(sb.toString());
-	} else {
-	    sb.append(trade_type).append(",").append(ntf.getText()).append(",").
-		append(trade_date).append(",").append(trade_price).append(",").
-		append(trade_daily_range);
-	    sb1.append(trade_type).append("  DAYS: 0").append("  IN: ").
-		append(trade_price).append("  RG: ").append(trade_daily_range);
+	if(cmd_name.equals("CLOSE CALL") || cmd_name.equals("CLOSE PUT")) {
+	    String cp = cmd_name.equals("CLOSE CALL")? "c": "p";
+	    String dt = etf.getText();
+	    String expiry =
+		StxCal.getMonthlyExpiration(dt, exp.getSelectedIndex() + 1);
+	    String trade_key = String.format("%s_%s_%s_%.2f", ntf.getText(), cp,
+					     expiry, strike.getSelectedItem());
+	    int ix = trade_ix.get(trade_key);
+	    StxTrade trd = trade_list.get(ix);
+	    trd.close(log_fname);	    
 	}
-	pw.close();
-	trade_status.setText(sb1.toString());
     }
+    
+    // private void log_trade(String cmd_name) throws IOException {
+    // 	PrintWriter pw = new PrintWriter(new FileWriter(log_fname, true));
+    // 	StringBuffer sb = new StringBuffer(), sb1 = new StringBuffer();
+    // 	float pnl = 0, in_price = trade_price, in_range = trade_daily_range;
+    // 	String in_date = trade_date;
+    // 	int sgn = cmd_name.contains("BUY")? 1: -1;
+    // 	trade_type = cmd_name;
+    // 	trade_date = etf.getText();
+    // 	trade_price = chrt.getSR(trade_date).c;
+    // 	trade_daily_range = jl1.avgRg();
+    // 	if(trade_type.startsWith("CLOSE")) {
+    // 	    pnl = sgn * (trade_price - in_price) / in_range - 1;
+    // 	    if(pnl < -2)
+    // 		pnl = -2;
+    // 	    pnl /= 2.0;
+    // 	    sb.append(cmd_name).append(',').append(ntf.getText()).append(',').
+    // 		append(in_date).append(',').append(in_price).append(',').
+    // 		append(String.format("%.2f", in_range)).append(',').
+    // 		append(trade_date).append(",").append(trade_price).append(",").
+    // 		append(String.format("%.2f", pnl)).append(",").
+    // 		append(in_date.substring(0, 4)).append(",");
+    // 	    if(pnl > 0)
+    // 		sb.append(String.format("1,%.2f,,", pnl));
+    // 	    else
+    // 		sb.append(String.format("0,,%.2f", pnl));
+    // 	    sb1.append(cmd_name).append("  DAYS: ").
+    // 		append(StxCal.numBusDays(in_date, trade_date)).append("  IN: ").
+    // 		append(in_price).append("  OUT: ").append(trade_price).
+    // 		append("  P&L: ").append(String.format("%.2f", pnl));
+    // 	    pw.println(sb.toString());
+    // 	} else {
+    // 	    sb.append(trade_type).append(",").append(ntf.getText()).append(",").
+    // 		append(trade_date).append(",").append(trade_price).append(",").
+    // 		append(trade_daily_range);
+    // 	    sb1.append(trade_type).append("  DAYS: 0").append("  IN: ").
+    // 		append(trade_price).append("  RG: ").append(trade_daily_range);
+    // 	}
+    // 	pw.close();
+    // 	trade_status.setText(sb1.toString());
+    // }
 
     private void updateTradeStatus() {
 	String dt = etf.getText();
