@@ -48,7 +48,7 @@ import jl.StxxJL;
 // 5. Create another text area that shows the current open trades
 // 6. Create a trading activity label
 //v7. Replace the strike and expiry labels with dropdown menus
-// 8. Adjust the logging to capture both spots, as well as option prices
+//v8. Adjust the logging to capture both spots, as well as option prices
 
 public class ACtx implements KeyListener, ActionListener {
     static JFrame jf; 
@@ -65,7 +65,8 @@ public class ACtx implements KeyListener, ActionListener {
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
     private StxxJL jl1, jl2, jl3;
-    private HashMap<String, String> portfolio = new HashMap<String, String>();
+    private List<StxTrade> trade_list = new ArrayList<StxTrade>();
+    private HashMap<String, Integer> trade_ix = new HashMap<String, Integer>();
     // <cp, expiry, strike> =>
     // <in_date, in_price, in_range, in_opt_px, crt_bid, crt_ask, crt_spot
     String last_scale= "3M";
@@ -507,7 +508,9 @@ public class ACtx implements KeyListener, ActionListener {
 	// options pushing close call or close put should get some
 	// default open options there should also be a trade command,
 	// that happens when the trade button is pushed
-        if(cmd_name.equals("CALL") || cmd_name.equals("PUT") ||
+        if(cmd_name.equals("CALL") || cmd_name.equals("PUT")) {
+	    StxTrade trd = new StxTrade(ntf.getText(), cmd_name, );
+	}
 	   cmd_name.equals("CLOSE CALL") || cmd_name.equals("CLOSE PUT"))
 	    try {
 		log_trade(cmd_name);
@@ -559,19 +562,10 @@ public class ACtx implements KeyListener, ActionListener {
     }
 
     private void updateTradeStatus() {
-	if((trade_type.compareTo("BUY") != 0) && 
-	   (trade_type.compareTo("SELL") != 0))
-	    return;
-	float pnl = 0, crt_price = chrt.getSR(etf.getText()).c;
-	int sgn = (trade_type.compareTo("BUY") == 0)? 1: -1;
-	StringBuffer sb = new StringBuffer();
-	pnl = sgn * (crt_price - trade_price) / trade_daily_range - 1;
-	sb.append(trade_type).append("  ").
-	    append(StxCal.numBusDays(trade_date, etf.getText())).
-	    append("  IN: ").append(trade_price).
-	    append("  PX: ").append(crt_price).
-	    append("  P&L: ").append(String.format("%.2f", pnl));	
-	trade_status.setText(sb.toString());
+	String dt = etf.getText();
+	float cc = chrt.getSR(dt).c;
+	for(StxTrade trd: trade_list)
+	    trd.update(dt, cc);
     }
     
     private void getOptions() {
@@ -603,7 +597,6 @@ public class ACtx implements KeyListener, ActionListener {
 	    System.err.println("Failed to get strikes for " + und + ":");
             ex.printStackTrace(System.err);
         }
-	trades.clear();
 	opts.clear();
 	if(invisible.isSelected())
 	    opts.append(String.format("%10d                            %10d\n",
