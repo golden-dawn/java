@@ -3,6 +3,7 @@ package gui;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.ResultSet;
 import core.StxCal;
 import core.StxDB;
 
@@ -13,21 +14,35 @@ public class StxTrade {
     boolean active;
     
     public StxTrade(String stk, String cp, String expiry, String in_date,
-		    float strike, float in_spot, float in_range, float in_bid,
-		    float in_ask, float capital) {
+		    Float strike, float in_spot, float in_range,
+		    Float capital) {
 	this.stk = stk;
-	this.cp = cp;
+	this.cp = cp.equals("CALL")? "c": "p";
 	this.expiry = expiry;
 	this.in_date = in_date;
-	this.strike = strike;
+	this.strike = strike.floatValue();
 	this.in_spot = in_spot;
 	this.in_range = in_range;
 	crt_spot = in_spot;
-	this.in_bid = in_bid;
-	this.in_ask = in_ask;
+	StringBuilder q1 =
+	    new StringBuilder("SELECT bid, ask FROM options WHERE und='");
+	q1.append(stk).append("' AND expiry='").append(expiry).
+	    append("' AND date='").append(in_date).append("' AND cp='").
+	    append(cp).append("' and strike=").append(strike);
+	try {
+	    StxDB sdb = new StxDB("stx_ng");
+	    ResultSet rset = sdb.get(q1.toString());
+	    while(rset.next()) {
+		in_bid = rset.getFloat(1);
+		in_ask = rset.getFloat(2);
+	    }
+	} catch( Exception ex) {
+	    System.err.println("Failed to bid/ask for " + key() + ":");
+	    ex.printStackTrace(System.err);
+	}
 	crt_bid = in_bid;
 	crt_ask = in_ask;
-	num_contracts = (int) (0.01 * capital / in_ask);
+	num_contracts = (int) (0.01 * capital.floatValue() / in_ask);
 	crt_date = in_date;
 	active = true;
     }
@@ -48,8 +63,10 @@ public class StxTrade {
 	    try {
 		StxDB sdb = new StxDB("stx_ng");
 		ResultSet rset = sdb.get(q1.toString());
-		crt_bid = rset.getFloat(1);
-		crt_ask = rset.getFloat(2);
+		while(rset.next()) {
+		    crt_bid = rset.getFloat(1);
+		    crt_ask = rset.getFloat(2);
+		}
 	    } catch( Exception ex) {
 		System.err.println("Failed to bid/ask for " + key() + ":");
 		ex.printStackTrace(System.err);
