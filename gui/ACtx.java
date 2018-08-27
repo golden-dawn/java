@@ -171,6 +171,10 @@ public class ACtx implements KeyListener, ActionListener {
 	exp.setEditable(true);
 	capital = new JComboBox<Float>();
 	capital.setEditable(true);
+	capital.addItem(500);
+	capital.addItem(1000);
+	capital.addItem(1500);
+	capital.addItem(2000);
 	opts = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trades = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trade_status = new JLabel("GETTING STARTED . . .");
@@ -182,8 +186,8 @@ public class ACtx implements KeyListener, ActionListener {
 	addC(jp_trd, exp, 485, 0, 120, 20);
 	addC(jp_trd, capital, 605, 0, 80, 20);
 	addC(jp_trd, trade_status, 725, 5, 550, 15);
-	addC(jp_trd, opts, 5, 20, 555, 115);
-	addC(jp_trd, trades, 560, 20, 555, 115);
+	addC(jp_trd, opts, 5, 20, 505, 115);
+	addC(jp_trd, trades, 510, 20, 855, 115);
 	
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
@@ -521,6 +525,7 @@ public class ACtx implements KeyListener, ActionListener {
 							 toString()));
 	    trade_ix.put(trd.key(), trade_list.size());
 	    trade_list.add(trd);
+	    updateTradeStatus();
 	}
 	if(cmd_name.equals("CLOSE CALL") || cmd_name.equals("CLOSE PUT")) {
 	    String cp = cmd_name.equals("CLOSE CALL")? "c": "p";
@@ -532,6 +537,7 @@ public class ACtx implements KeyListener, ActionListener {
 	    int ix = trade_ix.get(trade_key);
 	    StxTrade trd = trade_list.get(ix);
 	    trd.close(log_fname);	    
+	    updateTradeStatus();
 	}
     }
     
@@ -579,8 +585,11 @@ public class ACtx implements KeyListener, ActionListener {
     private void updateTradeStatus() {
 	String dt = etf.getText();
 	float cc = chrt.getSR(dt).c;
-	for(StxTrade trd: trade_list)
-	    trd.update(dt, cc);
+	trades.clear();
+	for(StxTrade trd: trade_list) {
+	    trd.update(dt, cc, log_fname);
+	    trades.append(trd.ui_entry());
+	}
     }
     
     private void getOptions() {
