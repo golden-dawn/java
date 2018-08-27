@@ -28,13 +28,15 @@ public class StxTrade {
 	    new StringBuilder("SELECT bid, ask FROM options WHERE und='");
 	q1.append(stk).append("' AND expiry='").append(expiry).
 	    append("' AND date='").append(in_date).append("' AND cp='").
-	    append(cp).append("' and strike=").append(strike);
+	    append(this.cp).append("' and strike=").append(strike);
+	// System.err.printf("Ctor: q1 = %s\n", q1.toString());
 	try {
 	    StxDB sdb = new StxDB("stx_ng");
 	    ResultSet rset = sdb.get(q1.toString());
 	    while(rset.next()) {
 		in_bid = rset.getFloat(1);
 		in_ask = rset.getFloat(2);
+		// System.err.printf("in_bid = %f, in_ask = %f\n", in_bid, in_ask);
 	    }
 	} catch( Exception ex) {
 	    System.err.println("Failed to bid/ask for " + key() + ":");
@@ -43,6 +45,7 @@ public class StxTrade {
 	crt_bid = in_bid;
 	crt_ask = in_ask;
 	num_contracts = (int) (0.01 * capital.floatValue() / in_ask);
+	// System.err.printf("Ctor: num_contracts = %d\n", num_contracts);
 	crt_date = in_date;
 	active = true;
     }
@@ -51,7 +54,7 @@ public class StxTrade {
 	return String.format("%s_%s_%s_%.2f", stk, cp, expiry, strike);
     }
 
-    public void update(String date, float spot) {
+    public void update(String date, float spot, String log_fname) {
 	if(active) {
 	    crt_date = date;
 	    crt_spot = spot;
@@ -71,9 +74,9 @@ public class StxTrade {
 		System.err.println("Failed to bid/ask for " + key() + ":");
 		ex.printStackTrace(System.err);
 	    }
+	    if(StxCal.numBusDays(crt_date, expiry) == 0)
+		close(log_fname);
 	}
-	if(StxCal.numBusDays(crt_date, expiry) == 0)
-	    active = false;
     }
 
     public void close(String log_fname) {
@@ -105,13 +108,14 @@ public class StxTrade {
     }
 
     public void log_entry(String log_fname) throws IOException {
+	// System.err.println("log_entry(): log_fname = " + log_fname);
 	int sgn = cp.equals("c")? 1: -1;
 	StringBuffer sb = new StringBuffer();
 	float spot_pnl = (sgn * (crt_spot - in_spot) / in_range - 1) / 2;
 	if(spot_pnl < -1) spot_pnl = -1;
 	float opt_pnl = 100 * num_contracts * (crt_bid - in_ask);
 
-	sb.append(stk).append(',').append(cp.equals('c')? "CALL": "PUT").
+	sb.append(stk).append(',').append(cp.equals("c")? "CALL": "PUT").
 	    append(',').append(in_date).append(',').append(in_spot).append(',').
 	    append(String.format("%.2f", in_range)).append(',').
 	    append(crt_date).append(",").append(crt_spot).append(",").
