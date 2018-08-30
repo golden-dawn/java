@@ -187,6 +187,10 @@ public class StxCal {
     static public int numBusDays( String s_date, String e_date) {
         return numWeekDays( s_date, e_date)- numHols( s_date, e_date);
     }
+    static public int numBusDaysExpiry( String s_date, String exp_date) {
+        int res = numBusDays(s_date, exp_date);
+	return (StxCal.cmp(exp_date, "2015-01-17") > 0)? res - 1: res;	
+    }
     private void addHol( int y, String md, String des, int dw, int wn) {
         StringBuilder sb= new StringBuilder(); sb.append( y).append( md);
         String s= sb.toString();
