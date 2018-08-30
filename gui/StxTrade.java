@@ -74,7 +74,10 @@ public class StxTrade {
 		System.err.println("Failed to bid/ask for " + key() + ":");
 		ex.printStackTrace(System.err);
 	    }
-	    if(StxCal.numBusDays(crt_date, expiry) == 0)
+	    // if((StxCal.numBusDays(crt_date, expiry) == 0) ||
+	    //    (StxCal.numBusDays(crt_date, expiry) == 1 &&
+	    // 	StxCal.cmp(expiry, "2015-01-17") > 0))
+	    if(StxCal.numBusDaysExpiry(crt_date, expiry) == 0)
 		close(log_fname);
 	}
     }
@@ -97,7 +100,7 @@ public class StxTrade {
 	StringBuilder sb = new StringBuilder(cp.equals("c")? "CALL ": " PUT ");
 	sb.append(String.format("%6.2f age %2d expires in %2d ", strike,
 				StxCal.numBusDays(in_date, crt_date),
-				StxCal.numBusDays(crt_date, expiry))).
+				StxCal.numBusDaysExpiry(crt_date, expiry))).
 	    append(String.format("Spot: %6.2f=>%6.2f, PL:%5.2f ", in_spot,
 				 crt_spot, 0.5 * (sgn * (crt_spot - in_spot) /
 						  in_range - 1))).
