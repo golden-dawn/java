@@ -171,10 +171,13 @@ public class ACtx implements KeyListener, ActionListener {
 	exp.setEditable(true);
 	capital = new JComboBox<Float>();
 	capital.setEditable(true);
+	capital.addItem(125);
+	capital.addItem(250);
 	capital.addItem(500);
 	capital.addItem(1000);
 	capital.addItem(1500);
 	capital.addItem(2000);
+	capital.setSelectedIndex(2);
 	opts = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trades = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trade_status = new JLabel("GETTING STARTED . . .");
