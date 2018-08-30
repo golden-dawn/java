@@ -626,9 +626,10 @@ public class ACtx implements KeyListener, ActionListener {
         }
 	opts.clear();
 	if(invisible.isSelected())
-	    opts.append(String.format("%10d                            %10d\n",
-				      StxCal.numBusDays(ed, expiries.get(0)),
-				      StxCal.numBusDays(ed, expiries.get(1))));
+	    opts.append(String.format
+			("%10d                            %10d\n",
+			 StxCal.numBusDaysExpiry(ed, expiries.get(0)),
+			 StxCal.numBusDaysExpiry(ed, expiries.get(1))));
 	else
 	    opts.append(String.format("%s                            %s\n",
 				      expiries.get(0), expiries.get(1)));
@@ -702,7 +703,8 @@ public class ACtx implements KeyListener, ActionListener {
 
 	for(String expiry: expiries)
 	    if(invisible.isSelected())
-		exp.addItem(String.format("%d", StxCal.numBusDays(ed, expiry)));
+		exp.addItem(String.format("%d",
+					  StxCal.numBusDaysExpiry(ed, expiry)));
 	    else
 		exp.addItem(expiry);
     }
