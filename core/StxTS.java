@@ -212,6 +212,24 @@ public class StxTS<T extends StxRecord> {
             end_dates[ ix++]= data.get( gap).date;
         return Arrays.asList( end_dates);
     }
+    public List<String> getLastSeries() {
+	Map.Entry<Integer, Integer> last_gap = gaps.lastEntry();
+	ArrayList<String> start_end = new ArrayList<String>();
+	start_end.add(data.get(last_gap.getKey()).date);
+	start_end.add(data.get(last_gap.getValue()).date);
+	return start_end;
+    }
+    public List<String> getSeries(String date) {
+	int ix = find(date, 0);
+	if(ix == -1)
+	    return null;
+	Map.Entry<Integer, Integer> last_gap = gaps.floorEntry(ix);
+	ArrayList<String> start_end = new ArrayList<String>();
+	start_end.add(data.get(last_gap.getKey()).date);
+	start_end.add(data.get(last_gap.getValue()).date);
+	return start_end;
+    }
+
     public T last() { return ( l<= 0)? null: data.get( l- 1); }
     public String firstDate() { return data.get( start).date;}
     //private void dividend( int n) {
@@ -242,13 +260,13 @@ public class StxTS<T extends StxRecord> {
     }
 
     static public StxTS<StxRec> loadEod( String stk) {
-        return loadEod( stk, null, null, "eod", "split");
+        return loadEod( stk, null, null, "eods", "dividends");
     }
     static public StxTS<StxRec> loadEod( String stk, String s_date) {
-        return loadEod( stk, s_date, null, "eod", "split");
+        return loadEod( stk, s_date, null, "eods", "dividends");
     }
     static public StxTS<StxRec> loadEod( String stk, String sd, String ed) {
-        return loadEod( stk, sd, ed, "eod", "split");
+        return loadEod( stk, sd, ed, "eods", "dividends");
     }
     static public StxTS<StxRec> loadEod( String stk, String sd, String ed, 
                                          String eod_tbl, String split_tbl) {
