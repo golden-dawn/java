@@ -1,3 +1,5 @@
+package indicators;
+
 import static java.lang.Math.*;
 import core.StxCal;
 import core.StxRec;
@@ -8,7 +10,8 @@ import java.util.List;
 
 public class StxADX {
 
-    private StxTS<StxRec> data; 
+    private StxTS<StxRec> data;
+    private boolean initialized;
     private int adxd;
     private float tpdm, tmdm, ttr, pdi, mdi, tadx;
 
@@ -31,13 +34,14 @@ public class StxADX {
 	pdi= 0;
 	mdi= 0;
 	tadx= 0;
+	initialized = false;
     }	
 	
     public int adxi(int ix) { return (int) adx(ix); }
     
     public HashMap<String, Float> daily_calc(int ix) {
 	HashMap<String, Float> res = new HashMap<String, Float>();
-        StxRec sr = data.get(ixx), sr_1 = data.get(ixx - 1);
+        StxRec sr = data.get(ix), sr_1 = data.get(ix - 1);
         /** The indicators to compute */
         float pdm= 0, mdm= 0, tr= 0;
 	/** compute +DM and -DM */
@@ -49,74 +53,68 @@ public class StxADX {
 	    mdm = 0;
 	/** Compute True Range */
 	tr = sr.trueRange(sr_1);
-	res["pdm"] = pdm;
-	res["mdm"] = mdm;
-	res["tr"] = tr;
+	res.put("pdm", pdm);
+	res.put("mdm", mdm);
+	res.put("tr", tr);
 	return res;
     }
     
-    public HashMap<String, Float> adx(int ix) {
-	HashMap<String, Float> res = new HashMap<String, Float>();
-        /** The indicators to compute */
-        float ypdm = 0, ymdm = 0, ytr= 0;
-	float dx= 0, ydx= 0, tdx= 0, yadx= 0;
-        /** for how many days have we already computed adx? */
-        int dx_idx = -1;
-        /** utility index */
-        int ixx;
-        for( ixx = 0; ixx <= ix; ixx++) {
-            dx_idx++;
-            if(ixx == 0)
-                continue;
-	    HashMap<String, Float> dly = daily_calc(ixx);
-
-            /** start adding up +DM, -DM and True Range */
-            if( dx_idx <= adxd) {
-                tpdm += dly.get("pdm");
-                tmdm += dly.get("mdm");
-                ttr += dly.get("tr");
+    public float next_dx(HashMap<String, Float> daily) {
+	/** smooth PDM, MDM, and True Range; calculate +DI/-DI/DX */
+	float ypdm = tpdm, ymdm = tmdm, ytr = ttr; 
+	tpdm = ypdm - ypdm / adxd + daily.get("pdm");
+	tmdm = ymdm - ymdm / adxd + daily.get("mdm");
+	ttr = ytr - ytr / adxd + daily.get("tr");
+	pdi = 100 * tpdm / ttr;
+	mdi = 100 * tmdm / ttr;
+	return 100 * abs(pdi - mdi) / (pdi + mdi);
+    }
+    
+    public float adx(int ix) {
+        float dx= 0, ydx= 0, tdx= 0, yadx= 0;
+	if(initialized) {
+	    HashMap<String, Float> daily = daily_calc(ix);
+	    dx = next_dx(daily);
+	    yadx = tadx;
+	    tadx = ((adxd - 1) * yadx + dx) / adxd;
+	    return tadx * ((pdi > mdi)? 1: -1);
+	}
+	initialized = true;
+        for(int dx_idx = 0; dx_idx <= ix; dx_idx++) {
+            if(dx_idx == 0) continue;
+	    HashMap<String, Float> daily = daily_calc(dx_idx);
+            if( dx_idx <= adxd) { /** days 1-14: add up +DM, -DM, True Range */
+                tpdm += daily.get("pdm");
+                tmdm += daily.get("mdm");
+                ttr += daily.get("tr");
             }
-            /** got first +DI and -DI; start computing DX*/
-            if( dx_idx == adxd) {
-                if(ttr == 0) return 0;
-                pdi = tpdm / ttr * 100;
-                mdi = tmdm / ttr * 100;
-                di_diff = abs(pdi - mdi);
-                di_sum = pdi + mdi;
-                tdx = di_diff * 100 / di_sum;
+            if( dx_idx == adxd) { /** day 15: got +DI/-DI; compute first DX */
+                pdi = 100 * tpdm / ttr;
+                mdi = 100 * tmdm / ttr;
+                tdx = 100 * abs(pdi - mdi) / (pdi + mdi);
             }
-            /** Smooth average +DI, -DI and True Range */
             if(dx_idx > adxd) {
-                ypdm = tpdm; 
-                ymdm = tmdm; 
-                ytr = ttr; 
-                tpdm = ypdm - ypdm / adxd + dly["pdm"];
-                tmdm = ymdm - ymdm / adxd + dly["mdm"];
-                ttr =  ytr -   ytr / adxd +  dly["tr"];
-                if((pdi + mdi == 0) || (ttr == 0))
-                    return 0;
-                pdi = tpdm * 100 / ttr;
-                mdi = tmdm * 100 / ttr;
-                dx = abs(pdi - mdi) * 100 / (pdi + mdi);
-                if(dx_idx < 2 * adxd - 1) /** Start adding up DX */
-                    tdx += dx;
-                else if(dx_idx == 2 * adxd - 1) { 
-                    /** Compute first ADX by averaging DX */
-                    tdx += dx;
-                    tadx = tdx/ adxd;
-                }
+		dx = next_dx(daily);
+		if(dx_idx < 2 * adxd - 1)
+		    /** days 15-27: start adding up DX */
+		    tdx += dx;
+		else if(dx_idx == 2 * adxd - 1) { 
+		    /** day 27: compute first ADX 
+			(DX average) */
+		    tdx += dx;
+		    tadx = tdx/ adxd;
+		}
                 else { /** Smooth average ADX */
                     yadx = tadx;
                     tadx = ((adxd - 1) * yadx + dx) / adxd;
                 }
             } /** end ( dx_idx > adxd)) */
 //             System.err.printf( "%s,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", sr.date, sr.h, sr.l, sr.c, tr, pdm, mdm, ttr, tpdm, tmdm, pdi, mdi, di_diff, di_sum, tdx, tadx);
-        } /** end fgets */
-	
+        } /** end main for loop */
         return tadx * ((pdi > mdi)? 1: -1);
     }
 
-    public String usage() {
+    public static String usage() {
 	return "java StxADX stk_name <-sd start_date> " +
 	    "<-ed end_date> <-d number of adx days>";
     }
@@ -126,7 +124,7 @@ public class StxADX {
 	int adxd = 14;
 	int ix = 0, s_ix = 0, e_ix = 0;
 	while (ix < args.length) {
-            arg = args[ix++];
+            String arg = args[ix++];
             if(ix == 1)
 		stk = arg;
             else if(arg.equals("-sd")) {
@@ -174,15 +172,17 @@ public class StxADX {
 	    List<String> start_end = ts.getSeries(ed);
 	    ed = start_end.get(1);
 	}
-	s_ix = ts.setDay(sd);
-	if(pos - ts.start() < 2 * adxd) {
+	s_ix = ts.setDay(sd, 0, 1);
+	if(s_ix - ts.start() < 2 * adxd) {
 	    s_ix = 2 * adxd + ts.start();
 	    sd = ts.get(s_ix).date;
-	    s_ix = ts.setDay(sd);
+	    s_ix = ts.setDay(sd, 0, 1);
 	}
 	e_ix = ts.find(ed, 0);
-	List<Float> adx_indicators = adx.adx(s_ix);
-	for(int ix = s_ix + 1; ix <= e_ix; ix++)
-	    adx_indicators
+	for(int ixx = s_ix; ixx <= e_ix; ixx++) {
+	    ts.nextDay(1);
+	    System.err.printf("%s: ADX = %8.2f\n", ts.get(ixx).date,
+			      adx.adx(ixx));
+	}
     }
 }
