@@ -215,8 +215,13 @@ public class StxTS<T extends StxRecord> {
     public List<String> getLastSeries() {
 	Map.Entry<Integer, Integer> last_gap = gaps.lastEntry();
 	ArrayList<String> start_end = new ArrayList<String>();
-	start_end.add(data.get(last_gap.getKey()).date);
-	start_end.add(data.get(last_gap.getValue()).date);
+	if(last_gap == null) {
+	    start_end.add(data.get(start).date);
+	    start_end.add(data.get(l - 1).date);
+	} else {
+	    start_end.add(data.get(last_gap.getKey()).date);
+	    start_end.add(data.get(last_gap.getValue()).date);
+	}
 	return start_end;
     }
     public List<String> getSeries(String date) {
@@ -225,8 +230,13 @@ public class StxTS<T extends StxRecord> {
 	    return null;
 	Map.Entry<Integer, Integer> last_gap = gaps.floorEntry(ix);
 	ArrayList<String> start_end = new ArrayList<String>();
-	start_end.add(data.get(last_gap.getKey()).date);
-	start_end.add(data.get(last_gap.getValue()).date);
+	if(last_gap == null) {
+	    start_end.add(data.get(start).date);
+	    start_end.add(data.get(l - 1).date);
+	} else {
+	    start_end.add(data.get(last_gap.getKey()).date);
+	    start_end.add(data.get(last_gap.getValue()).date);
+	}
 	return start_end;
     }
 
