@@ -74,8 +74,9 @@ public class ACtx1 implements KeyListener, ActionListener {
         ntf= new JTextField(); ntf.setCaretColor( Color.lightGray);
         ntf.setName( "NTF"); ntf.addKeyListener( this);
         dtf= new JTextField( "20"); dtf.setCaretColor( Color.lightGray);
-        dbetf= new JTextField( "eod"); dbetf.setCaretColor( Color.lightGray);
-        dbstf= new JTextField( "split"); dbstf.setCaretColor( Color.lightGray);
+        dbetf= new JTextField("eods"); dbetf.setCaretColor( Color.lightGray);
+        dbstf= new JTextField("dividends");
+	dbstf.setCaretColor(Color.lightGray);
         ntf.setFont(font);
         etf.setFont(font);
         dtf.setFont(font);
@@ -341,8 +342,7 @@ public class ACtx1 implements KeyListener, ActionListener {
         idx= jtp_jl.indexOfTab( n);
         if( idx!= -1)
             jtp_jl.remove( idx); 
-        chrt= new Chart( n, s, e, true, dbetf.getText(), dbstf.getText(), 
-                         trend_map);
+        chrt= new Chart( n, s, e);
         chrt.setScale( last_scale);
         jtp_jl.add( n, chrt);
         jtp_jl.setSelectedIndex( jtp_jl.indexOfTab( n));
