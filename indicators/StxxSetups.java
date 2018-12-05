@@ -31,18 +31,20 @@ public class StxxSetups {
 		String sss = (tokens.length > 1) ? tokens[1].trim(): "";
 		recs.add(new StxSetups(dt, sss));
 	    }
-	} catch (IOException e) {
+	} catch (Exception e) {
 	    e.printStackTrace();
 	} finally {
 	    try {
 		if (br != null)
 		    br.close();
-	    } catch (IOException ex) {
+	    } catch (Exception ex) {
 		ex.printStackTrace();
 	    }
 	}
     }
     public String getSetups(String dt) {
+	if(recs.size() == 0)
+	    return "";
 	int ix = recs.find(dt, 0);
 	StringBuffer sb = new StringBuffer();
 	if(ix > 1)
