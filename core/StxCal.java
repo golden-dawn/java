@@ -250,7 +250,9 @@ public class StxCal {
         if( y== 2012) {
             addHol( y, "-10-29", "Frankenstorm 1");
             addHol( y, "-10-30", "Frankenstorm 2");
-        } 
+        }
+	if( y== 2018) addHol( y, "-12-05", "George H.W. Bush funeral");
+
     }
     public void printHolidays() {
         for( Holiday h: holidays) System.err.println( h.toString());
