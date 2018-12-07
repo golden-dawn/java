@@ -37,7 +37,10 @@ public class Chart extends JPanel {
     public Chart( String stk_name, String sd, String ed) {
         super( null);
         this.stk_name = stk_name;
+	System.err.printf("Creating new chart for %s between %s and %s\n",
+			  stk_name, sd, ed);
         ts= StxTS.loadEod( stk_name, null, null);
+	System.err.printf("%s, found %d records\n", stk_name, ts.size());
         start = ts.find( sd, 1); start0= start;
         end= ts.find( ed, -1);
 	this.ed = ed;
@@ -198,7 +201,9 @@ public class Chart extends JPanel {
         g2.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 14));
 	
 	StxUDV udv = new StxUDV(ts);
-	float last_avg_volume = avg_volumes.get(avg_volumes.size() - 1);
+	int avg_vol_sz = avg_volumes.size();
+	float last_avg_volume = (avg_vol_sz > 0)?
+	    avg_volumes.get(avg_vol_sz - 1): 0;
 	if(jl1 != null) {
 	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
 					  price_height, min_price, price_rg);
@@ -242,7 +247,8 @@ public class Chart extends JPanel {
 	    g2.setPaint( Color.darkGray);
 	}
 	// System.err.printf("end = %d, ts size = %d\n", end, ts.data().size());
-	// System.err.printf("ts.get(end) = %s\n", ts.get(end).toString());
+	// System.err.printf("%s: ts.get(end) = %s\n", ts.stk(),
+	// 		  ts.get(end).toString());
 	String cndls = sss.getSetups(ts.get(end).date);
 	String[] candles = cndls.split("\n");
 	if(candles.length == 3) {
