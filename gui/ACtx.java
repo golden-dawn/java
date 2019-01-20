@@ -3,6 +3,7 @@ package gui;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.BufferedReader;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -31,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -167,13 +170,43 @@ public class ACtx implements KeyListener, ActionListener {
         c_put = new JButton("CLOSE PUT"); c_put.addActionListener(this);
 	strike = new JComboBox<Float>();
 	strike.setEditable(true);
+	strike.getEditor().getEditorComponent().addKeyListener
+	    (new KeyAdapter() {
+		    @Override
+		    public void keyReleased(KeyEvent event) {
+			// System.err.printf("event.getKeyCode() = %d\n",
+			// 		   event.getKeyCode());
+			if (event.getKeyCode() == KeyEvent.VK_F1) {
+			    etf.requestFocusInWindow();
+			}
+		    }
+		});	
 	exp = new JComboBox<String>();
 	exp.setEditable(true);
+	exp.getEditor().getEditorComponent().addKeyListener
+	    (new KeyAdapter() {
+		    @Override
+		    public void keyReleased(KeyEvent event) {
+			if (event.getKeyCode() == KeyEvent.VK_F1) {
+			    etf.requestFocusInWindow();
+			}
+		    }
+		});	
 	capital = new JComboBox<Float>();
+	capital.getEditor().getEditorComponent().addKeyListener
+	    (new KeyAdapter() {
+		    @Override
+		    public void keyReleased(KeyEvent event) {
+			if (event.getKeyCode() == KeyEvent.VK_F1) {
+			    etf.requestFocusInWindow();
+			}
+		    }
+		});	
 	capital.setEditable(true);
 	capital.addItem(125);
 	capital.addItem(250);
 	capital.addItem(500);
+	capital.addItem(750);
 	capital.addItem(1000);
 	capital.addItem(1500);
 	capital.addItem(2000);
@@ -222,10 +255,23 @@ public class ACtx implements KeyListener, ActionListener {
     }
     public void keyPressed( KeyEvent e) {
         try {
+	    //  F1 = 112
+	    //  F2 = 113
+	    //  F3 = 114
+	    //  F4 = 115
+	    //  F5 = 116
+	    //  F6 = 117
+	    //  F7 = 118
+	    //  F8 = 119
+	    //  F9 = 120
+	    // F10 = 121
+	    // F11 = 122
+	    // F12 = 123
             int cd= e.getKeyCode(); String src= e.getComponent().getName();
+	    // System.err.printf("cd = %d, src = %s\n", cd, src);
             if( src.equals( "ETF")) {
                 String ed= etf.getText();
-                if( cd== 40) etf.setText( StxCal.prevBusDay( ed));
+                // if( cd== 40) etf.setText( StxCal.prevBusDay( ed));
                 if( cd== 38) etf.setText( StxCal.nextBusDay( ed));
                 if(cd == 34) {
                     decreaseScale();
@@ -240,6 +286,8 @@ public class ACtx implements KeyListener, ActionListener {
                     go();
                 }
                 if( cd== 10) go();
+		if(cd >= 112 && cd <= 123)
+		    handle_function_keys(cd);
             } else if(src.equals("NTF")) {
                 if( cd== 10) go();
                 if(cd == 38) {
@@ -272,25 +320,44 @@ public class ACtx implements KeyListener, ActionListener {
                     move(cd);
                     go();
                 }
-                if(cd == 112) {
-                    int sz = entries.size();
-                    if(sz == 0) return;
-                    crt_pos = 0;
-                    while(crt_pos < sz && entries.get(crt_pos)[0].compareTo
-                          (ntf.getText()) != 0)
-                        ++crt_pos;
-                    if(crt_pos == sz) crt_pos = 0;
-                    ntf.setText(entries.get(crt_pos)[0]);
-                    etf.setText(entries.get(crt_pos)[1]);
-                    go();
+		if(cd >= 112 && cd <= 123)
+		    handle_function_keys(cd);
+                // if(cd == 112) {
+                //     int sz = entries.size();
+                //     if(sz == 0) return;
+                //     crt_pos = 0;
+                //     while(crt_pos < sz && entries.get(crt_pos)[0].compareTo
+                //           (ntf.getText()) != 0)
+                //         ++crt_pos;
+                //     if(crt_pos == sz) crt_pos = 0;
+                //     ntf.setText(entries.get(crt_pos)[0]);
+                //     etf.setText(entries.get(crt_pos)[1]);
+                //     go();
                         
-                }
+                // }
             }
         } catch( Exception exc) {
             exc.printStackTrace( System.err);
         }
     }
 
+    private void handle_function_keys(int cd) {
+	if(cd == 112)
+	    openTrade("CALL");
+	else if(cd == 113)
+	    openTrade("PUT");
+	else if(cd == 114)
+	    closeTrade("CLOSE CALL");
+	else if(cd == 115)
+	    closeTrade("CLOSE PUT");
+	else if(cd == 116)
+	    strike.requestFocusInWindow();
+	else if(cd == 117)
+	    exp.requestFocusInWindow();
+	else if(cd == 118)
+	    capital.requestFocusInWindow();
+    }
+    
     private void decreaseScale() {
         switch(last_scale) {
         case "1M":
@@ -516,74 +583,41 @@ public class ACtx implements KeyListener, ActionListener {
 	// options pushing close call or close put should get some
 	// default open options there should also be a trade command,
 	// that happens when the trade button is pushed
-        if(cmd_name.equals("CALL") || cmd_name.equals("PUT")) {
-	    String dt = etf.getText();
-	    String expiry =
-		StxCal.getMonthlyExpiration(dt, exp.getSelectedIndex() + 1);
-	    StxTrade trd = new StxTrade(ntf.getText(), cmd_name, expiry, dt,
-					(Float)strike.getSelectedItem(),
-					chrt.getSR(dt).c, jl1.avgRg(),
-					Float.parseFloat(capital.
-							 getSelectedItem().
-							 toString()));
-	    trade_ix.put(trd.key(), trade_list.size());
-	    trade_list.add(trd);
-	    updateTradeStatus();
-	}
-	if(cmd_name.equals("CLOSE CALL") || cmd_name.equals("CLOSE PUT")) {
-	    String cp = cmd_name.equals("CLOSE CALL")? "c": "p";
-	    String dt = etf.getText();
-	    String expiry =
-		StxCal.getMonthlyExpiration(dt, exp.getSelectedIndex() + 1);
-	    String trade_key = String.format("%s_%s_%s_%.2f", ntf.getText(), cp,
-					     expiry, strike.getSelectedItem());
-	    int ix = trade_ix.get(trade_key);
-	    StxTrade trd = trade_list.get(ix);
-	    trd.close(log_fname);	    
-	    updateTradeStatus();
-	}
+        if(cmd_name.equals("CALL") || cmd_name.equals("PUT"))
+	    openTrade(cmd_name);
+	if(cmd_name.equals("CLOSE CALL") || cmd_name.equals("CLOSE PUT"))
+	    closeTrade(cmd_name);
     }
-    
-    // private void log_trade(String cmd_name) throws IOException {
-    // 	PrintWriter pw = new PrintWriter(new FileWriter(log_fname, true));
-    // 	StringBuffer sb = new StringBuffer(), sb1 = new StringBuffer();
-    // 	float pnl = 0, in_price = trade_price, in_range = trade_daily_range;
-    // 	String in_date = trade_date;
-    // 	int sgn = cmd_name.contains("BUY")? 1: -1;
-    // 	trade_type = cmd_name;
-    // 	trade_date = etf.getText();
-    // 	trade_price = chrt.getSR(trade_date).c;
-    // 	trade_daily_range = jl1.avgRg();
-    // 	if(trade_type.startsWith("CLOSE")) {
-    // 	    pnl = sgn * (trade_price - in_price) / in_range - 1;
-    // 	    if(pnl < -2)
-    // 		pnl = -2;
-    // 	    pnl /= 2.0;
-    // 	    sb.append(cmd_name).append(',').append(ntf.getText()).append(',').
-    // 		append(in_date).append(',').append(in_price).append(',').
-    // 		append(String.format("%.2f", in_range)).append(',').
-    // 		append(trade_date).append(",").append(trade_price).append(",").
-    // 		append(String.format("%.2f", pnl)).append(",").
-    // 		append(in_date.substring(0, 4)).append(",");
-    // 	    if(pnl > 0)
-    // 		sb.append(String.format("1,%.2f,,", pnl));
-    // 	    else
-    // 		sb.append(String.format("0,,%.2f", pnl));
-    // 	    sb1.append(cmd_name).append("  DAYS: ").
-    // 		append(StxCal.numBusDays(in_date, trade_date)).append("  IN: ").
-    // 		append(in_price).append("  OUT: ").append(trade_price).
-    // 		append("  P&L: ").append(String.format("%.2f", pnl));
-    // 	    pw.println(sb.toString());
-    // 	} else {
-    // 	    sb.append(trade_type).append(",").append(ntf.getText()).append(",").
-    // 		append(trade_date).append(",").append(trade_price).append(",").
-    // 		append(trade_daily_range);
-    // 	    sb1.append(trade_type).append("  DAYS: 0").append("  IN: ").
-    // 		append(trade_price).append("  RG: ").append(trade_daily_range);
-    // 	}
-    // 	pw.close();
-    // 	trade_status.setText(sb1.toString());
-    // }
+
+    private void openTrade(String cmd_name) {
+	String dt = etf.getText();
+	String expiry =
+	    StxCal.getMonthlyExpiration(dt, exp.getSelectedIndex() + 1);
+	StxTrade trd = new StxTrade(ntf.getText(), cmd_name, expiry, dt,
+				    (Float)strike.getSelectedItem(),
+				    chrt.getSR(dt).c, jl1.avgRg(),
+				    Float.parseFloat(capital.
+						     getSelectedItem().
+						     toString()));
+	trade_ix.put(trd.key(), trade_list.size());
+	trade_list.add(trd);
+	updateTradeStatus();
+	trade_status.setText(String.format("OPENED %s", trd.key()));
+    }
+
+    private void closeTrade(String cmd_name) {
+	String cp = cmd_name.equals("CLOSE CALL")? "c": "p";
+	String dt = etf.getText();
+	String expiry =
+	    StxCal.getMonthlyExpiration(dt, exp.getSelectedIndex() + 1);
+	String trade_key = String.format("%s_%s_%s_%.2f", ntf.getText(), cp,
+					 expiry, strike.getSelectedItem());
+	int ix = trade_ix.get(trade_key);
+	StxTrade trd = trade_list.get(ix);
+	trd.close(log_fname);
+	updateTradeStatus();
+	trade_status.setText(String.format("CLOSED %s", trade_key));
+    }
 
     private void updateTradeStatus() {
 	String dt = etf.getText();
@@ -706,7 +740,9 @@ public class ACtx implements KeyListener, ActionListener {
 		exp.addItem(String.format("%d",
 					  StxCal.numBusDaysExpiry(ed, expiry)));
 	    else
-		exp.addItem(expiry);
+		exp.addItem(String.format("%d (%s)",
+					  StxCal.numBusDaysExpiry(ed, expiry),
+					  expiry));
     }
     
     public static void main( String[] args) {
