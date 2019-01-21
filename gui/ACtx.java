@@ -602,7 +602,10 @@ public class ACtx implements KeyListener, ActionListener {
 	trade_ix.put(trd.key(), trade_list.size());
 	trade_list.add(trd);
 	updateTradeStatus();
-	trade_status.setText(String.format("OPENED %s", trd.key()));
+	String trade_key = String.format
+	    ("%s_%s_%d_%.2f", ntf.getText(), cmd_name,
+	     StxCal.numBusDaysExpiry(dt, expiry), strike.getSelectedItem());
+	trade_status.setText(String.format("OPENED %s", trade_key));
     }
 
     private void closeTrade(String cmd_name) {
@@ -616,7 +619,10 @@ public class ACtx implements KeyListener, ActionListener {
 	StxTrade trd = trade_list.get(ix);
 	trd.close(log_fname);
 	updateTradeStatus();
-	trade_status.setText(String.format("CLOSED %s", trade_key));
+	String trd_key = String.format("%s_%s_%d_%.2f", ntf.getText(), cp,
+				       StxCal.numBusDaysExpiry(dt, expiry),
+				       strike.getSelectedItem());
+	trade_status.setText(String.format("CLOSED %s", trd_key));
     }
 
     private void updateTradeStatus() {
