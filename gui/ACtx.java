@@ -79,12 +79,13 @@ public class ACtx implements KeyListener, ActionListener {
     int crt_pos = 0;
     TreeMap<String, Integer> trend_map= new TreeMap<String, Integer>();
     int idx= -1;
-    String log_fname;
+    String log_fname, last_opt_date;
 
     public ACtx() {
         
         Calendar c= new GregorianCalendar();
         yr= c.get( Calendar.YEAR);
+	last_opt_date = String.format("%d-12-31", (yr - 1));
         String d= String.format( "%d-%02d-%02d", yr,
                                  1+ c.get( Calendar.MONTH),
                                  c.get( Calendar.DAY_OF_MONTH));
@@ -644,10 +645,13 @@ public class ACtx implements KeyListener, ActionListener {
 	float min_dist = 10000;
 	int atm_ix = -1, strike_ix = -1;
 	float cc = chrt.getSR(ed).c;
+	String opt_tbl = (StxCal.cmp(last_opt_date, ed) <= 0)?
+	    "options": "opt_cache";
+	String dt_col = (StxCal.cmp(last_opt_date, ed) <= 0)? "date": "dt";
 	StringBuilder q1= new StringBuilder("SELECT DISTINCT strike FROM ");
-	q1.append("options WHERE und='").append(und).append("' AND date='").
-	    append(ed).append("' AND expiry='").append(expiries.get(1)).
-	    append("' ").append("ORDER BY strike");
+	q1.append(opt_tbl).append(" WHERE und='").append(und).append("' AND ").
+	    append(dt_col).append("='").append(ed).append("' AND expiry='").
+	    append(expiries.get(1)).append("' ").append("ORDER BY strike");
  	try {
             StxDB sdb = new StxDB("stx_ng");
             ResultSet rset = sdb.get(q1.toString());
@@ -703,11 +707,13 @@ public class ACtx implements KeyListener, ActionListener {
 	    ++strike_ix;
 	}
 	s_sb.append(")");
-	StringBuilder q2= new StringBuilder("SELECT * FROM options WHERE ");
-        q2.append("und='").append(und).append( "' and date='").append(ed).
-	    append("' and expiry in ('").append(expiries.get(0)).append("', '").
+	StringBuilder q2= new StringBuilder("SELECT * FROM ");
+	q2.append(opt_tbl).append(" WHERE und='").append(und).append( "' and ").
+	    append(dt_col).append("='").append(ed).append("' and expiry in ('").
+	    append(expiries.get(0)).append("', '").
 	    append(expiries.get(1)).append("') and strike in ").
 	    append(s_sb.toString()).append(" order by expiry, strike, cp");
+	System.err.println(q2.toString());
 	try {
             StxDB sdb = new StxDB("stx_ng");
             ResultSet rset = sdb.get(q2.toString());
