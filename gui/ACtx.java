@@ -652,6 +652,7 @@ public class ACtx implements KeyListener, ActionListener {
 	q1.append(opt_tbl).append(" WHERE und='").append(und).append("' AND ").
 	    append(dt_col).append("='").append(ed).append("' AND expiry='").
 	    append(expiries.get(1)).append("' ").append("ORDER BY strike");
+	// System.err.println("q1 = " + q1.toString());
  	try {
             StxDB sdb = new StxDB("stx_ng");
             ResultSet rset = sdb.get(q1.toString());
@@ -713,7 +714,7 @@ public class ACtx implements KeyListener, ActionListener {
 	    append(expiries.get(0)).append("', '").
 	    append(expiries.get(1)).append("') and strike in ").
 	    append(s_sb.toString()).append(" order by expiry, strike, cp");
-	System.err.println(q2.toString());
+	// System.err.println(q2.toString());
 	try {
             StxDB sdb = new StxDB("stx_ng");
             ResultSet rset = sdb.get(q2.toString());
@@ -723,6 +724,7 @@ public class ACtx implements KeyListener, ActionListener {
 		    ask = rset.getFloat(7);
 		opt_dct.get(s).get(expiry).
 		    put(cp, String.format("%5.2f/%5.2f ", bid, ask));
+		// System.err.printf("expiry = %s, cp = %s, s = %.2f, bid = %.2f, ask = %.2f\n", expiry, cp, s, bid, ask);
 	    }
         } catch( Exception ex) {
             System.err.println("Failed to get options for " + und + ":");
