@@ -665,6 +665,20 @@ public class ACtx implements KeyListener, ActionListener {
 		}
 		strikes.add(s);
 	    }
+	    if(strikes.size() == 0) {
+		String q1_1 = q1.toString().replace(expiries.get(1),
+						    expiries.get(0));
+		ResultSet rset1 = sdb.get(q1_1);
+		while(rset1.next()) {
+		    strike_ix++;
+		    float s = rset1.getFloat(1), dist = Math.abs(s - cc);
+		    if(dist <= min_dist) {
+			min_dist = dist;
+			atm_ix = strike_ix;
+		    }
+		    strikes.add(s);
+		}
+	    }
         } catch( Exception ex) {
 	    System.err.println("Failed to get strikes for " + und + ":");
             ex.printStackTrace(System.err);
