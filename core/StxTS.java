@@ -258,6 +258,7 @@ public class StxTS<T extends StxRecord> {
         for( int ix= start; ix< end; ix++) sb.append(data.get(ix).toString());
         return sb.toString();
     }
+    public String currentDate() { return data.get(pos).date; }
     public List<T> data() { return data; }
     //public TreeMap<String, Float> getDividends() { return dividends;}
     //public void setDividends( TreeMap<String, Float> dividends) {
