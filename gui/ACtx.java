@@ -3,6 +3,8 @@ package gui;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -243,6 +245,16 @@ public class ACtx implements KeyListener, ActionListener {
                                          jtp_jl, jp_trd);
         jspv.setOneTouchExpandable(true);
         jspv.setDividerLocation(vert_div);
+
+	jtp_jl.addChangeListener(new ChangeListener() {
+		public void stateChanged(ChangeEvent e) {
+		    Chart cc = (Chart)jtp_jl.getSelectedComponent();
+		    if((cc != null) && (ntf.getText() != cc.stk_name)) {
+			ntf.setText(cc.stk_name);
+			etf.setText(cc.ts.currentDate());
+		    }
+		}
+	    });
 	
         JSplitPane jspu= new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
                                          jspv, jpu);
@@ -290,23 +302,19 @@ public class ACtx implements KeyListener, ActionListener {
 		if(cd >= 112 && cd <= 123)
 		    handle_function_keys(cd);
             } else if(src.equals("NTF")) {
-                if( cd== 10) go();
+                if(cd== 10) go();
                 if(cd == 38) {
-                    if(entries.size() == 0)
-                        return;
-                    if(++crt_pos >= entries.size())
-                        crt_pos = entries.size() - 1;
-                    ntf.setText(entries.get(crt_pos)[0]);
-                    etf.setText(entries.get(crt_pos)[1]);
+		    int sel_ix = jtp_jl.getSelectedIndex() + 1;
+		    if(sel_ix >= jtp_jl.getTabCount())
+			sel_ix = 0;
+		    jtp_jl.setSelectedIndex(sel_ix);
                     go();
                 }
                 if(cd == 40) {
-                    if(entries.size() == 0)
-                        return;
-                    if(--crt_pos < 0)
-                        crt_pos = 0;
-                    ntf.setText(entries.get(crt_pos)[0]);
-                    etf.setText(entries.get(crt_pos)[1]);
+		    int sel_ix = jtp_jl.getSelectedIndex() - 1;
+		    if(sel_ix < 0)
+			sel_ix = jtp_jl.getTabCount() - 1;
+		    jtp_jl.setSelectedIndex(sel_ix);
                     go();
                 }
                 if(cd == 34) {
@@ -357,6 +365,13 @@ public class ACtx implements KeyListener, ActionListener {
 	    exp.requestFocusInWindow();
 	else if(cd == 118)
 	    capital.requestFocusInWindow();
+	else if(cd == 123) {
+	    int sel_ix = jtp_jl.getSelectedIndex();
+	    jtp_jl.remove(sel_ix);
+	    if(sel_ix >= jtp_jl.getTabCount())
+		sel_ix = jtp_jl.getTabCount() - 1;
+	    jtp_jl.setSelectedIndex(sel_ix);
+	}
     }
     
     private void decreaseScale() {
