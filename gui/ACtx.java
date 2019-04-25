@@ -660,20 +660,20 @@ public class ACtx implements KeyListener, ActionListener {
 	float min_dist = 10000;
 	int atm_ix = -1, strike_ix = -1;
 	float cc = chrt.getSR(ed).c;
-	String opt_tbl = (StxCal.cmp(last_opt_date, ed) <= 0)?
-	    "options": "opt_cache";
+	String opt_tbl = "options";
 	String dt_col = (StxCal.cmp(last_opt_date, ed) <= 0)? "date": "dt";
 	StringBuilder q1= new StringBuilder("SELECT DISTINCT strike FROM ");
-	q1.append(opt_tbl).append(" WHERE und='").append(und).append("' AND ").
-	    append(dt_col).append("='").append(ed).append("' AND expiry='").
+	q1.append("options WHERE und='").append(und).append("' AND ").
+	    append("dt='").append(ed).append("' AND expiry='").
 	    append(expiries.get(1)).append("' ").append("ORDER BY strike");
 	// System.err.println("q1 = " + q1.toString());
  	try {
-            StxDB sdb = new StxDB("stx_ng");
+            StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet rset = sdb.get(q1.toString());
 	    while(rset.next()) {
 		strike_ix++;
-		float s = rset.getFloat(1), dist = Math.abs(s - cc);
+		float s = (float)(rset.getInt(1) / 100.0);
+		float dist = Math.abs(s - cc);
 		if(dist <= min_dist) {
 		    min_dist = dist;
 		    atm_ix = strike_ix;
@@ -686,7 +686,8 @@ public class ACtx implements KeyListener, ActionListener {
 		ResultSet rset1 = sdb.get(q1_1);
 		while(rset1.next()) {
 		    strike_ix++;
-		    float s = rset1.getFloat(1), dist = Math.abs(s - cc);
+		    float s = (float)(rset1.getInt(1) / 100.0);
+		    float dist = Math.abs(s - cc);
 		    if(dist <= min_dist) {
 			min_dist = dist;
 			atm_ix = strike_ix;
@@ -733,24 +734,25 @@ public class ACtx implements KeyListener, ActionListener {
 	strike_ix = 0;
 	for(float s: sel_strikes) {
 	    if(strike_ix > 0) s_sb.append(",");
-	    s_sb.append(s);
+	    s_sb.append((int)(s * 100));
 	    ++strike_ix;
 	}
 	s_sb.append(")");
-	StringBuilder q2= new StringBuilder("SELECT * FROM ");
-	q2.append(opt_tbl).append(" WHERE und='").append(und).append( "' and ").
-	    append(dt_col).append("='").append(ed).append("' and expiry in ('").
+	StringBuilder q2= new StringBuilder("SELECT * FROM options");
+	q2.append(" WHERE und='").append(und).append( "' AND dt='").
+	    append(ed).append("' and expiry in ('").
 	    append(expiries.get(0)).append("', '").
 	    append(expiries.get(1)).append("') and strike in ").
 	    append(s_sb.toString()).append(" order by expiry, strike, cp");
 	// System.err.println(q2.toString());
 	try {
-            StxDB sdb = new StxDB("stx_ng");
+            StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet rset = sdb.get(q2.toString());
             while(rset.next()) {
 		String expiry = rset.getString(1), cp = rset.getString(3);
-		float s = rset.getFloat(4), bid = rset.getFloat(6),
-		    ask = rset.getFloat(7);
+		float s = (float)(rset.getInt(4) / 100.0);
+		float bid = (float)(rset.getInt(6) / 100.0);
+		float ask = (float)(rset.getInt(7) / 100.0);
 		opt_dct.get(s).get(expiry).
 		    put(cp, String.format("%5.2f/%5.2f ", bid, ask));
 		// System.err.printf("expiry = %s, cp = %s, s = %.2f, bid = %.2f, ask = %.2f\n", expiry, cp, s, bid, ask);
