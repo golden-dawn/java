@@ -240,7 +240,7 @@ public class ACtx implements KeyListener, ActionListener {
         addC( jpu, jld3, 5, 730, resX- hd11- 80, 290);
         jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
 
-	int vert_div = 15 * resY / 18;
+	int vert_div = 15 * resY / 19;
         JSplitPane jspv= new JSplitPane( JSplitPane.VERTICAL_SPLIT,
                                          jtp_jl, jp_trd);
         jspv.setOneTouchExpandable(true);
