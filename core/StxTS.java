@@ -56,15 +56,15 @@ public class StxTS<T extends StxRecord> {
         q1.append( "stk='").append( stk).append( "' ");
         // q2.append( "t.id.stk='").append( stk).append( "' ");
         if( sd!= null) {
-            q1.append( "AND date>='").append( sd).append( "' "); 
+            q1.append( "AND dt>='").append( sd).append( "' "); 
             //   q2.append( "AND t.id.dt>='").append( sd).append( "' "); 
         }
         if( ed!= null) {
-            q1.append( "AND date<='").append( ed).append( "'"); 
+            q1.append( "AND dt<='").append( ed).append( "'"); 
             //   q2.append( "AND t.id.dt<='").append( ed).append( "'"); 
         }
         try {
-            StxDB sdb = new StxDB("stx_ng");
+            StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet rset = sdb.get(q1.toString());
             while(rset.next())
                 splits.put( StxCal.nextBusDay(rset.getString(2)),
@@ -287,18 +287,18 @@ public class StxTS<T extends StxRecord> {
             q.append(eod_tbl).append(" WHERE ");
             q.append( "stk='").append( stk).append( "'");
             if( sd!= null) 
-                q.append( " AND date>='"+ sd+ "'");
+                q.append( " AND dt>='"+ sd+ "'");
             else
-                q.append( " AND date>='1901-01-02'");
-            if( ed!= null) q.append( " AND date<='"+ ed+ "'");
-	    q.append(" ORDER BY date");
-            StxDB sdb = new StxDB("stx_ng");
+                q.append( " AND dt>='1901-01-02'");
+            if( ed!= null) q.append( " AND dt<='"+ ed+ "'");
+	    q.append(" ORDER BY dt");
+            StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet rset = sdb.get(q.toString());
             int s_gap= 0, l_gap= 0, ix= 0;
             while(rset.next()) {
-                StxRec sr = new StxRec(rset.getString(2), rset.getFloat(3),
-                                       rset.getFloat(4),  rset.getFloat(5),
-                                       rset.getFloat(6),  rset.getFloat(7));
+                StxRec sr = new StxRec(rset.getString(2), rset.getInt(3),
+                                       rset.getInt(4),  rset.getInt(5),
+                                       rset.getInt(6),  rset.getInt(7));
                 if( ts.last()!= null) {
                     String d= StxCal.nextBusDay( ts.last().date);
                     int dt_cmp= StxCal.cmp( sr.date, d);
