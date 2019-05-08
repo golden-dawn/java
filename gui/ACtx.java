@@ -649,7 +649,7 @@ public class ACtx implements KeyListener, ActionListener {
 	    append(ed).append("' AND expiry='").append(expiries.get(1)).
 	    append("' ").append("ORDER BY strike");
  	try {
-            StxDB sdb = new StxDB("stx_ng");
+            StxDB sdb = new StxDB("stx");
             ResultSet rset = sdb.get(q1.toString());
 	    while(rset.next()) {
 		strike_ix++;
@@ -709,7 +709,7 @@ public class ACtx implements KeyListener, ActionListener {
 	    append(expiries.get(1)).append("') and strike in ").
 	    append(s_sb.toString()).append(" order by expiry, strike, cp");
 	try {
-            StxDB sdb = new StxDB("stx_ng");
+            StxDB sdb = new StxDB("stx");
             ResultSet rset = sdb.get(q2.toString());
             while(rset.next()) {
 		String expiry = rset.getString(1), cp = rset.getString(3);
