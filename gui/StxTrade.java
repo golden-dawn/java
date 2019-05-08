@@ -31,7 +31,7 @@ public class StxTrade {
 	    append(this.cp).append("' and strike=").append(strike);
 	// System.err.printf("Ctor: q1 = %s\n", q1.toString());
 	try {
-	    StxDB sdb = new StxDB("stx_ng");
+	    StxDB sdb = new StxDB("stx");
 	    ResultSet rset = sdb.get(q1.toString());
 	    while(rset.next()) {
 		in_bid = rset.getFloat(1);
@@ -64,7 +64,7 @@ public class StxTrade {
 		append("' AND date='").append(date).append("' AND cp='").
 		append(cp).append("' and strike=").append(strike);
 	    try {
-		StxDB sdb = new StxDB("stx_ng");
+		StxDB sdb = new StxDB("stx");
 		ResultSet rset = sdb.get(q1.toString());
 		while(rset.next()) {
 		    crt_bid = rset.getFloat(1);
