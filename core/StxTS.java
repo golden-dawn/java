@@ -64,7 +64,7 @@ public class StxTS<T extends StxRecord> {
             //   q2.append( "AND t.id.dt<='").append( ed).append( "'"); 
         }
         try {
-            StxDB sdb = new StxDB("stx_ng");
+            StxDB sdb = new StxDB("stx");
             ResultSet rset = sdb.get(q1.toString());
             while(rset.next())
                 splits.put( StxCal.nextBusDay(rset.getString(2)),
@@ -291,7 +291,7 @@ public class StxTS<T extends StxRecord> {
                 q.append( " AND date>='1901-01-02'");
             if( ed!= null) q.append( " AND date<='"+ ed+ "'");
 	    q.append(" ORDER BY date");
-            StxDB sdb = new StxDB("stx_ng");
+            StxDB sdb = new StxDB("stx");
             ResultSet rset = sdb.get(q.toString());
             int s_gap= 0, l_gap= 0, ix= 0;
             while(rset.next()) {
