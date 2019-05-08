@@ -24,27 +24,27 @@ public class StxJLDisplay extends JScrollPane {
 
     public StxJLDisplay(){ 
         super(); jtp= new JTextPane(); jtp.setDocument( d); 
-        jtp.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 9));
+        jtp.setFont( new Font("Monospaced", Font.PLAIN, 9));
         jtp.setBackground( Color.black); this.name= "";
         a= new SimpleAttributeSet(); this.setViewportView( jtp);
     }
     public StxJLDisplay( int w, int h){ 
         super(); jtp= new JTextPane(); jtp.setDocument( d); 
-        jtp.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 9));
+        jtp.setFont( new Font("Monospaced", Font.PLAIN, 9));
         jtp.setBackground( Color.black); this.name= "";
         a= new SimpleAttributeSet(); this.setViewportView( jtp);
         setPreferredSize( new Dimension( w, h));
     }
     public StxJLDisplay( int w, int h, int fsz){ 
         super(); jtp= new JTextPane(); jtp.setDocument( d); 
-        jtp.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, fsz));
+        jtp.setFont( new Font("Monospaced", Font.PLAIN, fsz));
         jtp.setBackground( Color.black); this.name= "";
         a= new SimpleAttributeSet(); this.setViewportView( jtp);
         setPreferredSize( new Dimension( w, h));
     }
     public StxJLDisplay( int w, int h, int fsz, String name){ 
         super(); jtp= new JTextPane(); jtp.setDocument( d); 
-        jtp.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, fsz));
+        jtp.setFont( new Font("Monospaced", Font.PLAIN, fsz));
         jtp.setBackground( Color.black); this.name= name;
         a= new SimpleAttributeSet(); this.setViewportView( jtp);
         setPreferredSize( new Dimension( w, h));

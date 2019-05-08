@@ -29,6 +29,16 @@ public class StxRec extends StxRecord {
         super( date, c); this.o= o; this.h= h; this.l= l; this.c= c; }
     public StxRec( String date, float o, float h, float l, float c, float v) {
         super( date, c); this.o= o; this.h= h; this.l= l; this.c= c; this.v= v;}
+
+    public StxRec(String date, int o, int h, int l, int c, int v) {
+        super(date, (float)(c / 100.0));
+	this.o = (float)(o / 100.0);
+	this.h = (float)(h / 100.0);
+	this.l = (float)(l / 100.0);
+	this.c = (float)(c / 100.0);
+	this.v= (float) v;
+    }
+    
     public void copySR( StxRec sr) {
         this.date= sr.date; this.en= sr.en; this.ev= sr.ev; this.ef= sr.ef;
         this.o= sr.o; this.h= sr.h; this.l= sr.l; this.c= sr.c; this.v= sr.v;

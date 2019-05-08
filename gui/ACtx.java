@@ -3,6 +3,8 @@ package gui;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -79,12 +81,13 @@ public class ACtx implements KeyListener, ActionListener {
     int crt_pos = 0;
     TreeMap<String, Integer> trend_map= new TreeMap<String, Integer>();
     int idx= -1;
-    String log_fname;
+    String log_fname, last_opt_date;
 
     public ACtx() {
         
         Calendar c= new GregorianCalendar();
         yr= c.get( Calendar.YEAR);
+	last_opt_date = String.format("%d-12-31", (yr - 1));
         String d= String.format( "%d-%02d-%02d", yr,
                                  1+ c.get( Calendar.MONTH),
                                  c.get( Calendar.DAY_OF_MONTH));
@@ -237,11 +240,21 @@ public class ACtx implements KeyListener, ActionListener {
         addC( jpu, jld3, 5, 730, resX- hd11- 80, 290);
         jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
 
-	int vert_div = 15 * resY / 18;
+	int vert_div = 15 * resY / 19;
         JSplitPane jspv= new JSplitPane( JSplitPane.VERTICAL_SPLIT,
                                          jtp_jl, jp_trd);
         jspv.setOneTouchExpandable(true);
         jspv.setDividerLocation(vert_div);
+
+	jtp_jl.addChangeListener(new ChangeListener() {
+		public void stateChanged(ChangeEvent e) {
+		    Chart cc = (Chart)jtp_jl.getSelectedComponent();
+		    if((cc != null) && (ntf.getText() != cc.stk_name)) {
+			ntf.setText(cc.stk_name);
+			etf.setText(cc.ts.currentDate());
+		    }
+		}
+	    });
 	
         JSplitPane jspu= new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
                                          jspv, jpu);
@@ -289,23 +302,19 @@ public class ACtx implements KeyListener, ActionListener {
 		if(cd >= 112 && cd <= 123)
 		    handle_function_keys(cd);
             } else if(src.equals("NTF")) {
-                if( cd== 10) go();
+                if(cd== 10) go();
                 if(cd == 38) {
-                    if(entries.size() == 0)
-                        return;
-                    if(++crt_pos >= entries.size())
-                        crt_pos = entries.size() - 1;
-                    ntf.setText(entries.get(crt_pos)[0]);
-                    etf.setText(entries.get(crt_pos)[1]);
+		    int sel_ix = jtp_jl.getSelectedIndex() + 1;
+		    if(sel_ix >= jtp_jl.getTabCount())
+			sel_ix = 0;
+		    jtp_jl.setSelectedIndex(sel_ix);
                     go();
                 }
                 if(cd == 40) {
-                    if(entries.size() == 0)
-                        return;
-                    if(--crt_pos < 0)
-                        crt_pos = 0;
-                    ntf.setText(entries.get(crt_pos)[0]);
-                    etf.setText(entries.get(crt_pos)[1]);
+		    int sel_ix = jtp_jl.getSelectedIndex() - 1;
+		    if(sel_ix < 0)
+			sel_ix = jtp_jl.getTabCount() - 1;
+		    jtp_jl.setSelectedIndex(sel_ix);
                     go();
                 }
                 if(cd == 34) {
@@ -356,6 +365,13 @@ public class ACtx implements KeyListener, ActionListener {
 	    exp.requestFocusInWindow();
 	else if(cd == 118)
 	    capital.requestFocusInWindow();
+	else if(cd == 123) {
+	    int sel_ix = jtp_jl.getSelectedIndex();
+	    jtp_jl.remove(sel_ix);
+	    if(sel_ix >= jtp_jl.getTabCount())
+		sel_ix = jtp_jl.getTabCount() - 1;
+	    jtp_jl.setSelectedIndex(sel_ix);
+	}
     }
     
     private void decreaseScale() {
@@ -644,21 +660,40 @@ public class ACtx implements KeyListener, ActionListener {
 	float min_dist = 10000;
 	int atm_ix = -1, strike_ix = -1;
 	float cc = chrt.getSR(ed).c;
+	String opt_tbl = "options";
+	String dt_col = (StxCal.cmp(last_opt_date, ed) <= 0)? "date": "dt";
 	StringBuilder q1= new StringBuilder("SELECT DISTINCT strike FROM ");
-	q1.append("options WHERE und='").append(und).append("' AND date='").
-	    append(ed).append("' AND expiry='").append(expiries.get(1)).
-	    append("' ").append("ORDER BY strike");
+	q1.append("options WHERE und='").append(und).append("' AND ").
+	    append("dt='").append(ed).append("' AND expiry='").
+	    append(expiries.get(1)).append("' ").append("ORDER BY strike");
+	// System.err.println("q1 = " + q1.toString());
  	try {
-            StxDB sdb = new StxDB("stx");
+            StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet rset = sdb.get(q1.toString());
 	    while(rset.next()) {
 		strike_ix++;
-		float s = rset.getFloat(1), dist = Math.abs(s - cc);
+		float s = (float)(rset.getInt(1) / 100.0);
+		float dist = Math.abs(s - cc);
 		if(dist <= min_dist) {
 		    min_dist = dist;
 		    atm_ix = strike_ix;
 		}
 		strikes.add(s);
+	    }
+	    if(strikes.size() == 0) {
+		String q1_1 = q1.toString().replace(expiries.get(1),
+						    expiries.get(0));
+		ResultSet rset1 = sdb.get(q1_1);
+		while(rset1.next()) {
+		    strike_ix++;
+		    float s = (float)(rset1.getInt(1) / 100.0);
+		    float dist = Math.abs(s - cc);
+		    if(dist <= min_dist) {
+			min_dist = dist;
+			atm_ix = strike_ix;
+		    }
+		    strikes.add(s);
+		}
 	    }
         } catch( Exception ex) {
 	    System.err.println("Failed to get strikes for " + und + ":");
@@ -699,24 +734,28 @@ public class ACtx implements KeyListener, ActionListener {
 	strike_ix = 0;
 	for(float s: sel_strikes) {
 	    if(strike_ix > 0) s_sb.append(",");
-	    s_sb.append(s);
+	    s_sb.append((int)(s * 100));
 	    ++strike_ix;
 	}
 	s_sb.append(")");
-	StringBuilder q2= new StringBuilder("SELECT * FROM options WHERE ");
-        q2.append("und='").append(und).append( "' and date='").append(ed).
-	    append("' and expiry in ('").append(expiries.get(0)).append("', '").
+	StringBuilder q2= new StringBuilder("SELECT * FROM options");
+	q2.append(" WHERE und='").append(und).append( "' AND dt='").
+	    append(ed).append("' and expiry in ('").
+	    append(expiries.get(0)).append("', '").
 	    append(expiries.get(1)).append("') and strike in ").
 	    append(s_sb.toString()).append(" order by expiry, strike, cp");
+	// System.err.println(q2.toString());
 	try {
-            StxDB sdb = new StxDB("stx");
+            StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet rset = sdb.get(q2.toString());
             while(rset.next()) {
 		String expiry = rset.getString(1), cp = rset.getString(3);
-		float s = rset.getFloat(4), bid = rset.getFloat(6),
-		    ask = rset.getFloat(7);
+		float s = (float)(rset.getInt(4) / 100.0);
+		float bid = (float)(rset.getInt(6) / 100.0);
+		float ask = (float)(rset.getInt(7) / 100.0);
 		opt_dct.get(s).get(expiry).
 		    put(cp, String.format("%5.2f/%5.2f ", bid, ask));
+		// System.err.printf("expiry = %s, cp = %s, s = %.2f, bid = %.2f, ask = %.2f\n", expiry, cp, s, bid, ask);
 	    }
         } catch( Exception ex) {
             System.err.println("Failed to get options for " + und + ":");

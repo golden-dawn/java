@@ -25,8 +25,8 @@ public class StxDB {
             Class.forName( "org.postgresql.Driver").newInstance();
             String urlStr= "jdbc:postgresql://127.0.0.1:5432/"+ db_name;
 	    Properties props = new Properties();
-	    props.setProperty("user", System.getenv("DB_USER"));
-	    props.setProperty("password", System.getenv("DB_PASSWORD"));
+	    props.setProperty("user", System.getenv("POSTGRES_USER"));
+	    props.setProperty("password", System.getenv("POSTGRES_PASSWORD"));
             s= DriverManager.getConnection( urlStr, props).
                 createStatement();
         }

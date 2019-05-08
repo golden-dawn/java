@@ -198,7 +198,7 @@ public class Chart extends JPanel {
 	    }
             xx+= day_width;
         }
-        g2.setFont( new Font("Lucida Sans Typewriter", Font.PLAIN, 14));
+        g2.setFont( new Font("Monospaced", Font.PLAIN, 14));
 	
 	StxUDV udv = new StxUDV(ts);
 	int avg_vol_sz = avg_volumes.size();
