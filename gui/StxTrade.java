@@ -27,15 +27,15 @@ public class StxTrade {
 	StringBuilder q1 =
 	    new StringBuilder("SELECT bid, ask FROM options WHERE und='");
 	q1.append(stk).append("' AND expiry='").append(expiry).
-	    append("' AND date='").append(in_date).append("' AND cp='").
-	    append(this.cp).append("' and strike=").append(strike);
+	    append("' AND dt='").append(in_date).append("' AND cp='").
+	    append(this.cp).append("' and strike=").append((int)(100 * strike));
 	// System.err.printf("Ctor: q1 = %s\n", q1.toString());
 	try {
 	    StxDB sdb = new StxDB("stx");
 	    ResultSet rset = sdb.get(q1.toString());
 	    while(rset.next()) {
-		in_bid = rset.getFloat(1);
-		in_ask = rset.getFloat(2);
+		in_bid = (float) (rset.getInt(1) / 100.0);
+		in_ask = (float) (rset.getInt(2) / 100.0);
 		// System.err.printf("in_bid = %f, in_ask = %f\n", in_bid, in_ask);
 	    }
 	} catch( Exception ex) {
@@ -61,14 +61,14 @@ public class StxTrade {
 	    StringBuilder q1 =
 		new StringBuilder("SELECT bid, ask FROM options WHERE und='");
 	    q1.append(stk).append("' AND expiry='").append(expiry).
-		append("' AND date='").append(date).append("' AND cp='").
-		append(cp).append("' and strike=").append(strike);
+		append("' AND dt='").append(date).append("' AND cp='").
+		append(cp).append("' and strike=").append((int)(100 * strike));
 	    try {
 		StxDB sdb = new StxDB("stx");
 		ResultSet rset = sdb.get(q1.toString());
 		while(rset.next()) {
-		    crt_bid = rset.getFloat(1);
-		    crt_ask = rset.getFloat(2);
+		    crt_bid = (float) (rset.getInt(1) / 100.0);
+		    crt_ask = (float) (rset.getInt(2) / 100.0);
 		}
 	    } catch( Exception ex) {
 		System.err.println("Failed to bid/ask for " + key() + ":");
