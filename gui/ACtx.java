@@ -67,7 +67,7 @@ public class ACtx implements KeyListener, ActionListener {
     private JCheckBox invisible;
     private JLDisplay jld1, jld2, jld3, opts, trades;
     private JLabel jlfl1, jlfl2, jlfl3, trade_status;
-    private int resX= 1920, resY= 1080, yr;
+    private int resX= 1366, resY= 768, yr;
     private Chart chrt;
     private StxxJL jl1, jl2, jl3;
     private List<StxTrade> trade_list = new ArrayList<StxTrade>();
