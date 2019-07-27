@@ -59,14 +59,13 @@ public class ACtx implements KeyListener, ActionListener {
     static JFrame jf; 
     private JTabbedPane jtp_jl;
     private JPanel jpu, jp_trd;
-    private JTextField etf, ntf, dtf, dbetf, dbstf, jlf1, jlf2, jlf3, jlp;
-    private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
-    private JButton rewind, fwd, bak, pick_stk;
+    private JTextField etf, ntf, dbetf, dbstf, jlf1, jlf2, jlp;
+    private JButton pick_stk;
     private JButton call, put, c_call, c_put;
-    private JComboBox exp, strike, capital;
+    private JComboBox exp, strike, capital, chart_scale;
     private JCheckBox invisible;
-    private JLDisplay jld1, jld2, jld3, opts, trades;
-    private JLabel jlfl1, jlfl2, jlfl3, trade_status;
+    private JLDisplay jld1, jld2, opts, trades;
+    private JLabel jlfl1, jlfl2, trade_status;
     private int resX= 1366, resY= 768, yr;
     private Chart chrt;
     private StxxJL jl1, jl2, jl3;
@@ -100,15 +99,12 @@ public class ACtx implements KeyListener, ActionListener {
         etf.setName( "ETF"); etf.addKeyListener( this);
         ntf= new JTextField(); ntf.setCaretColor( Color.white);
         ntf.setName( "NTF"); ntf.addKeyListener( this);
-        dtf= new JTextField( "120"); dtf.setCaretColor( Color.white);
         dbetf= new JTextField( "eods"); dbetf.setCaretColor( Color.white);
         dbstf= new JTextField( "dividends"); dbstf.setCaretColor( Color.white);
         jlf1 = new JTextField( "1.0"); jlf1.setCaretColor( Color.white);
-        jlf2 = new JTextField( "1.5"); jlf2.setCaretColor( Color.white);
-        jlf3 = new JTextField( "2.0"); jlf3.setCaretColor( Color.white);
+        jlf2 = new JTextField( "2.0"); jlf2.setCaretColor( Color.white);
         jlfl1 = new JLabel("Factor: "+ jlf1.getText());
         jlfl2 = new JLabel("Factor: "+ jlf2.getText());
-        jlfl3 = new JLabel("Factor: "+ jlf3.getText());
         jlp= new JTextField( "16"); jlp.setCaretColor( Color.white);
 	invisible = new JCheckBox("Invisible");
 	invisible.setSelected(true);
@@ -118,51 +114,28 @@ public class ACtx implements KeyListener, ActionListener {
 	addC( jpu, ntf, 15, 7, 60, 25);
         addC( jpu, etf, 75, 7, 75, 25);
         etf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
-        fwd= new JButton( "+"); fwd.addActionListener( this);
-        bak= new JButton( "-"); bak.addActionListener( this);
-        rewind = new JButton("<");
-        rewind.addActionListener(this);
-        addC( jpu, rewind, 150, 12, 50, 15);
-        addC( jpu, fwd, 200, 12, 50, 15);
-        addC( jpu, bak, 250, 12, 50, 15);
-        addC( jpu, dtf, 300, 7, 50, 25);
-        addC( jpu, invisible, 350, 7, 150, 25);
-        addC( jpu, invisible, 350, 7, 150, 25);
+        addC( jpu, invisible, 150, 7, 150, 25);
         pick_stk = new JButton("R");
         pick_stk.addActionListener(this);
-        addC( jpu, pick_stk, 500, 7, 50, 25);
-        jb1m= new JButton( "1M");
-        jb1m.addActionListener( this);
-        addC( jpu, jb1m, 15, 35, 55, 15);
-        jb3m= new JButton( "3M");
-        jb3m.addActionListener( this);
-        addC( jpu, jb3m, 70, 35, 55, 15);
-        jb6m= new JButton( "6M");
-        jb6m.addActionListener( this);
-        addC( jpu, jb6m, 125, 35, 55, 15);
-        jb1y= new JButton( "1Y");
-        jb1y.addActionListener( this);
-        addC( jpu, jb1y, 180, 35, 55, 15);
-        jbjl= new JButton( "JL");
-        jbjl.addActionListener( this);
-        addC( jpu, jbjl, 235, 35, 55, 15);
-        jb2y = new JButton( "2Y");
-        jb2y.addActionListener( this);
-        addC( jpu, jb2y, 290, 35, 55, 15);
-        jb3y= new JButton( "3Y");
-        jb3y.addActionListener( this);
-        addC( jpu, jb3y, 345, 35, 55, 15);
-        jb5y= new JButton( "5Y");
-        jb5y.addActionListener( this);
-        addC( jpu, jb5y, 400, 35, 55, 15);
-        jball= new JButton( "All");
-        jball.addActionListener( this);
-        addC( jpu, jball, 455, 35, 55, 15);
-        addC( jpu, new JLabel("JL: "), 15, 55, 25, 20);
-        addC( jpu, jlf1,  40, 55, 50, 20);
-        addC( jpu, jlf2,  90, 55, 50, 20);
-        addC( jpu, jlf3,  140, 55, 50, 20);
-        addC( jpu, jlp,  190, 55, 50, 20);
+        addC( jpu, pick_stk, 300, 7, 50, 25);
+	chart_scale = new JComboBox<String>();
+	chart_scale.setEditable(false);
+	chart_scale.addItem("1M");
+	chart_scale.addItem("3M");
+	chart_scale.addItem("6M");
+	chart_scale.addItem("1Y");
+	chart_scale.addItem("JL");
+	chart_scale.addItem("2Y");
+	chart_scale.addItem("3Y");
+	chart_scale.addItem("5Y");
+	chart_scale.addItem("All");
+	chart_scale.setSelectedIndex(1);
+	chart_scale.addActionListener(this);
+	addC(jpu, chart_scale, 15, 35, 80, 20);
+        addC( jpu, new JLabel("JL: "), 115, 35, 25, 20);
+        addC( jpu, jlf1, 140, 35, 50, 20);
+        addC( jpu, jlf2, 190, 35, 50, 20);
+        addC( jpu, jlp,  240, 35, 50, 20);
 	
         jp_trd = new JPanel(null);
         jp_trd.setBackground(Color.black);
@@ -217,30 +190,27 @@ public class ACtx implements KeyListener, ActionListener {
 	opts = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trades = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trade_status = new JLabel("GETTING STARTED . . .");
-        addC(jp_trd, call, 5, 5, 80, 15);
-        addC(jp_trd, put, 85, 5, 80, 15);
-        addC(jp_trd, c_call, 165, 5, 120, 15);
-        addC(jp_trd, c_put, 285, 5, 120, 15);
-	addC(jp_trd, strike, 405, 0, 80, 20);
-	addC(jp_trd, exp, 485, 0, 120, 20);
-	addC(jp_trd, capital, 605, 0, 80, 20);
-	addC(jp_trd, trade_status, 725, 5, 550, 15);
-	addC(jp_trd, opts, 5, 20, 505, 115);
-	addC(jp_trd, trades, 510, 20, 855, 115);
+        addC(jpu, call, 5, 55, 80, 15);
+        addC(jpu, put, 85, 55, 80, 15);
+        addC(jpu, c_call, 165, 55, 120, 15);
+        addC(jpu, c_put, 285, 55, 120, 15);
+	addC(jpu, strike, 5, 70, 80, 20);
+	addC(jpu, exp, 85, 70, 120, 20);
+	addC(jpu, capital, 205, 70, 80, 20);
+	addC(jpu, trade_status, 285, 70, 150, 15);
+	addC(jpu, opts, 5, 90, 305, 230);
+	addC(jpu, trades, 5, 320, 305, 230);
 	
-        int hd11= 2* resX/ 3;
-        addC( jpu, jlfl1, 5, 90, 80, 20);
-        jld1= new JLDisplay( hd11 + 40, 220, 12, invisible.isSelected());
-        addC( jpu, jld1, 5, 110, resX- hd11- 80, 290);
-        addC( jpu, jlfl2,  5, 400, 80, 20);
-        jld2= new JLDisplay( hd11- 10, 220, 12, invisible.isSelected());
-        addC( jpu, jld2, 5, 420, resX- hd11- 80, 290);
-        addC( jpu, jlfl3,  5, 710, 80, 20);
-        jld3= new JLDisplay( hd11- 10, 220, 12, invisible.isSelected());
-        addC( jpu, jld3, 5, 730, resX- hd11- 80, 290);
-        jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
+        int hd11= 1080;
+        addC( jp_trd, jlfl1, 5, 0, 80, 20);
+        jld1= new JLDisplay( 540, 220, 12, invisible.isSelected());
+        addC( jp_trd, jld1, 0, 20, 540, 200);
+        addC( jp_trd, jlfl2, 540, 0, 80, 20);
+        jld2= new JLDisplay(540, 220, 12, invisible.isSelected());
+        addC( jp_trd, jld2, 540, 20, 540, 200);
+        jtp_jl= new JTabbedPane( JTabbedPane.LEFT);
 
-	int vert_div = 15 * resY / 19;
+	int vert_div = resY - 200;
         JSplitPane jspv= new JSplitPane( JSplitPane.VERTICAL_SPLIT,
                                          jtp_jl, jp_trd);
         jspv.setOneTouchExpandable(true);
@@ -294,10 +264,6 @@ public class ACtx implements KeyListener, ActionListener {
                     increaseScale();
                     go();
                 }
-                if(cd == 35 || cd == 36) {
-                    move(cd);
-                    go();
-                }
                 if( cd== 10) go();
 		if(cd >= 112 && cd <= 123)
 		    handle_function_keys(cd);
@@ -323,10 +289,6 @@ public class ACtx implements KeyListener, ActionListener {
                 }
                 if(cd == 33) {
                     increaseScale();
-                    go();
-                }
-                if(cd == 35 || cd == 36) {
-                    move(cd);
                     go();
                 }
 		if(cd >= 112 && cd <= 123)
@@ -434,34 +396,6 @@ public class ACtx implements KeyListener, ActionListener {
         }
     }
 
-    private void move(int cd) {
-        int num_bds = 20;
-        try {
-            num_bds = Integer.parseInt(dtf.getText());
-        } catch(Exception ex) {}
-        etf.setText(StxCal.moveBusDays(etf.getText(), (cd == 35)?
-                                       num_bds: -num_bds));
-    }
-    // private String getAnalysisDate( String ed, int dir) {
-    //     String res= ed;
-    //     String[] current_values = analysis_file.get( ed);
-    //     if( current_values== null)
-    //         return res;
-    //     boolean found= false;        
-    //     SortedMap<String, String[]> smap= ( dir== 1)? 
-    //         analysis_file.tailMap( StxCal.nextBusDay( ed)): 
-    //         analysis_file.descendingMap().tailMap( StxCal.prevBusDay( ed));
-    //     for( Map.Entry<String, String[]> entry: smap.entrySet()) {
-    //         found= true; String[] values= entry.getValue();
-    //         for( int ix: idxf) {
-    //             if(values[ix].compareTo( current_values[ ix])!= 0) {
-    //                 found= false; break;
-    //             }
-    //         }
-    //         if( found== true) { res= entry.getKey(); break;}
-    //     }
-    //     return res;
-    // }
     public void keyReleased(KeyEvent e) {}
     public void keyTyped(KeyEvent e) {}
 
@@ -472,12 +406,10 @@ public class ACtx implements KeyListener, ActionListener {
         int idx, w= 20, p= Integer.parseInt( jlp.getText());
         float f1= Float.parseFloat( jlf1.getText());
         float f2= Float.parseFloat( jlf2.getText());
-        float f3= Float.parseFloat( jlf3.getText());
 	etf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
 	ntf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
         jlfl1.setText("Factor: "+ jlf1.getText());
         jlfl2.setText("Factor: "+ jlf2.getText());
-        updateSetupPanel();
         if( StxCal.isBusDay( e)== false)
             e= StxCal.nextBusDay( e);
         jls= ( StxCal.year( e)- 2)+ "-01-01";
@@ -491,8 +423,6 @@ public class ACtx implements KeyListener, ActionListener {
         jl2 = jld2.runJL(n, jls, e, f2, w, p, dbetf.getText(),
 			 dbstf.getText());
         // jld2.append( analysis( e));
-        jl3 = jld3.runJL(n, jls, e, f3, w, p, dbetf.getText(),
-			 dbstf.getText());
         chrt= new Chart(n, s, e, true, dbetf.getText(), dbstf.getText(), 
 			jl1, jl2, jl3, invisible.isSelected());
         chrt.setScale(last_scale);
@@ -502,36 +432,6 @@ public class ACtx implements KeyListener, ActionListener {
 	updateTradeStatus();
     }
 
-    private void updateSetupPanel() {
-        jld3.clear();
-        if(entries.size() == 0)
-            return;
-        int ix = 0;
-        for(String str: entries.get(crt_pos)) {
-            switch(ix) {
-            case 0: case 1: case 3: case 4: case 9: case 11: case 16: case 21:
-                jld3.append(str + '\n');
-                break;
-            case 5: case 6: case 7: case 8: case 10: case 12: case 13: case 14:
-            case 15:
-                float val = Float.parseFloat(str);
-                jld3.append(String.format("%.2f\n", val));
-                break;
-            case 17: case 18: case 19: case 20:
-                try {
-                    float val1 = Float.parseFloat(str);
-                    jld3.append(String.format("%.2f\n", val1));
-                } catch(Exception ex) {
-                    jld3.append("\n");
-                }
-                break;
-            default:
-                break;
-            }
-            ix++;
-        }
-    }
-
     public void addC( JPanel p, JComponent c, int x, int y,
                       int h, int w) {
         p.add( c); c.setBounds( x, y, h, w);
@@ -539,44 +439,8 @@ public class ACtx implements KeyListener, ActionListener {
         c.setForeground( Color.lightGray);
     }
 
-    private void moveDate( int sign) {
-        int num= 20;
-        try {
-            num= Integer.parseInt( dtf.getText());
-        } catch (Exception e1) {}
-        num*= sign;
-        try {
-            String crt_date = etf.getText();
-            etf.setText( StxCal.moveBusDays( crt_date, num));
-            go();
-        } catch (Exception e2) {
-            e2.printStackTrace( System.err);
-        }
-    }
-
-    public void actionPerformed( ActionEvent ae) {
-        String cmd_name= ( String) ae.getActionCommand();
-        Chart cc= ( Chart) jtp_jl.getSelectedComponent();
-        if( cmd_name.equals( "1M")|| cmd_name.equals( "3M")||
-            cmd_name.equals( "6M")|| cmd_name.equals( "1Y")||
-            cmd_name.equals( "JL")|| cmd_name.equals( "2Y")||
-            cmd_name.equals( "3Y")|| cmd_name.equals( "5Y")||
-            cmd_name.equals( "All")) {
-            cc.setScale( cmd_name);
-            last_scale= cmd_name;
-        }
-        if( ae.getSource() == fwd) moveDate( 1);
-        if( ae.getSource() == bak) moveDate( -1);
-        if( ae.getSource() == rewind) {
-	    String rewind_date = cc.rewind();
-	    etf.setText(rewind_date);
-	    try {
-		go();
-	    } catch( Exception exc) {
-		exc.printStackTrace(System.err);
-	    }
-	}
-	if(ae.getSource() == pick_stk) {
+    public void actionPerformed(ActionEvent ae) {
+	if (ae.getSource() == pick_stk) {
 	    String stk = "NFLX";
 	    try {
 		List<String> lines = Files.readAllLines
@@ -594,15 +458,16 @@ public class ACtx implements KeyListener, ActionListener {
 		exc.printStackTrace(System.err);
 	    }	    
 	}
-
-	// TODO: pushing call or put should retrieve all the relevant
-	// options pushing close call or close put should get some
-	// default open options there should also be a trade command,
-	// that happens when the trade button is pushed
-        if(cmd_name.equals("CALL") || cmd_name.equals("PUT"))
-	    openTrade(cmd_name);
-	if(cmd_name.equals("CLOSE CALL") || cmd_name.equals("CLOSE PUT"))
-	    closeTrade(cmd_name);
+	else if ((ae.getSource() == call) || (ae.getSource() == put))
+	    openTrade((String)ae.getActionCommand());
+	else if ((ae.getSource() == c_call) || (ae.getSource() == c_put))
+	    closeTrade((String)ae.getActionCommand());
+	else if (ae.getSource() == chart_scale) {
+	    String new_scale = chart_scale.getSelectedItem().toString();
+	    Chart cc= ( Chart) jtp_jl.getSelectedComponent();
+	    cc.setScale(new_scale);
+            last_scale= new_scale;
+        }
     }
 
     private void openTrade(String cmd_name) {
