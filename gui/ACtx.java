@@ -111,13 +111,13 @@ public class ACtx implements KeyListener, ActionListener {
         jpu= new JPanel( null);
         jpu.setBackground( Color.black);
         jpu.setForeground( Color.lightGray);
-	addC( jpu, ntf, 15, 7, 60, 25);
-        addC( jpu, etf, 75, 7, 75, 25);
+	addC( jpu, ntf, 5, 7, 60, 25);
+        addC( jpu, etf, 65, 7, 75, 25);
         etf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
-        addC( jpu, invisible, 150, 7, 150, 25);
+        addC( jpu, invisible, 140, 7, 70, 25);
         pick_stk = new JButton("R");
         pick_stk.addActionListener(this);
-        addC( jpu, pick_stk, 300, 7, 50, 25);
+        addC( jpu, pick_stk, 210, 7, 50, 25);
 	chart_scale = new JComboBox<String>();
 	chart_scale.setEditable(false);
 	chart_scale.addItem("1M");
@@ -132,10 +132,10 @@ public class ACtx implements KeyListener, ActionListener {
 	chart_scale.setSelectedIndex(1);
 	chart_scale.addActionListener(this);
 	addC(jpu, chart_scale, 15, 35, 80, 20);
-        addC( jpu, new JLabel("JL: "), 115, 35, 25, 20);
-        addC( jpu, jlf1, 140, 35, 50, 20);
-        addC( jpu, jlf2, 190, 35, 50, 20);
-        addC( jpu, jlp,  240, 35, 50, 20);
+        addC( jpu, new JLabel("JL: "), 95, 35, 25, 20);
+        addC( jpu, jlf1, 120, 35, 50, 20);
+        addC( jpu, jlf2, 170, 35, 50, 20);
+        addC( jpu, jlp,  220, 35, 50, 20);
 	
         jp_trd = new JPanel(null);
         jp_trd.setBackground(Color.black);
@@ -192,14 +192,14 @@ public class ACtx implements KeyListener, ActionListener {
 	trade_status = new JLabel("GETTING STARTED . . .");
         addC(jpu, call, 5, 55, 80, 15);
         addC(jpu, put, 85, 55, 80, 15);
-        addC(jpu, c_call, 165, 55, 120, 15);
-        addC(jpu, c_put, 285, 55, 120, 15);
-	addC(jpu, strike, 5, 70, 80, 20);
-	addC(jpu, exp, 85, 70, 120, 20);
-	addC(jpu, capital, 205, 70, 80, 20);
-	addC(jpu, trade_status, 285, 70, 150, 15);
-	addC(jpu, opts, 5, 90, 305, 230);
-	addC(jpu, trades, 5, 320, 305, 230);
+        addC(jpu, c_call, 5, 70, 120, 15);
+        addC(jpu, c_put, 130, 70, 120, 15);
+	addC(jpu, strike, 5, 85, 70, 20);
+	addC(jpu, exp, 75, 85, 120, 20);
+	addC(jpu, capital, 195, 85, 70, 20);
+	addC(jpu, trade_status, 5, 105, 150, 15);
+	addC(jpu, opts, 5, 120, 305, 230);
+	addC(jpu, trades, 5, 350, 305, 230);
 	
         int hd11= 1080;
         addC( jp_trd, jlfl1, 5, 0, 80, 20);
@@ -515,18 +515,19 @@ public class ACtx implements KeyListener, ActionListener {
 	    trades.append(trd.ui_entry());
 	}
     }
-    
     private void getOptions() {
-	String und = ntf.getText(), ed = etf.getText();
-	if(und == null || und.equals("") || ed == null || ed.equals(""))
+	String stk = ntf.getText(), ed = etf.getText();
+	if(stk == null || stk.equals("") || ed == null || ed.equals(""))
 	    return;
+	String und = stk.matches("[A-Z]+\\.[0-9]{6}")?
+	    stk.substring(0, stk.indexOf('.')): stk;
+	System.err.printf("stk = %s, und = %s\n", stk, und);
 	List<String> expiries = StxCal.expiries(ed, 2);
 	List<Float> strikes = new ArrayList<Float>();
 	float min_dist = 10000;
 	int atm_ix = -1, strike_ix = -1;
 	float cc = chrt.getSR(ed).c;
 	String opt_tbl = "options";
-	String dt_col = (StxCal.cmp(last_opt_date, ed) <= 0)? "date": "dt";
 	StringBuilder q1= new StringBuilder("SELECT DISTINCT strike FROM ");
 	q1.append("options WHERE und='").append(und).append("' AND ").
 	    append("dt='").append(ed).append("' AND expiry='").
