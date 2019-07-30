@@ -203,14 +203,14 @@ public class ACtx implements KeyListener, ActionListener {
 	
         int hd11= 1080;
         addC( jp_trd, jlfl1, 5, 0, 80, 20);
-        jld1= new JLDisplay( 540, 220, 12, invisible.isSelected());
+        jld1= new JLDisplay( 540, 200, 12, invisible.isSelected());
         addC( jp_trd, jld1, 0, 20, 540, 200);
         addC( jp_trd, jlfl2, 540, 0, 80, 20);
-        jld2= new JLDisplay(540, 220, 12, invisible.isSelected());
+        jld2= new JLDisplay(540, 200, 12, invisible.isSelected());
         addC( jp_trd, jld2, 540, 20, 540, 200);
         jtp_jl= new JTabbedPane( JTabbedPane.LEFT);
 
-	int vert_div = resY - 200;
+	int vert_div = resY - 240;
         JSplitPane jspv= new JSplitPane( JSplitPane.VERTICAL_SPLIT,
                                          jtp_jl, jp_trd);
         jspv.setOneTouchExpandable(true);
