@@ -8,7 +8,7 @@ import core.StxCal;
 import core.StxDB;
 
 public class StxTrade {
-    String stk, cp, expiry, in_date, crt_date;
+    String stk, und, cp, expiry, in_date, crt_date;
     float strike, in_spot, in_range, crt_spot, in_bid, in_ask, crt_bid, crt_ask;
     int num_contracts;
     boolean active;
@@ -17,6 +17,8 @@ public class StxTrade {
 		    Float strike, float in_spot, float in_range,
 		    Float capital) {
 	this.stk = stk;
+	this.und = stk.matches("[A-Z]+\\.[0-9]{6}")?
+	    stk.substring(0, stk.indexOf('.')): stk;
 	this.cp = cp.equals("CALL")? "c": "p";
 	this.expiry = expiry;
 	this.in_date = in_date;
@@ -26,7 +28,7 @@ public class StxTrade {
 	crt_spot = in_spot;
 	StringBuilder q1 =
 	    new StringBuilder("SELECT bid, ask FROM options WHERE und='");
-	q1.append(stk).append("' AND expiry='").append(expiry).
+	q1.append(this.und).append("' AND expiry='").append(expiry).
 	    append("' AND dt='").append(in_date).append("' AND cp='").
 	    append(this.cp).append("' and strike=").append((int)(100 * strike));
 	// System.err.printf("Ctor: q1 = %s\n", q1.toString());
@@ -60,7 +62,7 @@ public class StxTrade {
 	    crt_spot = spot;
 	    StringBuilder q1 =
 		new StringBuilder("SELECT bid, ask FROM options WHERE und='");
-	    q1.append(stk).append("' AND expiry='").append(expiry).
+	    q1.append(this.und).append("' AND expiry='").append(expiry).
 		append("' AND dt='").append(date).append("' AND cp='").
 		append(cp).append("' and strike=").append((int)(100 * strike));
 	    try {
