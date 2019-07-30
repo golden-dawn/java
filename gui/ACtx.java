@@ -441,22 +441,18 @@ public class ACtx implements KeyListener, ActionListener {
 
     public void actionPerformed(ActionEvent ae) {
 	if (ae.getSource() == pick_stk) {
-	    String stk = "NFLX";
+	    String q1= "SELECT * FROM setups ORDER BY random() LIMIT 1";
 	    try {
-		List<String> lines = Files.readAllLines
-		    (new File("../super_liquid_stx.txt").
-		     toPath(), Charset.defaultCharset());
-		stk = lines.get(ThreadLocalRandom.current().nextInt
-				(0, lines.size()));
-	    } catch(IOException ioe) {
-		ioe.printStackTrace(System.err);
-	    }
-	    ntf.setText(stk);
-	    try {
+		StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
+		ResultSet rset = sdb.get(q1);
+		while(rset.next()) {
+		    etf.setText(rset.getString(1));
+		    ntf.setText(rset.getString(2));
+		}
 		go();
 	    } catch( Exception exc) {
 		exc.printStackTrace(System.err);
-	    }	    
+	    }
 	}
 	else if ((ae.getSource() == call) || (ae.getSource() == put))
 	    openTrade((String)ae.getActionCommand());
@@ -527,7 +523,6 @@ public class ACtx implements KeyListener, ActionListener {
 	float min_dist = 10000;
 	int atm_ix = -1, strike_ix = -1;
 	float cc = chrt.getSR(ed).c;
-	String opt_tbl = "options";
 	StringBuilder q1= new StringBuilder("SELECT DISTINCT strike FROM ");
 	q1.append("options WHERE und='").append(und).append("' AND ").
 	    append("dt='").append(ed).append("' AND expiry='").
