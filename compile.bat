@@ -1,4 +1,3 @@
-#!/bin/bash
 echo "creating output directory"
 mkdir -p output
 echo "compiling core"
