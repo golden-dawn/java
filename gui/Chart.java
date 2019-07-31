@@ -40,7 +40,7 @@ public class Chart extends JPanel {
 	System.err.printf("Creating new chart for %s between %s and %s\n",
 			  stk_name, sd, ed);
         ts= StxTS.loadEod( stk_name, null, null);
-	System.err.printf("%s, found %d records\n", stk_name, ts.size());
+	// System.err.printf("%s, found %d records\n", stk_name, ts.size());
         start = ts.find( sd, 1); start0= start;
         end= ts.find( ed, -1);
 	this.ed = ed;
@@ -215,7 +215,7 @@ public class Chart extends JPanel {
 					  pts.get(6), pts.get(7)));
 	    }
 	    String udv_str = getUDV(jl1, udv, last_avg_volume);
-	    g2.drawString(udv_str, d.width / 2 - 550, 15);
+	    g2.drawString(udv_str, d.width / 2 - 350, 15);
 	    g2.setPaint( Color.darkGray);
 	}
 	if(jl2 != null) {
@@ -229,7 +229,7 @@ public class Chart extends JPanel {
 					  pts.get(6), pts.get(7)));
 	    }
 	    String udv_str = getUDV(jl2, udv, last_avg_volume);
-	    g2.drawString(udv_str, d.width / 2 - 550, 35);
+	    g2.drawString(udv_str, d.width / 2 - 350, 35);
 	    g2.setPaint( Color.darkGray);
 	}
 	if(jl3 != null) {
@@ -243,7 +243,7 @@ public class Chart extends JPanel {
 					  pts.get(6), pts.get(7)));
 	    }
 	    String udv_str = getUDV(jl3, udv, last_avg_volume);
-	    g2.drawString(udv_str, d.width / 2 - 550, 55);
+	    g2.drawString(udv_str, d.width / 2 - 350, 55);
 	    g2.setPaint( Color.darkGray);
 	}
 	// System.err.printf("end = %d, ts size = %d\n", end, ts.data().size());
