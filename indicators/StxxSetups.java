@@ -32,7 +32,7 @@ public class StxxSetups {
 		recs.add(new StxSetups(dt, sss));
 	    }
 	} catch (Exception e) {
-	    System.err.println(e.toString());
+	    // System.err.println(e.toString());
 	    // e.printStackTrace();
 	} finally {
 	    try {
