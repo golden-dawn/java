@@ -79,7 +79,7 @@ public class ACtx implements KeyListener, ActionListener {
     List<String[]> entries = new ArrayList<String[]>();
     int crt_pos = 0;
     TreeMap<String, Integer> trend_map= new TreeMap<String, Integer>();
-    int idx= -1;
+    int idx= -1, num_tabs = 0;
     String log_fname, last_opt_date;
 
     public ACtx() {
@@ -111,10 +111,10 @@ public class ACtx implements KeyListener, ActionListener {
         jpu= new JPanel( null);
         jpu.setBackground( Color.black);
         jpu.setForeground( Color.lightGray);
-	addC( jpu, ntf, 5, 7, 60, 25);
+	addC( jpu, ntf, 555, 7, 60, 25);
         addC( jpu, etf, 65, 7, 75, 25);
         etf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
-        addC( jpu, invisible, 140, 7, 70, 25);
+        addC( jpu, invisible, 666, 7, 70, 25);
         pick_stk = new JButton("R");
         pick_stk.addActionListener(this);
         addC( jpu, pick_stk, 210, 7, 50, 25);
@@ -414,8 +414,13 @@ public class ACtx implements KeyListener, ActionListener {
             e= StxCal.nextBusDay( e);
         jls= ( StxCal.year( e)- 2)+ "-01-01";
         s= "1901-01-02";
-        idx= jtp_jl.indexOfTab( n);
-        if( idx!= -1)
+	for(idx = 0; idx < jtp_jl.getTabCount(); idx++) {
+	    Chart cc = (Chart)jtp_jl.getComponentAt(idx);
+	    if (cc.stk_name.equals(n))
+		break;
+	}
+        // idx= jtp_jl.indexOfTab( n);
+        if (idx != jtp_jl.getTabCount())
             jtp_jl.remove( idx); 
         jl1 = jld1.runJL(n, jls, e, f1, w, p, dbetf.getText(),
 			 dbstf.getText());
@@ -426,8 +431,9 @@ public class ACtx implements KeyListener, ActionListener {
         chrt= new Chart(n, s, e, true, dbetf.getText(), dbstf.getText(), 
 			jl1, jl2, jl3, invisible.isSelected());
         chrt.setScale(last_scale);
-        jtp_jl.add(n, chrt);
-        jtp_jl.setSelectedIndex(jtp_jl.indexOfTab(n));
+        jtp_jl.add(Integer.toString(idx), chrt);	
+        // jtp_jl.setSelectedIndex(jtp_jl.indexOfTab(n));
+        jtp_jl.setSelectedIndex(idx);
 	getOptions();
 	updateTradeStatus();
     }
@@ -480,7 +486,7 @@ public class ACtx implements KeyListener, ActionListener {
 	trade_list.add(trd);
 	updateTradeStatus();
 	String trade_key = String.format
-	    ("%s_%s_%d_%.2f", ntf.getText(), cmd_name,
+	    ("XXXX_%s_%d_%.2f", cmd_name,
 	     StxCal.numBusDaysExpiry(dt, expiry), strike.getSelectedItem());
 	trade_status.setText(String.format("OPENED %s", trade_key));
     }
@@ -496,7 +502,7 @@ public class ACtx implements KeyListener, ActionListener {
 	StxTrade trd = trade_list.get(ix);
 	trd.close(log_fname);
 	updateTradeStatus();
-	String trd_key = String.format("%s_%s_%d_%.2f", ntf.getText(), cp,
+	String trd_key = String.format("XXXX_%s_%d_%.2f", cp,
 				       StxCal.numBusDaysExpiry(dt, expiry),
 				       strike.getSelectedItem());
 	trade_status.setText(String.format("CLOSED %s", trd_key));
@@ -517,7 +523,7 @@ public class ACtx implements KeyListener, ActionListener {
 	    return;
 	String und = stk.matches("[A-Z]+\\.[0-9]{6}")?
 	    stk.substring(0, stk.indexOf('.')): stk;
-	System.err.printf("stk = %s, und = %s\n", stk, und);
+	// System.err.printf("stk = %s, und = %s\n", stk, und);
 	List<String> expiries = StxCal.expiries(ed, 2);
 	List<Float> strikes = new ArrayList<Float>();
 	float min_dist = 10000;
