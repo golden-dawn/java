@@ -63,7 +63,7 @@ public class ACtx implements KeyListener, ActionListener {
     private JButton pick_stk;
     private JButton call, put, c_call, c_put;
     private JComboBox exp, strike, capital, chart_scale;
-    private JCheckBox invisible;
+    private JCheckBox invisible, skip_trade;
     private JLDisplay jld1, jld2, opts, trades;
     private JLabel jlfl1, jlfl2, trade_status;
     private int resX= 1366, resY= 768, yr;
@@ -112,12 +112,15 @@ public class ACtx implements KeyListener, ActionListener {
         jpu.setBackground( Color.black);
         jpu.setForeground( Color.lightGray);
 	addC( jpu, ntf, 555, 7, 60, 25);
-        addC( jpu, etf, 65, 7, 75, 25);
+        addC( jpu, etf, 615, 7, 75, 25);
         etf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
         addC( jpu, invisible, 666, 7, 70, 25);
         pick_stk = new JButton("R");
         pick_stk.addActionListener(this);
-        addC( jpu, pick_stk, 210, 7, 50, 25);
+        addC( jpu, pick_stk, 5, 7, 50, 25);
+	skip_trade = new JCheckBox("Skip");
+	skip_trade.setSelected(false);
+        addC( jpu, skip_trade, 60, 7, 80, 25);
 	chart_scale = new JComboBox<String>();
 	chart_scale.setEditable(false);
 	chart_scale.addItem("1M");
@@ -327,6 +330,8 @@ public class ACtx implements KeyListener, ActionListener {
 	    exp.requestFocusInWindow();
 	else if(cd == 118)
 	    capital.requestFocusInWindow();
+	else if(cd == 119)
+	    skip_trade.setSelected(!skip_trade.isSelected());
 	else if(cd == 123) {
 	    int sel_ix = jtp_jl.getSelectedIndex();
 	    jtp_jl.remove(sel_ix);
@@ -481,7 +486,8 @@ public class ACtx implements KeyListener, ActionListener {
 				    chrt.getSR(dt).c, jl1.avgRg(),
 				    Float.parseFloat(capital.
 						     getSelectedItem().
-						     toString()));
+						     toString()),
+				    skip_trade.isSelected());
 	trade_ix.put(trd.key(), trade_list.size());
 	trade_list.add(trd);
 	updateTradeStatus();
