@@ -11,11 +11,11 @@ public class StxTrade {
     String stk, und, cp, expiry, in_date, crt_date;
     float strike, in_spot, in_range, crt_spot, in_bid, in_ask, crt_bid, crt_ask;
     int num_contracts;
-    boolean active;
+    boolean active, skip;
     
     public StxTrade(String stk, String cp, String expiry, String in_date,
 		    Float strike, float in_spot, float in_range,
-		    Float capital) {
+		    Float capital, boolean skip) {
 	this.stk = stk;
 	this.und = stk.matches("[A-Z]+\\.[0-9]{6}")?
 	    stk.substring(0, stk.indexOf('.')): stk;
@@ -50,6 +50,7 @@ public class StxTrade {
 	// System.err.printf("Ctor: num_contracts = %d\n", num_contracts);
 	crt_date = in_date;
 	active = true;
+	this.skip = skip;
     }
 
     public String key() {
@@ -138,7 +139,7 @@ public class StxTrade {
 	    sb.append(String.format("1,%.2f,,", opt_pnl));
 	else
 	    sb.append(String.format("0,,%.2f,", opt_pnl));
-	
+	sb.append(skip? "1,": "0,");
 	PrintWriter pw = new PrintWriter(new FileWriter(log_fname, true));
 	pw.println(sb.toString());
 	pw.close();	
