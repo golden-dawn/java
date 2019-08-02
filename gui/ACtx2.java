@@ -595,7 +595,7 @@ public class ACtx2 implements KeyListener, ActionListener {
 				    chrt.getSR(dt).c, jl1.avgRg(),
 				    Float.parseFloat(capital.
 						     getSelectedItem().
-						     toString()));
+						     toString()), false);
 	trade_ix.put(trd.key(), trade_list.size());
 	trade_list.add(trd);
 	updateTradeStatus();
