@@ -661,6 +661,7 @@ public class ACtx implements KeyListener, ActionListener {
 		exp.addItem(String.format("%d (%s)",
 					  StxCal.numBusDaysExpiry(ed, expiry),
 					  expiry));
+	exp.setSelectedIndex(1);
     }
     
     public static void main( String[] args) {
