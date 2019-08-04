@@ -332,6 +332,8 @@ public class ACtx implements KeyListener, ActionListener {
 	    capital.requestFocusInWindow();
 	else if(cd == 119)
 	    skip_trade.setSelected(!skip_trade.isSelected());
+	else if(cd == 120)
+	    pickRandomSetup();
 	else if(cd == 123) {
 	    int sel_ix = jtp_jl.getSelectedIndex();
 	    jtp_jl.remove(sel_ix);
@@ -451,20 +453,8 @@ public class ACtx implements KeyListener, ActionListener {
     }
 
     public void actionPerformed(ActionEvent ae) {
-	if (ae.getSource() == pick_stk) {
-	    String q1= "SELECT * FROM setups ORDER BY random() LIMIT 1";
-	    try {
-		StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
-		ResultSet rset = sdb.get(q1);
-		while(rset.next()) {
-		    etf.setText(rset.getString(1));
-		    ntf.setText(rset.getString(2));
-		}
-		go();
-	    } catch( Exception exc) {
-		exc.printStackTrace(System.err);
-	    }
-	}
+	if (ae.getSource() == pick_stk)
+	    pickRandomSetup();
 	else if ((ae.getSource() == call) || (ae.getSource() == put))
 	    openTrade((String)ae.getActionCommand());
 	else if ((ae.getSource() == c_call) || (ae.getSource() == c_put))
@@ -475,6 +465,21 @@ public class ACtx implements KeyListener, ActionListener {
 	    cc.setScale(new_scale);
             last_scale= new_scale;
         }
+    }
+
+    private void pickRandomSetup() {
+	String q1= "SELECT * FROM setups ORDER BY random() LIMIT 1";
+	try {
+	    StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
+	    ResultSet rset = sdb.get(q1);
+	    while(rset.next()) {
+		etf.setText(rset.getString(1));
+		ntf.setText(rset.getString(2));
+	    }
+	    go();
+	} catch( Exception exc) {
+	    exc.printStackTrace(System.err);
+	}
     }
 
     private void openTrade(String cmd_name) {
