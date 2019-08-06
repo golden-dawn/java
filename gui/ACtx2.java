@@ -72,7 +72,7 @@ public class ACtx2 implements KeyListener, ActionListener {
     private HashMap<String, Integer> trade_ix = new HashMap<String, Integer>();
     // <cp, expiry, strike> =>
     // <in_date, in_price, in_range, in_opt_px, crt_bid, crt_ask, crt_spot
-    String last_scale= "3M";
+    String last_scale= "3M", crt_date;
     private String trade_type = "", trade_date;
     private float trade_price, trade_daily_range;
     List<String[]> entries = new ArrayList<String[]>();
@@ -83,21 +83,21 @@ public class ACtx2 implements KeyListener, ActionListener {
     String log_fname;
     
     public ACtx2() {
-        
-        Calendar c= new GregorianCalendar();
-        yr= c.get( Calendar.YEAR);
-        String d= String.format( "%d-%02d-%02d", yr,
-                                 1+ c.get( Calendar.MONTH),
-                                 c.get( Calendar.DAY_OF_MONTH));
-        new StxCal( yr+ 2);
-        if( StxCal.isBusDay( d)== false)
-            d= StxCal.prevBusDay( d);
+        Calendar c = new GregorianCalendar();
+        yr = c.get(Calendar.YEAR);
+        String d = String.format("%d-%02d-%02d", yr,
+                                 1 + c.get(Calendar.MONTH),
+                                 c.get(Calendar.DAY_OF_MONTH));
+        new StxCal(yr + 2);
+        if(StxCal.isBusDay(d) == false)
+            d = StxCal.prevBusDay(d);
 	log_fname = String.format("../trades/%s.txt", d);
-        jf= new JFrame( "ACTX");
-        etf= new JTextField( d); etf.setCaretColor( Color.white);
-        etf.setName( "ETF"); etf.addKeyListener( this);
-        ntf= new JTextField(); ntf.setCaretColor( Color.white);
-        ntf.setName( "NTF"); ntf.addKeyListener( this);
+	this.crt_date = d;
+        jf = new JFrame("ACTX2");
+        etf = new JTextField(d); etf.setCaretColor(Color.white);
+        etf.setName("ETF"); etf.addKeyListener(this);
+        ntf = new JTextField(); ntf.setCaretColor(Color.white);
+        ntf.setName("NTF"); ntf.addKeyListener(this);
         dtf= new JTextField( "120"); dtf.setCaretColor( Color.white);
         dbetf= new JTextField( "eods"); dbetf.setCaretColor( Color.white);
         dbstf= new JTextField( "dividends"); dbstf.setCaretColor( Color.white);
@@ -595,7 +595,8 @@ public class ACtx2 implements KeyListener, ActionListener {
 				    chrt.getSR(dt).c, jl1.avgRg(),
 				    Float.parseFloat(capital.
 						     getSelectedItem().
-						     toString()), false);
+						     toString()),
+				    false, crt_date);
 	trade_ix.put(trd.key(), trade_list.size());
 	trade_list.add(trd);
 	updateTradeStatus();
