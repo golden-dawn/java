@@ -1,5 +1,5 @@
 echo "creating output directory"
-mkdir -p output
+mkdir output
 echo "compiling core"
 cd core/
 javac *.java -d ../output
