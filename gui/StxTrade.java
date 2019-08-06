@@ -8,14 +8,14 @@ import core.StxCal;
 import core.StxDB;
 
 public class StxTrade {
-    String stk, und, cp, expiry, in_date, crt_date;
+    String stk, und, cp, expiry, in_date, crt_date, trade_date;
     float strike, in_spot, in_range, crt_spot, in_bid, in_ask, crt_bid, crt_ask;
     int num_contracts;
     boolean active, skip;
     
     public StxTrade(String stk, String cp, String expiry, String in_date,
 		    Float strike, float in_spot, float in_range,
-		    Float capital, boolean skip) {
+		    Float capital, boolean skip, String trade_date) {
 	this.stk = stk;
 	this.und = stk.matches("[A-Z]+\\.[0-9]{6}")?
 	    stk.substring(0, stk.indexOf('.')): stk;
@@ -25,6 +25,7 @@ public class StxTrade {
 	this.strike = strike.floatValue();
 	this.in_spot = in_spot;
 	this.in_range = in_range;
+	this.trade_date = trade_date;
 	crt_spot = in_spot;
 	StringBuilder q1 =
 	    new StringBuilder("SELECT bid, ask FROM options WHERE und='");
@@ -113,7 +114,8 @@ public class StxTrade {
 	return sb.toString();
     }
 
-    public void log_entry(String log_fname) throws IOException {
+    public void log_entry(String log_fname)
+	throws IOException {
 	// System.err.println("log_entry(): log_fname = " + log_fname);
 	int sgn = cp.equals("c")? 1: -1;
 	StringBuffer sb = new StringBuffer();
@@ -139,7 +141,7 @@ public class StxTrade {
 	    sb.append(String.format("1,%.2f,,", opt_pnl));
 	else
 	    sb.append(String.format("0,,%.2f,", opt_pnl));
-	sb.append(skip? "1,": "0,");
+	sb.append(skip? "1,": "0,").append(trade_date).append(",");
 	PrintWriter pw = new PrintWriter(new FileWriter(log_fname, true));
 	pw.println(sb.toString());
 	pw.close();	
