@@ -90,10 +90,10 @@ public class ACtx implements KeyListener, ActionListener {
                                  1 + c.get(Calendar.MONTH),
                                  c.get(Calendar.DAY_OF_MONTH));
         new StxCal(yr + 2);
+	this.crt_date = d;
         if (StxCal.isBusDay(d) == false)
 	    d = StxCal.prevBusDay(d);
 	log_fname = String.format("../trades/%s.txt", d);
-	this.crt_date = d;
         jf = new JFrame( "ACTX");
         etf= new JTextField( d); etf.setCaretColor( Color.white);
         etf.setName( "ETF"); etf.addKeyListener( this);
