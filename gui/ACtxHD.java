@@ -74,7 +74,7 @@ public class ACtxHD implements KeyListener, ActionListener {
     private HashMap<String, Integer> trade_ix = new HashMap<String, Integer>();
     // <cp, expiry, strike> =>
     // <in_date, in_price, in_range, in_opt_px, crt_bid, crt_ask, crt_spot
-    String last_scale= "3M";
+    String last_scale= "3M", crt_date;
     private String trade_type = "", trade_date;
     private float trade_price, trade_daily_range;
     List<String[]> entries = new ArrayList<String[]>();
@@ -92,6 +92,7 @@ public class ACtxHD implements KeyListener, ActionListener {
                                  1+ c.get( Calendar.MONTH),
                                  c.get( Calendar.DAY_OF_MONTH));
         new StxCal( yr+ 2);
+	this.crt_date = d;
         if( StxCal.isBusDay( d)== false)
             d= StxCal.prevBusDay( d);
 	log_fname = String.format("../trades/%s.txt", d);
@@ -614,7 +615,8 @@ public class ACtxHD implements KeyListener, ActionListener {
 				    chrt.getSR(dt).c, jl1.avgRg(),
 				    Float.parseFloat(capital.
 						     getSelectedItem().
-						     toString()));
+						     toString()), 
+				    false, crt_date);
 	trade_ix.put(trd.key(), trade_list.size());
 	trade_list.add(trd);
 	updateTradeStatus();
