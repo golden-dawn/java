@@ -260,6 +260,7 @@ public class StxTS<T extends StxRecord> {
     }
     public String currentDate() { return data.get(pos).date; }
     public List<T> data() { return data; }
+    public int currentPosition() { return pos; }
     //public TreeMap<String, Float> getDividends() { return dividends;}
     //public void setDividends( TreeMap<String, Float> dividends) {
     //    this.dividends= new TreeMap<String, Float>( dividends);
