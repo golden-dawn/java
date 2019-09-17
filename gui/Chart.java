@@ -270,6 +270,43 @@ public class Chart extends JPanel {
 	    StxJL piv_0 = jl.data(pivots.get(0));
 	    // System.err.printf("P0.date = %s\n", piv_0.date);
 	    int ixx = 0, start = ts.find(piv_0.date, 0);
+	    int udv_end = ts.currentPosition();
+	    for(int piv: pivots) {
+		if(ixx == 0) {
+		    ixx++;
+		    continue;
+		}
+		StxJL rec = jl.data(piv);
+		// System.err.printf("P%d date: %s\n", ixx, rec.date);
+		int udv_start = ts.find(rec.date, 0);
+		if (udv_start < udv_end)
+		    udv_start++;
+		List<Float> res = udv.udv(udv_start, udv_end);
+
+		udv_sb.append(" P").append(ixx).append(": ");
+		udv_sb.append(String.format("%7.2f [%4.1f]", rec.c,
+					    -res.get(2) / last_avg_volume));
+		ixx++;
+		if(rec.p2) {
+		    udv_sb.append(" P").append(ixx).append(": ");
+		    udv_sb.append(String.format("%7.2f [%4.1f]", rec.c2,
+						res.get(2) / last_avg_volume));
+		    ixx++;
+		}
+	    }
+	}
+	return udv_sb.toString();
+    }
+
+    String getUDVOld(StxxJL jl, StxUDV udv, float last_avg_volume) {
+	List<Integer> pivots = jl.pivots(4, true);
+	StringBuffer udv_sb = new StringBuffer("");
+	// System.err.printf("GetUDV, factor = %.2f\n", jl.getFactor());
+	// System.err.printf("Got the following pivots:\n");
+	if(pivots.size() >= 5) {
+	    StxJL piv_0 = jl.data(pivots.get(0));
+	    // System.err.printf("P0.date = %s\n", piv_0.date);
+	    int ixx = 0, start = ts.find(piv_0.date, 0);
 	    for(int piv: pivots) {
 		if(ixx == 0) {
 		    ixx++;
