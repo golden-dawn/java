@@ -350,11 +350,11 @@ public class ACtx1 implements KeyListener, ActionListener {
         StxRec sr = chrt.getSR(dt), sr_1 = chrt.getSR(prev_dt);
         String stk = ntf.getText();
         db_insert_tf.setText
-            (String.format("insert into split values ('%s', '%s', %.4f, 0)",
+	    (String.format("insert into dividends values ('%s', '%s', %.4f, 0)",
                            stk, prev_dt, sr.o / sr_1.c));
         db_update_tf.setText
             (String.format
-             ("update split set dt='%s' where stk='%s' and dt='%s'",
+             ("update dividends set dt='%s' where stk='%s' and dt='%s'",
               prev_dt, stk, dt));
         db_delete_tf.setText(String.format
                              ("delete from eod where stk='%s'", stk));
