@@ -63,6 +63,8 @@ public class ACtxHD implements KeyListener, ActionListener {
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
     private JButton rewind, fwd, bak, pick_stk;
     private JButton call, put, c_call, c_put;
+    private JButton wl_add, wl_del, wl_init, wl_clear;
+    private JTextField wl_query;
     private JComboBox exp, strike, capital;
     private JCheckBox invisible;
     private JLDisplay jld1, jld2, jld3, opts, trades;
@@ -112,27 +114,27 @@ public class ACtxHD implements KeyListener, ActionListener {
         jlfl3 = new JLabel("Factor: "+ jlf3.getText());
         jlp= new JTextField( "16"); jlp.setCaretColor( Color.white);
 	invisible = new JCheckBox("Invisible");
-	invisible.setSelected(true);
+	invisible.setSelected(false);
         jpu= new JPanel( null);
         jpu.setBackground( Color.black);
         jpu.setForeground( Color.lightGray);
 	addC( jpu, ntf, 15, 7, 60, 25);
-        addC( jpu, etf, 75, 7, 75, 25);
+        addC( jpu, etf, 75, 7, 100, 25);
         etf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
         fwd= new JButton( "+"); fwd.addActionListener( this);
         bak= new JButton( "-"); bak.addActionListener( this);
         rewind = new JButton("<");
         rewind.addActionListener(this);
-        addC( jpu, rewind, 150, 12, 50, 15);
-        addC( jpu, fwd, 200, 12, 50, 15);
-        addC( jpu, bak, 250, 12, 50, 15);
-        addC( jpu, dtf, 300, 7, 50, 25);
-        addC( jpu, invisible, 350, 7, 150, 25);
-        addC( jpu, invisible, 350, 7, 150, 25);
+        addC( jpu, rewind, 175, 12, 50, 15);
+        addC( jpu, fwd, 225, 12, 50, 15);
+        addC( jpu, bak, 275, 12, 50, 15);
+        addC( jpu, dtf, 325, 7, 50, 25);
+        addC( jpu, invisible, 375, 7, 100, 25);
         pick_stk = new JButton("R");
         pick_stk.addActionListener(this);
         addC( jpu, pick_stk, 500, 7, 50, 25);
         jb1m= new JButton( "1M");
+	jb1m.setOpaque(true);
         jb1m.addActionListener( this);
         addC( jpu, jb1m, 15, 35, 55, 15);
         jb3m= new JButton( "3M");
@@ -218,16 +220,30 @@ public class ACtxHD implements KeyListener, ActionListener {
 	opts = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trades = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trade_status = new JLabel("GETTING STARTED . . .");
+
+        wl_add = new JButton("WL ADD"); wl_add.addActionListener(this);
+        wl_del = new JButton("WL DEL"); wl_del.addActionListener(this);
+        wl_init= new JButton("WL INIT"); wl_init.addActionListener(this);
+        wl_clear = new JButton("WL CLEAR"); wl_clear.addActionListener(this);
+	StringBuilder qsb = new StringBuilder();
+	qsb.append("SELECT DISTINCT stk FROM setups WHERE dt='").
+	    append(etf.getText()).append("'");
+	wl_query = new JTextField(qsb.toString());
         addC(jp_trd, call, 5, 5, 80, 15);
         addC(jp_trd, put, 85, 5, 80, 15);
         addC(jp_trd, c_call, 165, 5, 120, 15);
         addC(jp_trd, c_put, 285, 5, 120, 15);
 	addC(jp_trd, strike, 405, 0, 80, 20);
-	addC(jp_trd, exp, 485, 0, 120, 20);
-	addC(jp_trd, capital, 605, 0, 80, 20);
-	addC(jp_trd, trade_status, 725, 5, 550, 15);
+	addC(jp_trd, exp, 485, 0, 160, 20);
+	addC(jp_trd, capital, 645, 0, 80, 20);
+	addC(jp_trd, trade_status, 765, 5, 550, 15);
 	addC(jp_trd, opts, 5, 20, 505, 115);
 	addC(jp_trd, trades, 510, 20, 855, 115);
+	addC(jp_trd, wl_add, 5, 135, 60, 20);
+	addC(jp_trd, wl_del, 65, 135, 60, 20);
+	addC(jp_trd, wl_init, 125, 135, 70, 20);
+	addC(jp_trd, wl_clear, 195, 135, 80, 20);
+	addC(jp_trd, wl_query, 275, 135, 725, 20);
 	
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
@@ -533,11 +549,14 @@ public class ACtxHD implements KeyListener, ActionListener {
         }
     }
 
-    public void addC( JPanel p, JComponent c, int x, int y,
-                      int h, int w) {
-        p.add( c); c.setBounds( x, y, h, w);
-        c.setBackground( Color.black);
-        c.setForeground( Color.lightGray);
+    public void addC(JPanel p, JComponent c, int x, int y, int h, int w) {
+        c.setBackground(Color.black);
+	c.setOpaque(true);
+	if (c instanceof JButton)
+	    c.setForeground(Color.black);
+	else
+	    c.setForeground(Color.lightGray);
+        p.add(c); c.setBounds(x, y, h, w);
     }
 
     private void moveDate( int sign) {
@@ -785,11 +804,13 @@ public class ACtxHD implements KeyListener, ActionListener {
 	for(String expiry: expiries)
 	    if(invisible.isSelected())
 		exp.addItem(String.format("%d",
-					  StxCal.numBusDaysExpiry(ed, expiry)));
+					  StxCal.numBusDaysExpiry(ed, 
+								  expiry)));
 	    else
 		exp.addItem(String.format("%d (%s)",
 					  StxCal.numBusDaysExpiry(ed, expiry),
 					  expiry));
+	exp.setSelectedIndex(1);
     }
     
     public static void main( String[] args) {
