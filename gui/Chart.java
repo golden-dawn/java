@@ -154,7 +154,7 @@ public class Chart extends JPanel {
             g2.draw( new Line2D.Double( xx, step, d.width- 100+ day_width,
                                         step));
         }
-	List<Float> avg_volumes = avgVolumes(50);
+	List<Float> avg_volumes = avgVolumes(20);
         for( ix= start; ix<= end; ix++) {
             if( labels.get( ix)!= null) {
                 g2.setPaint( Color.darkGray);
