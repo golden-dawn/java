@@ -120,7 +120,8 @@ public class ACtxHD implements KeyListener, ActionListener {
         jpu.setForeground( Color.lightGray);
 	addC( jpu, ntf, 15, 7, 60, 25);
         addC( jpu, etf, 75, 7, 100, 25);
-        etf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
+        etf.setForeground(invisible.isSelected()? Color.black: 
+			  Color.lightGray);
         fwd= new JButton( "+"); fwd.addActionListener( this);
         bak= new JButton( "-"); bak.addActionListener( this);
         rewind = new JButton("<");
