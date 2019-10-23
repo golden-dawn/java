@@ -64,7 +64,7 @@ public class ACtxHD implements KeyListener, ActionListener {
     private JButton rewind, fwd, bak, pick_stk;
     private JButton call, put, c_call, c_put;
     private JButton wl_add, wl_del, wl_init, wl_clear;
-    private JTextField wl_query;
+    private JTextField wl_date, wl_spread, wl_days, wl_setups;
     private JComboBox exp, strike, capital;
     private JCheckBox invisible;
     private JLDisplay jld1, jld2, jld3, opts, trades;
@@ -226,10 +226,23 @@ public class ACtxHD implements KeyListener, ActionListener {
         wl_del = new JButton("WL DEL"); wl_del.addActionListener(this);
         wl_init= new JButton("WL INIT"); wl_init.addActionListener(this);
         wl_clear = new JButton("WL CLEAR"); wl_clear.addActionListener(this);
-	StringBuilder qsb = new StringBuilder();
-	qsb.append("SELECT DISTINCT stk FROM setups WHERE dt='").
-	    append(etf.getText()).append("'");
-	wl_query = new JTextField(qsb.toString());
+	wl_date = new JTextField(d);
+        wl_date.setCaretColor(Color.white);
+        wl_date.setName("WLDT"); 
+	wl_date.addKeyListener(this);
+	wl_spread = new JTextField("15");
+        wl_spread.setCaretColor(Color.white);
+        wl_spread.setName("WLS"); 
+	wl_spread.addKeyListener(this);
+	wl_days = new JTextField("5");
+        wl_days.setCaretColor(Color.white);
+        wl_days.setName("WLD"); 
+	wl_days.addKeyListener(this);
+	wl_setups = new JTextField("1");
+        wl_setups.setCaretColor(Color.white);
+        wl_setups.setName("WLSTP"); 
+	wl_setups.addKeyListener(this);
+	
         addC(jp_trd, call, 5, 5, 80, 15);
         addC(jp_trd, put, 85, 5, 80, 15);
         addC(jp_trd, c_call, 165, 5, 120, 15);
@@ -244,7 +257,10 @@ public class ACtxHD implements KeyListener, ActionListener {
 	addC(jp_trd, wl_del, 65, 135, 60, 20);
 	addC(jp_trd, wl_init, 125, 135, 70, 20);
 	addC(jp_trd, wl_clear, 195, 135, 80, 20);
-	addC(jp_trd, wl_query, 275, 135, 725, 20);
+	addC(jp_trd, wl_date, 275, 135, 100, 25);
+	addC(jp_trd, wl_spread, 375, 135, 40, 25);
+	addC(jp_trd, wl_days, 415, 135, 40, 25);
+	addC(jp_trd, wl_setups, 455, 135, 40, 25);
 	
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
@@ -369,26 +385,40 @@ public class ACtxHD implements KeyListener, ActionListener {
     }
 
     private void handle_function_keys(int cd) {
-	if(cd == 112)
+	if (cd == 112)
 	    openTrade("CALL");
-	else if(cd == 113)
+	else if (cd == 113)
 	    openTrade("PUT");
-	else if(cd == 114)
+	else if (cd == 114)
 	    closeTrade("CLOSE CALL");
-	else if(cd == 115)
+	else if (cd == 115)
 	    closeTrade("CLOSE PUT");
-	else if(cd == 116)
+	else if (cd == 116)
 	    strike.requestFocusInWindow();
-	else if(cd == 117)
+	else if (cd == 117)
 	    exp.requestFocusInWindow();
-	else if(cd == 118)
+	else if (cd == 118)
 	    capital.requestFocusInWindow();
-	else if(cd == 123) {
+	else if (cd == 123) {
 	    int sel_ix = jtp_jl.getSelectedIndex();
 	    jtp_jl.remove(sel_ix);
 	    if(sel_ix >= jtp_jl.getTabCount())
 		sel_ix = jtp_jl.getTabCount() - 1;
 	    jtp_jl.setSelectedIndex(sel_ix);
+	} else if (cd == 120) {
+	    decreaseScale();
+	    try {
+		go();
+	    } catch (Exception exc) {
+		exc.printStackTrace(System.err);
+	    }
+	} else if (cd == 121) {
+	    increaseScale();
+	    try {
+		go();
+	    } catch (Exception exc) {
+		exc.printStackTrace(System.err);
+	    }
 	}
     }
     
@@ -575,20 +605,20 @@ public class ACtxHD implements KeyListener, ActionListener {
         }
     }
 
-    public void actionPerformed( ActionEvent ae) {
-        String cmd_name= ( String) ae.getActionCommand();
-        Chart cc= ( Chart) jtp_jl.getSelectedComponent();
-        if( cmd_name.equals( "1M")|| cmd_name.equals( "3M")||
-            cmd_name.equals( "6M")|| cmd_name.equals( "1Y")||
-            cmd_name.equals( "JL")|| cmd_name.equals( "2Y")||
-            cmd_name.equals( "3Y")|| cmd_name.equals( "5Y")||
-            cmd_name.equals( "All")) {
+    public void actionPerformed(ActionEvent ae) {
+        String cmd_name = (String) ae.getActionCommand();
+        Chart cc = (Chart) jtp_jl.getSelectedComponent();
+        if (cmd_name.equals("1M") || cmd_name.equals("3M") ||
+            cmd_name.equals("6M") || cmd_name.equals("1Y") ||
+            cmd_name.equals("JL") || cmd_name.equals("2Y") ||
+            cmd_name.equals("3Y") || cmd_name.equals("5Y") ||
+            cmd_name.equals("All")) {
             cc.setScale( cmd_name);
             last_scale= cmd_name;
         }
-        if( ae.getSource() == fwd) moveDate( 1);
-        if( ae.getSource() == bak) moveDate( -1);
-        if( ae.getSource() == rewind) {
+        if (ae.getSource() == fwd) moveDate( 1);
+        if (ae.getSource() == bak) moveDate( -1);
+        if (ae.getSource() == rewind) {
 	    String rewind_date = cc.rewind();
 	    etf.setText(rewind_date);
 	    try {
@@ -597,7 +627,7 @@ public class ACtxHD implements KeyListener, ActionListener {
 		exc.printStackTrace(System.err);
 	    }
 	}
-	if(ae.getSource() == pick_stk) {
+	if (ae.getSource() == pick_stk) {
 	    String stk = "NFLX";
 	    try {
 		List<String> lines = Files.readAllLines
@@ -615,7 +645,18 @@ public class ACtxHD implements KeyListener, ActionListener {
 		exc.printStackTrace(System.err);
 	    }	    
 	}
-
+	if (ae.getSource() == wl_add) {
+	    List<String> stx = getSetupStocks();
+	    for(String stk: stx) {
+		ntf.setText(stk);
+		etf.setText(wl_date.getText());
+		try {
+		    go();
+		} catch( Exception exc) {
+		    exc.printStackTrace(System.err);
+		}	    
+	    }
+	}
 	// TODO: pushing call or put should retrieve all the relevant
 	// options pushing close call or close put should get some
 	// default open options there should also be a trade command,
@@ -624,6 +665,15 @@ public class ACtxHD implements KeyListener, ActionListener {
 	    openTrade(cmd_name);
 	if(cmd_name.equals("CLOSE CALL") || cmd_name.equals("CLOSE PUT"))
 	    closeTrade(cmd_name);
+    }
+
+    private List<String> getSetupStocks() {
+	String dt = wl_date.getText();
+	int spread = Integer.parseInt(wl_spread.getText());
+	int days = Integer.parseInt(wl_days.getText());
+	int setups = Integer.parseInt(wl_setups.getText());
+	List<String> res = new ArrayList<String>();
+	return res;
     }
 
     private void openTrade(String cmd_name) {
