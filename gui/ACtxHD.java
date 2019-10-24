@@ -680,8 +680,6 @@ public class ACtxHD implements KeyListener, ActionListener {
 	q.append("setups WHERE dt='").append(dt).append("' AND ").
 	    append("setup IN ('JC_1234', 'JC_5DAYS')");
 	System.err.println("getSetupStocks: q = " + q.toString());
-	// Calculate expiry corresponding to dt
-	// 
 	String expiry = StxCal.getMonthlyExpiration(dt);
  	try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
@@ -696,10 +694,11 @@ public class ACtxHD implements KeyListener, ActionListener {
 		while (rset1.next())
 		    dct.put(stk, rset1.getInt(1));
 	    }
-	    for (Map.Entry<String, Integer> entry: dct.entrySet()) {
-		if (entry.getValue() <= spread)
+	    for (Map.Entry<String, Integer> entry: dct.entrySet())
+		if (entry.getValue() <= spread) {
+		    
 		    res.add(entry.getKey());
-	    }
+		}
         } catch( Exception ex) {
 	    System.err.println("Failed to get setups: ");
             ex.printStackTrace(System.err);
