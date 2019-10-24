@@ -18,8 +18,9 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -673,6 +674,36 @@ public class ACtxHD implements KeyListener, ActionListener {
 	int days = Integer.parseInt(wl_days.getText());
 	int setups = Integer.parseInt(wl_setups.getText());
 	List<String> res = new ArrayList<String>();
+	HashMap<String, Integer> dct = new HashMap<String, Integer>();
+
+	StringBuilder q= new StringBuilder("SELECT DISTINCT stk FROM ");
+	q.append("setups WHERE dt='").append(dt).append("' AND ").
+	    append("setup IN ('JC_1234', 'JC_5DAYS')");
+	System.err.println("getSetupStocks: q = " + q.toString());
+	// Calculate expiry corresponding to dt
+	// 
+	String expiry = StxCal.getMonthlyExpiration(dt);
+ 	try {
+            StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
+            ResultSet rset = sdb.get(q.toString());
+	    while (rset.next()) {
+		String stk = rset.getString(1);
+		StringBuilder q1 = new StringBuilder();
+		q1.append("SELECT opt_spread from leaders where expiry='").
+		    append(expiry).append("' AND stk='").append(stk).
+		    append("'");
+		ResultSet rset1 = sdb.get(q1.toString());
+		while (rset1.next())
+		    dct.put(stk, rset1.getInt(1));
+	    }
+	    for (Map.Entry<String, Integer> entry: dct.entrySet()) {
+		if (entry.getValue() <= spread)
+		    res.add(entry.getKey());
+	    }
+        } catch( Exception ex) {
+	    System.err.println("Failed to get setups: ");
+            ex.printStackTrace(System.err);
+        }
 	return res;
     }
 
