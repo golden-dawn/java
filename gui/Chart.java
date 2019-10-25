@@ -46,6 +46,7 @@ public class Chart extends JPanel {
 	this.ed = ed;
 	if(sss == null || sss.getStk() != stk_name)
 	    sss = new StxxSetups(stk_name);
+	setName(stk_name);
         repaint();
     }
 
