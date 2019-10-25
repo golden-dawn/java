@@ -15,12 +15,13 @@ import java.util.TreeMap;
 
 public class StxDB {
 
-    static private Statement s;
+    static private Statement s, s1;
     private SimpleDateFormat sdf;
     
     public StxDB( String db_name) throws Exception {
         try {
             s.getConnection();
+            s1.getConnection();
         } catch( Exception ex) {
             Class.forName( "org.postgresql.Driver").newInstance();
             String urlStr= "jdbc:postgresql://127.0.0.1:5432/"+ db_name;
@@ -31,6 +32,8 @@ public class StxDB {
 		props.setProperty("password", postgres_pwd);
             s = DriverManager.getConnection(urlStr, props).
                 createStatement();
+            s1 = DriverManager.getConnection(urlStr, props).
+                createStatement();
         }
         sdf= new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss");
     }
@@ -39,6 +42,10 @@ public class StxDB {
 
     public ResultSet get( String q) throws SQLException {
         return s.executeQuery( q);
+    }
+
+    public ResultSet get1(String q) throws SQLException {
+        return s1.executeQuery(q);
     }
 
     public void insert( String i) throws SQLException { s.executeUpdate( i);}
