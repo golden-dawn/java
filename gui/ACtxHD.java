@@ -545,7 +545,9 @@ public class ACtxHD implements KeyListener, ActionListener {
         chrt= new Chart(n, s, e, true, dbetf.getText(), dbstf.getText(), 
 			jl1, jl2, jl3, invisible.isSelected());
         chrt.setScale(last_scale);
-        jtp_jl.add(n, chrt);
+	if (idx == -1)
+	    idx = jtp_jl.getTabCount();
+        jtp_jl.insertTab(n, null, chrt, null, idx);
         jtp_jl.setSelectedIndex(jtp_jl.indexOfTab(n));
 	getOptions();
 	updateTradeStatus();
