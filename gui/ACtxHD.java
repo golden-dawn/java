@@ -64,7 +64,7 @@ public class ACtxHD implements KeyListener, ActionListener {
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
     private JButton rewind, fwd, bak, pick_stk;
     private JButton call, put, c_call, c_put;
-    private JButton wl_add, wl_del, wl_init, wl_clear;
+    private JButton wl_add, wl_trg, wl_mark, wl_clear;
     private JTextField wl_date, wl_spread, wl_days, wl_setups;
     private JComboBox exp, strike, capital;
     private JCheckBox invisible;
@@ -224,8 +224,8 @@ public class ACtxHD implements KeyListener, ActionListener {
 	trade_status = new JLabel("GETTING STARTED . . .");
 
         wl_add = new JButton("WL ADD"); wl_add.addActionListener(this);
-        wl_del = new JButton("WL DEL"); wl_del.addActionListener(this);
-        wl_init= new JButton("WL INIT"); wl_init.addActionListener(this);
+        wl_trg = new JButton("WL TRG"); wl_trg.addActionListener(this);
+        wl_mark = new JButton("WL MARK"); wl_mark.addActionListener(this);
         wl_clear = new JButton("WL CLEAR"); wl_clear.addActionListener(this);
 	wl_date = new JTextField(d);
         wl_date.setCaretColor(Color.white);
@@ -255,8 +255,8 @@ public class ACtxHD implements KeyListener, ActionListener {
 	addC(jp_trd, opts, 5, 20, 505, 115);
 	addC(jp_trd, trades, 510, 20, 855, 115);
 	addC(jp_trd, wl_add, 5, 135, 60, 20);
-	addC(jp_trd, wl_del, 65, 135, 60, 20);
-	addC(jp_trd, wl_init, 125, 135, 70, 20);
+	addC(jp_trd, wl_trg, 65, 135, 60, 20);
+	addC(jp_trd, wl_mark, 125, 135, 70, 20);
 	addC(jp_trd, wl_clear, 195, 135, 80, 20);
 	addC(jp_trd, wl_date, 275, 135, 100, 25);
 	addC(jp_trd, wl_spread, 375, 135, 40, 25);
@@ -657,7 +657,26 @@ public class ACtxHD implements KeyListener, ActionListener {
 		    go();
 		} catch( Exception exc) {
 		    exc.printStackTrace(System.err);
-		}	    
+		}
+	    }
+	}
+	if (ae.getSource() == wl_trg) {
+	    wl_date.setText(StxCal.nextBusDay(wl_date.getText()));
+	    List<String> stx = getSetupStocks(true);
+	    for (int ix = jtp_jl.getTabCount() - 1; ix >= 0; ix--) {
+		String stk = jtp_jl.getTitleAt(ix);
+		if (!stx.contains(stk) && 
+		    (jtp_jl.getToolTipTextAt(ix) == null))
+		    jtp_jl.remove(ix);
+		else {
+		    ntf.setText(stk);
+		    etf.setText(wl_date.getText());
+		    try {
+			go();
+		    } catch( Exception exc) {
+			exc.printStackTrace(System.err);
+		    }
+		}
 	    }
 	}
 	// TODO: pushing call or put should retrieve all the relevant
@@ -668,10 +687,16 @@ public class ACtxHD implements KeyListener, ActionListener {
 	    openTrade(cmd_name);
 	if(cmd_name.equals("CLOSE CALL") || cmd_name.equals("CLOSE PUT"))
 	    closeTrade(cmd_name);
-    }
+	}
 
     private List<String> getSetupStocks() {
+	return getSetupStocks(false);
+    }
+
+    private List<String> getSetupStocks(boolean triggered_only) {
 	String dt = wl_date.getText();
+	if (!triggered_only)
+	    dt = StxCal.nextBusDay(dt);
 	int spread = Integer.parseInt(wl_spread.getText());
 	int days = Integer.parseInt(wl_days.getText());
 	int setups = Integer.parseInt(wl_setups.getText()), stk_setups = 0;
@@ -681,6 +706,8 @@ public class ACtxHD implements KeyListener, ActionListener {
 	StringBuilder q = new StringBuilder("SELECT DISTINCT stk FROM ");
 	q.append("setups WHERE dt='").append(dt).append("' AND ").
 	    append("setup IN ('JC_1234', 'JC_5DAYS')");
+	if (triggered_only)
+	    q.append(" AND triggered=true");
 	System.err.println("getSetupStocks: q = " + q.toString());
 	String expiry = StxCal.getMonthlyExpiration(dt);
  	try {
