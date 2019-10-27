@@ -516,14 +516,16 @@ public class ACtxHD implements KeyListener, ActionListener {
 
     public void go() throws Exception {
 
-        String jls, s, e= etf.getText();
+        String jls, s, e= etf.getText(), tooltip_text = null;
         String n= ntf.getText();
         int idx, w= 20, p= Integer.parseInt( jlp.getText());
         float f1= Float.parseFloat( jlf1.getText());
         float f2= Float.parseFloat( jlf2.getText());
         float f3= Float.parseFloat( jlf3.getText());
-	etf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
-	ntf.setForeground(invisible.isSelected()? Color.black: Color.lightGray);
+	etf.setForeground(invisible.isSelected()? Color.black: 
+			  Color.lightGray);
+	ntf.setForeground(invisible.isSelected()? Color.black: 
+			  Color.lightGray);
         jlfl1.setText("Factor: "+ jlf1.getText());
         jlfl2.setText("Factor: "+ jlf2.getText());
         updateSetupPanel();
@@ -532,8 +534,10 @@ public class ACtxHD implements KeyListener, ActionListener {
         jls= ( StxCal.year( e)- 2)+ "-01-01";
         s= "1901-01-02";
         idx= jtp_jl.indexOfTab( n);
-        if( idx!= -1)
+        if( idx!= -1) {
+	    tooltip_text = jtp_jl.getToolTipTextAt(idx);
             jtp_jl.remove( idx); 
+	}
         jl1 = jld1.runJL(n, jls, e, f1, w, p, dbetf.getText(),
 			 dbstf.getText());
         // jld1.append( analysis( e));
@@ -547,7 +551,7 @@ public class ACtxHD implements KeyListener, ActionListener {
         chrt.setScale(last_scale);
 	if (idx == -1)
 	    idx = jtp_jl.getTabCount();
-        jtp_jl.insertTab(n, null, chrt, null, idx);
+        jtp_jl.insertTab(n, null, chrt, tooltip_text, idx);
         jtp_jl.setSelectedIndex(jtp_jl.indexOfTab(n));
 	getOptions();
 	updateTradeStatus();
@@ -678,6 +682,14 @@ public class ACtxHD implements KeyListener, ActionListener {
 		    }
 		}
 	    }
+	}
+	if (ae.getSource() == wl_mark) {
+	    int ix = jtp_jl.getSelectedIndex();
+	    jtp_jl.setToolTipTextAt(ix, wl_date.getText());
+	}
+	if (ae.getSource() == wl_clear) {
+	    int ix = jtp_jl.getSelectedIndex();
+	    jtp_jl.setToolTipTextAt(ix, null);
 	}
 	// TODO: pushing call or put should retrieve all the relevant
 	// options pushing close call or close put should get some
