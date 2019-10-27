@@ -341,16 +341,10 @@ public class ACtxHD implements KeyListener, ActionListener {
 // 		if (cd == KeyEvent.VK_LESS)
 		if (cd == 44)
 		    moveTabLeft();
-		if (cd == KeyEvent.VK_OPEN_BRACKET) {
-		    int ix = jtp_jl.getSelectedIndex();
-		    jtp_jl.setToolTipTextAt(ix, wl_date.getText());
-		    jtp_jl.setBackgroundAt(ix, Color.yellow);
-		}
-		if (cd == KeyEvent.VK_CLOSE_BRACKET) {
-		    int ix = jtp_jl.getSelectedIndex();
-		    jtp_jl.setToolTipTextAt(ix, null);
-		    jtp_jl.setBackgroundAt(ix, null);
-		}
+		if (cd == KeyEvent.VK_OPEN_BRACKET) 
+		    markTab();
+		if (cd == KeyEvent.VK_CLOSE_BRACKET) 
+		    clearTab();
 		if (cd >= 112 && cd <= 123)
 		    handle_function_keys(cd);
             } else if(src.equals("NTF")) {
@@ -393,6 +387,18 @@ public class ACtxHD implements KeyListener, ActionListener {
 	    sel_ix = jtp_jl.getTabCount() - 1;
 	jtp_jl.setSelectedIndex(sel_ix);
 	go();
+    }
+
+    private void markTab() {
+	int ix = jtp_jl.getSelectedIndex();
+	jtp_jl.setToolTipTextAt(ix, wl_date.getText());
+	jtp_jl.setBackgroundAt(ix, Color.yellow);
+    }
+
+    private void clearTab() {
+	int ix = jtp_jl.getSelectedIndex();
+	jtp_jl.setToolTipTextAt(ix, null);
+	jtp_jl.setBackgroundAt(ix, null);
     }
 
     private void handle_function_keys(int cd) {
@@ -696,14 +702,10 @@ public class ACtxHD implements KeyListener, ActionListener {
 		}
 	    }
 	}
-	if (ae.getSource() == wl_mark) {
-	    int ix = jtp_jl.getSelectedIndex();
-	    jtp_jl.setToolTipTextAt(ix, wl_date.getText());
-	}
-	if (ae.getSource() == wl_clear) {
-	    int ix = jtp_jl.getSelectedIndex();
-	    jtp_jl.setToolTipTextAt(ix, null);
-	}
+	if (ae.getSource() == wl_mark)
+	    markTab();
+	if (ae.getSource() == wl_clear) 
+	    clearTab();
 	// TODO: pushing call or put should retrieve all the relevant
 	// options pushing close call or close put should get some
 	// default open options there should also be a trade command,
