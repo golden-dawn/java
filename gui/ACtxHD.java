@@ -316,73 +316,83 @@ public class ACtxHD implements KeyListener, ActionListener {
 	    // F11 = 122
 	    // F12 = 123
             int cd= e.getKeyCode(); String src= e.getComponent().getName();
-	    // System.err.printf("cd = %d, src = %s\n", cd, src);
+	    System.err.printf("cd = %d, src = %s\n", cd, src);
             if( src.equals( "ETF")) {
                 String ed= etf.getText();
                 // if( cd== 40) etf.setText( StxCal.prevBusDay( ed));
-                if( cd== 38) etf.setText( StxCal.nextBusDay( ed));
-                if(cd == 34) {
-                    decreaseScale();
-                    go();
-                }
-                if(cd == 33) {
+                if (cd == KeyEvent.VK_ENTER) go();
+                if (cd == 33) {
                     increaseScale();
                     go();
                 }
-                if(cd == 35 || cd == 36) {
+                if (cd == 34) {
+                    decreaseScale();
+                    go();
+                }
+                if (cd == 35 || cd == 36) {
                     move(cd);
                     go();
                 }
-                if( cd== 10) go();
-		if(cd >= 112 && cd <= 123)
+                if (cd == 38) 
+		    etf.setText(StxCal.nextBusDay(ed));
+// 		if (cd == KeyEvent.VK_GREATER)
+		if (cd == 46)
+		    moveTabRight();
+// 		if (cd == KeyEvent.VK_LESS)
+		if (cd == 44)
+		    moveTabLeft();
+		if (cd == KeyEvent.VK_OPEN_BRACKET) {
+		    int ix = jtp_jl.getSelectedIndex();
+		    jtp_jl.setToolTipTextAt(ix, wl_date.getText());
+		    jtp_jl.setBackgroundAt(ix, Color.yellow);
+		}
+		if (cd == KeyEvent.VK_CLOSE_BRACKET) {
+		    int ix = jtp_jl.getSelectedIndex();
+		    jtp_jl.setToolTipTextAt(ix, null);
+		    jtp_jl.setBackgroundAt(ix, null);
+		}
+		if (cd >= 112 && cd <= 123)
 		    handle_function_keys(cd);
             } else if(src.equals("NTF")) {
                 if(cd== 10) go();
-                if(cd == 38) {
-		    int sel_ix = jtp_jl.getSelectedIndex() + 1;
-		    if(sel_ix >= jtp_jl.getTabCount())
-			sel_ix = 0;
-		    jtp_jl.setSelectedIndex(sel_ix);
-                    go();
-                }
-                if(cd == 40) {
-		    int sel_ix = jtp_jl.getSelectedIndex() - 1;
-		    if(sel_ix < 0)
-			sel_ix = jtp_jl.getTabCount() - 1;
-		    jtp_jl.setSelectedIndex(sel_ix);
+                if(cd == 33) {
+                    increaseScale();
                     go();
                 }
                 if(cd == 34) {
                     decreaseScale();
                     go();
                 }
-                if(cd == 33) {
-                    increaseScale();
-                    go();
-                }
                 if(cd == 35 || cd == 36) {
                     move(cd);
                     go();
                 }
+                if(cd == 38) 
+		    moveTabRight();
+                if(cd == 40) 
+		    moveTabLeft();
 		if(cd >= 112 && cd <= 123)
 		    handle_function_keys(cd);
-                // if(cd == 112) {
-                //     int sz = entries.size();
-                //     if(sz == 0) return;
-                //     crt_pos = 0;
-                //     while(crt_pos < sz && entries.get(crt_pos)[0].compareTo
-                //           (ntf.getText()) != 0)
-                //         ++crt_pos;
-                //     if(crt_pos == sz) crt_pos = 0;
-                //     ntf.setText(entries.get(crt_pos)[0]);
-                //     etf.setText(entries.get(crt_pos)[1]);
-                //     go();
-                        
-                // }
             }
         } catch( Exception exc) {
             exc.printStackTrace( System.err);
         }
+    }
+
+    private void moveTabRight() throws Exception {
+	int sel_ix = jtp_jl.getSelectedIndex() + 1;
+	if (sel_ix >= jtp_jl.getTabCount())
+	    sel_ix = 0;
+	jtp_jl.setSelectedIndex(sel_ix);
+	go();
+    }
+
+    private void moveTabLeft() throws Exception {
+	int sel_ix = jtp_jl.getSelectedIndex() - 1;
+	if(sel_ix < 0)
+	    sel_ix = jtp_jl.getTabCount() - 1;
+	jtp_jl.setSelectedIndex(sel_ix);
+	go();
     }
 
     private void handle_function_keys(int cd) {
@@ -517,6 +527,7 @@ public class ACtxHD implements KeyListener, ActionListener {
     public void go() throws Exception {
 
         String jls, s, e= etf.getText(), tooltip_text = null;
+	Color bg_color = null;
         String n= ntf.getText();
         int idx, w= 20, p= Integer.parseInt( jlp.getText());
         float f1= Float.parseFloat( jlf1.getText());
@@ -536,6 +547,7 @@ public class ACtxHD implements KeyListener, ActionListener {
         idx= jtp_jl.indexOfTab( n);
         if( idx!= -1) {
 	    tooltip_text = jtp_jl.getToolTipTextAt(idx);
+	    bg_color = jtp_jl.getBackgroundAt(idx);
             jtp_jl.remove( idx); 
 	}
         jl1 = jld1.runJL(n, jls, e, f1, w, p, dbetf.getText(),
@@ -552,6 +564,7 @@ public class ACtxHD implements KeyListener, ActionListener {
 	if (idx == -1)
 	    idx = jtp_jl.getTabCount();
         jtp_jl.insertTab(n, null, chrt, tooltip_text, idx);
+	jtp_jl.setBackgroundAt(idx, bg_color);
         jtp_jl.setSelectedIndex(jtp_jl.indexOfTab(n));
 	getOptions();
 	updateTradeStatus();
