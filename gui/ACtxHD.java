@@ -316,60 +316,33 @@ public class ACtxHD implements KeyListener, ActionListener {
 	    // F11 = 122
 	    // F12 = 123
             int cd= e.getKeyCode(); String src= e.getComponent().getName();
-	    System.err.printf("cd = %d, src = %s\n", cd, src);
+// 	    System.err.printf("cd = %d, src = %s\n", cd, src);
             if( src.equals( "ETF")) {
                 String ed= etf.getText();
-                // if( cd== 40) etf.setText( StxCal.prevBusDay( ed));
-                if (cd == KeyEvent.VK_ENTER) go();
-                if (cd == 33) {
-                    increaseScale();
-                    go();
-                }
-                if (cd == 34) {
-                    decreaseScale();
-                    go();
-                }
-                if (cd == 35 || cd == 36) {
-                    move(cd);
-                    go();
-                }
                 if (cd == 38) 
 		    etf.setText(StxCal.nextBusDay(ed));
-// 		if (cd == KeyEvent.VK_GREATER)
-		if (cd == 46)
-		    moveTabRight();
-// 		if (cd == KeyEvent.VK_LESS)
-		if (cd == 44)
-		    moveTabLeft();
-		if (cd == KeyEvent.VK_OPEN_BRACKET) 
-		    markTab();
-		if (cd == KeyEvent.VK_CLOSE_BRACKET) 
-		    clearTab();
-		if (cd >= 112 && cd <= 123)
-		    handle_function_keys(cd);
-            } else if(src.equals("NTF")) {
-                if(cd== 10) go();
-                if(cd == 33) {
-                    increaseScale();
-                    go();
-                }
-                if(cd == 34) {
-                    decreaseScale();
-                    go();
-                }
-                if(cd == 35 || cd == 36) {
-                    move(cd);
-                    go();
-                }
+//                 if (cd == 40)
+// 		    etf.setText(StxCal.prevBusDay(ed));
+		handleCommonKeys(cd);
+            } else if (src.equals("NTF")) {
+		handleCommonKeys(cd);
                 if(cd == 38) 
 		    moveTabRight();
                 if(cd == 40) 
 		    moveTabLeft();
-		if(cd >= 112 && cd <= 123)
-		    handle_function_keys(cd);
-            }
-        } catch( Exception exc) {
-            exc.printStackTrace( System.err);
+            } else if (src.equals("WLDT"))
+		handleCommonKeys(cd);
+	    else if (src.equals("WLS") || src.equals("WLD") || 
+		     src.equals("WLSTP")) {
+		if (cd == KeyEvent.VK_F1)
+		    etf.requestFocusInWindow();
+		if (cd == KeyEvent.VK_F2)
+		    ntf.requestFocusInWindow();
+		if (cd == KeyEvent.VK_F3)
+		    wl_date.requestFocusInWindow();
+	    }
+        } catch (Exception exc) {
+            exc.printStackTrace(System.err);
         }
     }
 
@@ -401,8 +374,30 @@ public class ACtxHD implements KeyListener, ActionListener {
 	jtp_jl.setBackgroundAt(ix, null);
     }
 
-    private void handle_function_keys(int cd) {
-	if (cd == 112)
+    private void handleCommonKeys(int cd) throws Exception {
+	if (cd == KeyEvent.VK_ENTER) 
+	    go();
+	if (cd == 33) {
+	    increaseScale();
+	    go();
+	}
+	if (cd == 34) {
+	    decreaseScale();
+	    go();
+	}
+	if (cd == 35 || cd == 36) {
+	    move(cd);
+	    go();
+	}
+	if (cd == 46) // KeyEvent.VK_GREATER
+	    moveTabRight();
+	if (cd == 44) // KeyEvent.VK_LESS
+	    moveTabLeft();
+	if (cd == KeyEvent.VK_OPEN_BRACKET) 
+	    markTab();
+	if (cd == KeyEvent.VK_CLOSE_BRACKET) 
+	    clearTab();
+	if (cd == KeyEvent.VK_F1)
 	    openTrade("CALL");
 	else if (cd == 113)
 	    openTrade("PUT");
@@ -424,18 +419,10 @@ public class ACtxHD implements KeyListener, ActionListener {
 	    jtp_jl.setSelectedIndex(sel_ix);
 	} else if (cd == 120) {
 	    decreaseScale();
-	    try {
-		go();
-	    } catch (Exception exc) {
-		exc.printStackTrace(System.err);
-	    }
+	    go();
 	} else if (cd == 121) {
 	    increaseScale();
-	    try {
-		go();
-	    } catch (Exception exc) {
-		exc.printStackTrace(System.err);
-	    }
+	    go();
 	}
     }
     
