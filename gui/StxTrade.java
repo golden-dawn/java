@@ -9,7 +9,8 @@ import core.StxDB;
 
 public class StxTrade {
     String stk, und, cp, expiry, in_date, crt_date, trade_date;
-    float strike, in_spot, in_range, crt_spot, in_bid, in_ask, crt_bid, crt_ask;
+    float strike, in_spot, in_range, crt_spot, in_bid, in_ask, crt_bid, 
+	crt_ask;
     int num_contracts;
     boolean active, skip;
     
@@ -101,13 +102,13 @@ public class StxTrade {
     
     public String ui_entry() {
 	int sgn = cp.equals("c")? 1: -1;
-	StringBuilder sb = new StringBuilder(cp.equals("c")? "CALL ": " PUT ");
-	sb.append(String.format("%6.2f age %2d expires in %2d ", strike,
-				StxCal.numBusDays(in_date, crt_date),
-				StxCal.numBusDaysExpiry(crt_date, expiry))).
-	    append(String.format("Spot: %6.2f=>%6.2f, PL:%5.2f ", in_spot,
-				 crt_spot, 0.5 * (sgn * (crt_spot - in_spot) /
-						  in_range - 1))).
+	StringBuilder sb = 
+	    new StringBuilder(String.format("%s %5s ", active? " ": "#", und));
+	sb.append(cp.equals("c")? "CALL ": " PUT ").
+	    append(String.format("%6.2f age %2d expires in %2d ", strike,
+				 StxCal.numBusDays(in_date, crt_date),
+				 StxCal.numBusDaysExpiry(crt_date, expiry))).
+	    append(String.format("Spot: %6.2f=>%6.2f, ", in_spot, crt_spot)).
 	    append(String.format("Opt: %5.2f=>(B:%5.2f, A:%5.2f), PL:%6.0f\n",
 				 in_ask, crt_bid, crt_ask,
 				 100 * num_contracts * (crt_bid - in_ask)));
