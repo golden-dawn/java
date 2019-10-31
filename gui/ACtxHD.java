@@ -64,7 +64,7 @@ public class ACtxHD implements KeyListener, ActionListener {
     private JButton jb1m, jb3m, jb6m, jb1y, jbjl, jb2y, jb3y, jb5y, jball;
     private JButton rewind, fwd, bak, pick_stk;
     private JButton call, put, c_call, c_put;
-    private JButton wl_add, wl_trg, wl_mark, wl_clear;
+    private JButton wl_add, wl_trg, wl_mark, wl_clear, wl_clear_all;
     private JTextField wl_date, wl_spread, wl_days, wl_setups;
     private JComboBox exp, strike, capital;
     private JCheckBox invisible;
@@ -227,6 +227,8 @@ public class ACtxHD implements KeyListener, ActionListener {
         wl_trg = new JButton("WL TRG"); wl_trg.addActionListener(this);
         wl_mark = new JButton("WL MARK"); wl_mark.addActionListener(this);
         wl_clear = new JButton("WL CLEAR"); wl_clear.addActionListener(this);
+        wl_clear_all = new JButton("WL CLEAR ALL"); 
+	wl_clear_all.addActionListener(this);
 	wl_date = new JTextField(d);
         wl_date.setCaretColor(Color.white);
         wl_date.setName("WLDT"); 
@@ -258,6 +260,7 @@ public class ACtxHD implements KeyListener, ActionListener {
 	addC(jp_trd, wl_trg, 65, 135, 60, 20);
 	addC(jp_trd, wl_mark, 125, 135, 70, 20);
 	addC(jp_trd, wl_clear, 195, 135, 80, 20);
+	addC(jp_trd, wl_clear_all, 495, 135, 120, 20);
 	addC(jp_trd, wl_date, 275, 135, 100, 25);
 	addC(jp_trd, wl_spread, 375, 135, 40, 25);
 	addC(jp_trd, wl_days, 415, 135, 40, 25);
@@ -693,6 +696,12 @@ public class ACtxHD implements KeyListener, ActionListener {
 	    markTab();
 	if (ae.getSource() == wl_clear) 
 	    clearTab();
+	if (ae.getSource() == wl_clear_all) {
+	    for (int ix = jtp_jl.getTabCount() - 1; ix >= 0; ix--) {
+		if (jtp_jl.getToolTipTextAt(ix) == null)
+		    jtp_jl.remove(ix);
+	    }
+	}
 	// TODO: pushing call or put should retrieve all the relevant
 	// options pushing close call or close put should get some
 	// default open options there should also be a trade command,
