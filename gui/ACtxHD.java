@@ -238,11 +238,11 @@ public class ACtxHD implements KeyListener, ActionListener {
         wl_spread.setCaretColor(Color.white);
         wl_spread.setName("WLS"); 
 	wl_spread.addKeyListener(this);
-	wl_days = new JTextField("5");
+	wl_days = new JTextField("8");
         wl_days.setCaretColor(Color.white);
         wl_days.setName("WLD"); 
 	wl_days.addKeyListener(this);
-	wl_setups = new JTextField("1");
+	wl_setups = new JTextField("3");
         wl_setups.setCaretColor(Color.white);
         wl_setups.setName("WLSTP"); 
 	wl_setups.addKeyListener(this);
