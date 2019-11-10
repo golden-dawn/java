@@ -68,7 +68,7 @@ public class ACtxHD implements KeyListener, ActionListener {
     private JTextField wl_date, wl_spread, wl_days, wl_setups;
     private JComboBox exp, strike, capital;
     private JCheckBox invisible;
-    private JLDisplay jld1, jld2, jld3, opts, trades;
+    private JLDisplay jld1, jld2, jld3, opts, trades, setups;
     private JLabel jlfl1, jlfl2, jlfl3, trade_status;
     private int resX= 1920, resY= 1080, yr;
     private Chart chrt;
@@ -221,6 +221,7 @@ public class ACtxHD implements KeyListener, ActionListener {
 	capital.setSelectedIndex(2);
 	opts = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trades = new JLDisplay(600, 100, 12, invisible.isSelected());
+	setups = new JLDisplay(600, 100, 12, invisible.isSelected());
 	trade_status = new JLabel("GETTING STARTED . . .");
 
         wl_add = new JButton("WL ADD"); wl_add.addActionListener(this);
@@ -255,7 +256,8 @@ public class ACtxHD implements KeyListener, ActionListener {
 	addC(jp_trd, capital, 645, 0, 80, 20);
 	addC(jp_trd, trade_status, 765, 5, 550, 15);
 	addC(jp_trd, opts, 5, 20, 505, 115);
-	addC(jp_trd, trades, 510, 20, 855, 115);
+	addC(jp_trd, trades, 510, 20, 655, 115);
+	addC(jp_trd, setups, 1170, 20, 200, 115);
 	addC(jp_trd, wl_add, 5, 135, 60, 20);
 	addC(jp_trd, wl_trg, 65, 135, 60, 20);
 	addC(jp_trd, wl_mark, 125, 135, 70, 20);
@@ -564,6 +566,7 @@ public class ACtxHD implements KeyListener, ActionListener {
         jtp_jl.setSelectedIndex(jtp_jl.indexOfTab(n));
 	getOptions();
 	updateTradeStatus();
+	updateSetupStatus();
     }
 
     private void updateSetupPanel() {
@@ -814,6 +817,36 @@ public class ACtxHD implements KeyListener, ActionListener {
 	    trd.update(dt, cc, log_fname);
 	    trades.append(trd.ui_entry());
 	}
+    }
+
+    private void updateSetupStatus() {
+	String edt = etf.getText(), sdt;
+	int days = 5;
+	try {
+	    days = Integer.parseInt(wl_days.getText());
+	} catch (Exception ex) {
+	    System.err.println("Failed to get num days for setups:");
+            ex.printStackTrace(System.err);
+	}
+	setups.clear();
+	sdt = StxCal.moveBusDays(edt, -days);
+	StringBuilder q = new StringBuilder("SELECT * FROM setups WHERE ");
+	q.append("stk='").append(ntf.getText()).append("' AND dt BETWEEN '").
+	    append(sdt).append("' AND '").append(edt).append("' AND setup ").
+	    append("IN ('GAP_HV', 'STRONG_CLOSE') ORDER BY dt DESC");
+ 	try {
+            StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
+            ResultSet rset = sdb.get1(q.toString());
+	    while(rset.next()) {
+		String stp = String.format("%s %s\n", rset.getString(1), 
+					   rset.getString(3));
+		String dir = rset.getString(4);
+		setups.append(stp, dir.equals("U")? Color.green: Color.red);
+	    }
+        } catch( Exception ex) {
+	    System.err.println("Failed to get setups: ");
+            ex.printStackTrace(System.err);
+        }
     }
     
     private void getOptions() {
