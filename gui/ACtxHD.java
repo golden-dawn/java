@@ -838,8 +838,11 @@ public class ACtxHD implements KeyListener, ActionListener {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet rset = sdb.get1(q.toString());
 	    while(rset.next()) {
-		String stp = String.format("%s %s\n", rset.getString(1), 
-					   rset.getString(3));
+		int num_days = StxCal.numBusDays(rset.getString(1), edt);
+		String display_setup = rset.getString(3).equals("GAP_HV")?
+		    "GAP": "SC";
+		String stp = String.format("D_%d %s\n", num_days, 
+					   display_setup);
 		String dir = rset.getString(4);
 		setups.append(stp, dir.equals("U")? Color.green: Color.red);
 	    }
