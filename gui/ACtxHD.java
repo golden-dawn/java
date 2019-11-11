@@ -720,15 +720,14 @@ public class ACtxHD implements KeyListener, ActionListener {
     }
 
     private List<String> getSetupStocks(boolean triggered_only) {
-	String dt = wl_date.getText();
-	if (!triggered_only)
-	    dt = StxCal.nextBusDay(dt);
+	String crt_dt = wl_date.getText();
+	String dt = (!triggered_only) ? StxCal.nextBusDay(crt_dt): crt_dt;
 	int spread = Integer.parseInt(wl_spread.getText());
 	int days = Integer.parseInt(wl_days.getText());
 	int setups = Integer.parseInt(wl_setups.getText()), stk_setups = 0;
 	List<String> res = new ArrayList<String>();
 	HashMap<String, Integer> dct = new HashMap<String, Integer>();
-	String sdt = StxCal.moveBusDays(dt, -days);
+	String sdt = StxCal.moveBusDays(crt_dt, -days);
 	StringBuilder q = new StringBuilder("SELECT DISTINCT stk FROM ");
 	q.append("setups WHERE dt='").append(dt).append("' AND ").
 	    append("setup IN ('JC_1234', 'JC_5DAYS')");
@@ -754,9 +753,9 @@ public class ACtxHD implements KeyListener, ActionListener {
 		if (entry.getValue() <= spread) {
 		    StringBuilder q2 = new StringBuilder();
 		    q2.append("SELECT count(*) FROM setups WHERE dt BETWEEN").
-			append(" '").append(sdt).append("' AND '").append(dt).
-			append("' AND setup IN ('GAP_HV', 'STRONG_CLOSE') ").
-			append(" AND stk='").append(stk).append("'");
+			append(" '").append(sdt).append("' AND '").
+			append(crt_dt).append("' AND stk='").append(stk).
+			append("' AND setup IN ('GAP_HV', 'STRONG_CLOSE')");
 		    ResultSet rset2 = sdb.get(q2.toString());
 		    stk_setups = 0;
 		    while (rset2.next())
