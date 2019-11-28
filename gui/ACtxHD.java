@@ -670,7 +670,10 @@ public class ACtxHD implements KeyListener, ActionListener {
 	    }	    
 	}
 	if (ae.getSource() == wl_add) {
-	    List<String> stx = getSetupStocks();
+	    String table_name = setups_or_trades.getSelectedItem().toString().
+		toLowerCase();
+	    List<String> stx = table_name.equals("setups")? getSetupStocks():
+		getTradeStocks();
 	    for(String stk: stx) {
 		ntf.setText(stk);
 		etf.setText(wl_date.getText());
@@ -682,20 +685,24 @@ public class ACtxHD implements KeyListener, ActionListener {
 	    }
 	}
 	if (ae.getSource() == wl_trg) {
-	    wl_date.setText(StxCal.nextBusDay(wl_date.getText()));
-	    List<String> stx = getSetupStocks(true);
-	    for (int ix = jtp_jl.getTabCount() - 1; ix >= 0; ix--) {
-		String stk = jtp_jl.getTitleAt(ix);
-		if (!stx.contains(stk) && 
-		    (jtp_jl.getToolTipTextAt(ix) == null))
-		    jtp_jl.remove(ix);
-		else {
-		    ntf.setText(stk);
-		    etf.setText(wl_date.getText());
-		    try {
-			go();
-		    } catch( Exception exc) {
-			exc.printStackTrace(System.err);
+	    String table_name = setups_or_trades.getSelectedItem().toString().
+		toLowerCase();
+	    if (table_name.equals("setups")) {
+		wl_date.setText(StxCal.nextBusDay(wl_date.getText()));
+		List<String> stx = getSetupStocks(true);
+		for (int ix = jtp_jl.getTabCount() - 1; ix >= 0; ix--) {
+		    String stk = jtp_jl.getTitleAt(ix);
+		    if (!stx.contains(stk) && 
+			(jtp_jl.getToolTipTextAt(ix) == null))
+			jtp_jl.remove(ix);
+		    else {
+			ntf.setText(stk);
+			etf.setText(wl_date.getText());
+			try {
+			    go();
+			} catch( Exception exc) {
+			    exc.printStackTrace(System.err);
+			}
 		    }
 		}
 	    }
@@ -720,6 +727,24 @@ public class ACtxHD implements KeyListener, ActionListener {
 	    closeTrade(cmd_name);
 	}
 
+    private List<String> getTradeStocks() {
+	String dt = wl_date.getText();
+	List<String> res = new ArrayList<String>();
+	StringBuilder q = new StringBuilder("SELECT DISTINCT stk FROM ");
+	q.append("trades WHERE dt='").append(dt).append("'");
+	System.err.println("getTradeStocks: q = " + q.toString());
+ 	try {
+            StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
+            ResultSet sret = sdb.get1(q.toString());
+	    while(sret.next())
+		res.add(sret.getString(1));
+        } catch( Exception ex) {
+	    System.err.println("Failed to get trades: ");
+            ex.printStackTrace(System.err);
+        }
+	return res;
+    }	 
+    
     private List<String> getSetupStocks() {
 	return getSetupStocks(false);
     }
@@ -794,6 +819,7 @@ public class ACtxHD implements KeyListener, ActionListener {
 	    ("%s_%s_%d_%.2f", ntf.getText(), cmd_name,
 	     StxCal.numBusDaysExpiry(dt, expiry), strike.getSelectedItem());
 	trade_status.setText(String.format("OPENED %s", trade_key));
+	markTab();
     }
 
     private void closeTrade(String cmd_name) {
@@ -811,6 +837,7 @@ public class ACtxHD implements KeyListener, ActionListener {
 				       StxCal.numBusDaysExpiry(dt, expiry),
 				       strike.getSelectedItem());
 	trade_status.setText(String.format("CLOSED %s", trd_key));
+	clearTab();
     }
 
     private void updateTradeStatus() {
