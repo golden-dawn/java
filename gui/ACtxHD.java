@@ -66,7 +66,7 @@ public class ACtxHD implements KeyListener, ActionListener {
     private JButton call, put, c_call, c_put;
     private JButton wl_add, wl_trg, wl_mark, wl_clear, wl_clear_all;
     private JTextField wl_date, wl_spread, wl_days, wl_setups;
-    private JComboBox exp, strike, capital;
+    private JComboBox exp, strike, capital, setups_or_trades;
     private JCheckBox invisible;
     private JLDisplay jld1, jld2, jld3, opts, trades, setups;
     private JLabel jlfl1, jlfl2, jlfl3, trade_status;
@@ -246,6 +246,11 @@ public class ACtxHD implements KeyListener, ActionListener {
         wl_setups.setCaretColor(Color.white);
         wl_setups.setName("WLSTP"); 
 	wl_setups.addKeyListener(this);
+	setups_or_trades = new JComboBox<String>();
+	setups_or_trades.setEditable(false);
+	setups_or_trades.addItem("Trades");
+	setups_or_trades.addItem("Setups");
+	setups_or_trades.setSelectedIndex(0);
 	
         addC(jp_trd, call, 5, 5, 80, 15);
         addC(jp_trd, put, 85, 5, 80, 15);
@@ -267,7 +272,7 @@ public class ACtxHD implements KeyListener, ActionListener {
 	addC(jp_trd, wl_spread, 375, 135, 40, 25);
 	addC(jp_trd, wl_days, 415, 135, 40, 25);
 	addC(jp_trd, wl_setups, 455, 135, 40, 25);
-	
+	addC(jp_trd, setups_or_trades, 615, 135, 80, 20);	
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
         jld1= new JLDisplay( hd11 + 40, 220, 12, invisible.isSelected());
