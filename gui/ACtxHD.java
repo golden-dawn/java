@@ -272,7 +272,7 @@ public class ACtxHD implements KeyListener, ActionListener {
 	addC(jp_trd, wl_spread, 375, 135, 40, 25);
 	addC(jp_trd, wl_days, 415, 135, 40, 25);
 	addC(jp_trd, wl_setups, 455, 135, 40, 25);
-	addC(jp_trd, setups_or_trades, 615, 135, 80, 20);	
+	addC(jp_trd, setups_or_trades, 615, 135, 100, 20);	
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
         jld1= new JLDisplay( hd11 + 40, 220, 12, invisible.isSelected());
