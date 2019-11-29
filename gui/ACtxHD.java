@@ -692,8 +692,8 @@ public class ACtxHD implements KeyListener, ActionListener {
 	if (ae.getSource() == wl_trg) {
 	    String table_name = setups_or_trades.getSelectedItem().toString().
 		toLowerCase();
+	    wl_date.setText(StxCal.nextBusDay(wl_date.getText()));
 	    if (table_name.equals("setups")) {
-		wl_date.setText(StxCal.nextBusDay(wl_date.getText()));
 		List<String> stx = getSetupStocks(true);
 		for (int ix = jtp_jl.getTabCount() - 1; ix >= 0; ix--) {
 		    String stk = jtp_jl.getTitleAt(ix);
@@ -708,6 +708,17 @@ public class ACtxHD implements KeyListener, ActionListener {
 			} catch( Exception exc) {
 			    exc.printStackTrace(System.err);
 			}
+		    }
+		}
+	    } else {
+		for (int ix = jtp_jl.getTabCount() - 1; ix >= 0; ix--) {
+		    String stk = jtp_jl.getTitleAt(ix);
+		    ntf.setText(stk);
+		    etf.setText(wl_date.getText());
+		    try {
+			go();
+		    } catch( Exception exc) {
+			exc.printStackTrace(System.err);
 		    }
 		}
 	    }
