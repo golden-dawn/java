@@ -340,16 +340,21 @@ public class ACtxHD implements KeyListener, ActionListener {
 		    moveTabRight();
                 if(cd == 40) 
 		    moveTabLeft();
-            } else if (src.equals("WLDT"))
-		handleCommonKeys(cd);
-	    else if (src.equals("WLS") || src.equals("WLD") || 
-		     src.equals("WLSTP")) {
+            } else if (src.equals("WLS") || src.equals("WLD") || 
+		       src.equals("WLSTP")) {
 		if (cd == KeyEvent.VK_F1)
 		    etf.requestFocusInWindow();
 		if (cd == KeyEvent.VK_F2)
 		    ntf.requestFocusInWindow();
 		if (cd == KeyEvent.VK_F3)
 		    wl_date.requestFocusInWindow();
+	    } else if (src.equals("WLDT")) {
+                String ed = wl_date.getText();
+                if (cd == 38) 
+		    wl_date.setText(StxCal.nextBusDay(ed));
+		if (cd == 40)
+ 		    wl_date.setText(StxCal.prevBusDay(ed));
+		handleCommonKeys(cd);
 	    }
         } catch (Exception exc) {
             exc.printStackTrace(System.err);
@@ -731,7 +736,7 @@ public class ACtxHD implements KeyListener, ActionListener {
 	String dt = wl_date.getText();
 	List<String> res = new ArrayList<String>();
 	StringBuilder q = new StringBuilder("SELECT DISTINCT stk FROM ");
-	q.append("trades WHERE dt='").append(dt).append("'");
+	q.append("trades WHERE in_dt='").append(dt).append("'");
 	System.err.println("getTradeStocks: q = " + q.toString());
  	try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
