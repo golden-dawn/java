@@ -260,9 +260,9 @@ public class ACtxHD implements KeyListener, ActionListener {
 	addC(jp_trd, exp, 485, 0, 160, 20);
 	addC(jp_trd, capital, 645, 0, 80, 20);
 	addC(jp_trd, trade_status, 765, 5, 550, 15);
-	addC(jp_trd, opts, 5, 20, 505, 115);
-	addC(jp_trd, trades, 510, 20, 655, 115);
-	addC(jp_trd, setups, 1170, 20, 200, 115);
+	addC(jp_trd, opts, 5, 20, 505, 155);
+	addC(jp_trd, trades, 510, 20, 655, 155);
+	addC(jp_trd, setups, 1170, 20, 200, 155);
 	addC(jp_trd, wl_add, 5, 135, 60, 20);
 	addC(jp_trd, wl_trg, 65, 135, 60, 20);
 	addC(jp_trd, wl_mark, 125, 135, 70, 20);
@@ -285,7 +285,7 @@ public class ACtxHD implements KeyListener, ActionListener {
         addC( jpu, jld3, 5, 730, resX- hd11- 80, 290);
         jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
 
-	int vert_div = 15 * resY / 19;
+	int vert_div = 14 * resY / 19;
         JSplitPane jspv= new JSplitPane( JSplitPane.VERTICAL_SPLIT,
                                          jtp_jl, jp_trd);
         jspv.setOneTouchExpandable(true);
