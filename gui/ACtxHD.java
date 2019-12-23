@@ -331,8 +331,8 @@ public class ACtxHD implements KeyListener, ActionListener {
                 String ed= etf.getText();
                 if (cd == 38) 
 		    etf.setText(StxCal.nextBusDay(ed));
-//                 if (cd == 40)
-// 		    etf.setText(StxCal.prevBusDay(ed));
+		if (cd == 40)
+ 		    etf.setText(StxCal.prevBusDay(ed));
 		handleCommonKeys(cd);
             } else if (src.equals("NTF")) {
 		handleCommonKeys(cd);
