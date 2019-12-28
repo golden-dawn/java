@@ -81,10 +81,13 @@ public class StxxJL {
         //lns.split( ratio);
     }
 
-    private void recDay( int ix, int sh, int sl) {
-        StxRec sr= data.get( ix);
+    private void recDay(int ix, int sh, int sl) {
+        StxRec sr = data.get(ix);
+	float prev_c = (ix == 0)? sr.o: data.get(ix - 1).c;
         vi= 0;//StxCalc.mfi( data.data(), ix, vw);
-        StxJL jlr= new StxJL( sr.date, avg_rg, vi, recs.size()); recs.add( jlr);
+        StxJL jlr= new StxJL( sr.date, avg_rg, vi, recs.size());
+	jlr.setOBV(sr, prev_c); 
+	recs.add( jlr);
         if(( sh!= StxJL.None)&& ( sl!= StxJL.None)) {
             if( sr.hiB4Lo()){ r( jlr, sr, sh); r( jlr, sr, sl);}
             else{ r( jlr, sr, sl); r( jlr, sr, sh);}
