@@ -18,7 +18,7 @@ public class StxJL extends StxRecord {
     static  public final int m_NRe= 7;
 
     static String[] states= { "SRa", "NRa", "UT", "DT", "NRe", "SRe"};
-    public float c, c2, vr, arg;
+    public float c, c2, vr, arg, obv1, obv2, obv3;
     public int s, s2, xx;
     public boolean p, p2;
     private Integer px= null, px2= null, nx= null, lx= null;
@@ -107,6 +107,37 @@ public class StxJL extends StxRecord {
     }
     public Integer nx() { return nx;}
     public Integer lx() { return lx;}
+    // The OBV 1, 2, 3 allocate a portion of the daily volume to each
+    // of these three phases:
+    // 1. The volume between the previous day close and the high or
+    // low of today, whichever comes first.
+    // 2. The volume between the high and low of the day, whichever
+    // comes first.
+    // 3. The volume between the last extreme of the day (high or low)
+    // and the close.
+    // The way to calculate obv 1, 2, and 3 is the following: 
+    // a. Determine which one occured first, the high or the low.  We
+    // are using an approximation here: if 2 * close < high + low,
+    // then we assume that the high happened before the low,
+    // otherwise, the low happened before the high.
+    // b. Calculate the absolute differences between:
+    //  1. First extreme (high or low) of today and previous close.
+    //  2. Today's high and low.
+    //  3. Second extreme (high or low) of today and the close.
+    // c. Assign a ratio to each difference (1, 2, 3) dividing its
+    // absolute value by their sum
+    // d. obv{1,2,3} are the signed ratios multiplied by the total
+    // volume for the day.
+    public void setOBV(StxRec sr, float prev_c) {
+	boolean hb4l = sr.hiB4Lo();
+	float e1 = hb4l? sr.h: sr.l, e2 = hb4l? sr.l: sr.h;
+	float diff1 = e1 - prev_c, diff2 = e2 - e1, diff3 = sr.c - e2;
+	float sum = Math.abs(diff1) + Math.abs(diff2) + Math.abs(diff3);
+	this.obv1 = sr.v * diff1 / sum;
+	this.obv2 = sr.v * diff2 / sum;
+	this.obv3 = sr.v * diff3 / sum;
+    }
+
     public static void main( String[] args) {
         //               StxJL sjl= new StxJL( "28-Dec-09", 50, 0, SRa);
         //               System.err.println( sjl.toString());
