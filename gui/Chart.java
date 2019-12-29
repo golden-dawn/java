@@ -3,6 +3,7 @@ package gui;
 import core.StxCal;
 import core.StxRec;
 import core.StxTS;
+import indicators.StxOBV;
 import indicators.StxUDV;
 import indicators.StxxSetups;
 import jl.StxJL;
@@ -201,7 +202,6 @@ public class Chart extends JPanel {
         }
         g2.setFont( new Font("Monospaced", Font.PLAIN, 14));
 	
-	StxUDV udv = new StxUDV(ts);
 	int avg_vol_sz = avg_volumes.size();
 	float last_avg_volume = (avg_vol_sz > 0)?
 	    avg_volumes.get(avg_vol_sz - 1): 0;
@@ -215,8 +215,8 @@ public class Chart extends JPanel {
 		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
 					  pts.get(6), pts.get(7)));
 	    }
-	    String udv_str = getUDV(jl1, udv, last_avg_volume);
-	    g2.drawString(udv_str, d.width / 2 - 350, 15);
+	    String obv_str = getOBV(jl1, last_avg_volume);
+	    g2.drawString(obv_str, d.width / 2 - 350, 15);
 	    g2.setPaint( Color.darkGray);
 	}
 	if(jl2 != null) {
@@ -229,8 +229,8 @@ public class Chart extends JPanel {
 		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
 					  pts.get(6), pts.get(7)));
 	    }
-	    String udv_str = getUDV(jl2, udv, last_avg_volume);
-	    g2.drawString(udv_str, d.width / 2 - 350, 35);
+	    String obv_str = getOBV(jl2, last_avg_volume);
+	    g2.drawString(obv_str, d.width / 2 - 350, 35);
 	    g2.setPaint( Color.darkGray);
 	}
 	if(jl3 != null) {
@@ -243,13 +243,10 @@ public class Chart extends JPanel {
 		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
 					  pts.get(6), pts.get(7)));
 	    }
-	    String udv_str = getUDV(jl3, udv, last_avg_volume);
-	    g2.drawString(udv_str, d.width / 2 - 350, 55);
+	    String obv_str = getOBV(jl3, last_avg_volume);
+	    g2.drawString(obv_str, d.width / 2 - 350, 55);
 	    g2.setPaint( Color.darkGray);
 	}
-	// System.err.printf("end = %d, ts size = %d\n", end, ts.data().size());
-	// System.err.printf("%s: ts.get(end) = %s\n", ts.stk(),
-	// 		  ts.get(end).toString());
 	String cndls = sss.getSetups(ts.get(end).date);
 	String[] candles = cndls.split("\n");
 	if(candles.length == 3) {
@@ -260,6 +257,39 @@ public class Chart extends JPanel {
         g2.setPaint(Color.lightGray);
 	if(!invisible)
 	    g2.drawString(stk_name.toUpperCase(), 50, 15);         
+    }
+
+    String getOBV(StxxJL jl, float last_avg_volume) {
+	StxOBV obv = new StxOBV(ts, jl);
+	List<Integer> pivots = jl.pivots(4, true);
+	StringBuffer udv_sb = new StringBuffer("");
+	if(pivots.size() >= 5) {
+	    StxJL piv_0 = jl.data(pivots.get(0));
+	    int ixx = 0, start = ts.find(piv_0.date, 0);
+	    int udv_end = ts.currentPosition();
+	    for(int piv: pivots) {
+		if(ixx == 0) {
+		    ixx++;
+		    continue;
+		}
+		StxJL rec = jl.data(piv);
+		int udv_start = ts.find(rec.date, 0);
+		if (udv_start < udv_end)
+		    udv_start++;
+		float res = obv.obv(udv_start, udv_end);
+		udv_sb.append(" P").append(ixx).append(": ");
+		udv_sb.append(String.format("%7.2f [%4.1f]", rec.c,
+					    res / last_avg_volume));
+		ixx++;
+		if(rec.p2) {
+		    udv_sb.append(" P").append(ixx).append(": ");
+		    udv_sb.append(String.format("%7.2f [%4.1f]", rec.c2,
+						res / last_avg_volume));
+		    ixx++;
+		}
+	    }
+	}
+	return udv_sb.toString();
     }
 
     String getUDV(StxxJL jl, StxUDV udv, float last_avg_volume) {
