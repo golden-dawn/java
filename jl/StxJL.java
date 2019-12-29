@@ -1,6 +1,7 @@
 package jl;
 
 import core.StxRecord;
+import core.StxRec;
 
 import java.util.Arrays;
 import java.util.List;
