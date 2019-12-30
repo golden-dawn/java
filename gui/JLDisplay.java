@@ -55,7 +55,8 @@ public class JLDisplay extends JScrollPane {
         a= new SimpleAttributeSet(); this.setViewportView( jtp);
         setPreferredSize( new Dimension( w, h));
     }
-    public void append( String s, Color cf, Color cb, boolean bul, boolean bb) {
+    public void append( String s, Color cf, Color cb, boolean bul, 
+			boolean bb) {
         try {
             StyleConstants.setForeground( a, cf);
             StyleConstants.setBackground( a, cb);
@@ -110,7 +111,7 @@ public class JLDisplay extends JScrollPane {
             append( "|");
         } 
         append( " ");
-        append( String.format( "%6.2f", jlr.arg));
+        append( String.format( "%6.2f %6.0f %6.0f %6.0f", jlr.arg, jlr.obv1, jlr.obv2, jlr.obv3));
     }
      
     public void printRecBody2( StxJL jlr) { 
@@ -262,13 +263,18 @@ public class JLDisplay extends JScrollPane {
         sjl.jl( ed);
 	first_date = sjl.data(0).date;
         List<Integer> pivots= sjl.pivots( pivs, false);
-        for( int piv: pivots)
-            printRec( sjl.data( piv));
-            // printSmallRec2( sjl.data( piv));
-        for( int ix= pivots.get( pivots.size()- 1)+ 1; ix< sjl.size(); ++ix)
-            printRec( sjl.data( ix));
-            // printSmallRec2( sjl.data( ix));
-        printLastLine( sjl.lastDay(), sjl.avgRg()); append("\n");
+        for(int piv: pivots) {
+	    if (piv < 0)
+		continue;
+            printRec(sjl.data( piv));
+	}
+	int start = pivots.get(pivots.size() - 1);
+	if (start < 0)
+	    start *= -1;
+        for(int ix = start + 1; ix < sjl.size(); ++ix)
+            printRec(sjl.data(ix));
+        printLastLine(sjl.lastDay(), sjl.avgRg());
+	append("\n");
 	return sjl;
     }
 }
