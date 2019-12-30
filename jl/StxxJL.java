@@ -233,36 +233,55 @@ public class StxxJL {
     public float factorPrice() { return _f;}
     public float avgVol() { return vi;}
     public float avgRg() { return avg_rg;}
-    public List<Integer> pivots( int num, String as_of_date) {
-        List<Integer> piv= new ArrayList<Integer>( num);
-        int ix= 0, ixx= recs.find( as_of_date, -1), xx= recs.get( ixx).xx();
-        while( ix< num&& ixx> 0) {
-            StxJL rec= recs.get( ixx);
-            List<Integer> rec_pivs= rec.pxx();
-            Integer rec_p= rec_pivs.get( 0), rec_p2= rec_pivs.get( 1);
-            if(( rec_p2!= null)&& ( rec_p2<= xx)) {
-                piv.add( 0, -ixx); if( ++ix>= num) break;
+    public List<Integer> pivots(int num, String as_of_date) {
+        List<Integer> piv = new ArrayList<Integer>(num);
+        int ix = 0, ixx = recs.find(as_of_date, -1), xx = recs.get(ixx).xx();
+        while((ix < num) && (ixx > 0)) {
+            StxJL rec = recs.get(ixx);
+            List<Integer> rec_pivs = rec.pxx();
+            Integer rec_p = rec_pivs.get(0), rec_p2 = rec_pivs.get(1);
+            if ((rec_p2 != null) && (rec_p2 <= xx)) {
+		System.err.printf("P2: %.1f: adding %d to pivs\n", f, -ixx);
+                piv.add(0, -ixx); 
+		if (++ix >= num)
+		    break;
             }
-            if(( rec_p!= null)&& ( rec_p<= xx)) { ix++; piv.add( 0, ixx);}
+            if ((rec_p != null) && (rec_p <= xx)) {
+		ix++;
+		piv.add(0, ixx);
+		System.err.printf("P1: %.1f: adding %d to pivs\n", f, ixx);
+	    }
             --ixx;
         }
         return piv;
-    }    
-    public ArrayList<Integer> pivots( int num) { return pivots( num, false);}
-    public ArrayList<Integer> pivots( int num, boolean include_lns) {
-        ArrayList<Integer> piv= new ArrayList<Integer>( num);
+    }
+
+    public ArrayList<Integer> pivots(int num) { 
+	return pivots(num, false);
+    }
+
+    public ArrayList<Integer> pivots(int num, boolean include_lns) {
+        ArrayList<Integer> piv = new ArrayList<Integer>(num);
         int ix= 0, ixx= recs.size();
-        while( ix< num&& ixx> 0) {
-            if( recs.get( --ixx).p) {
-                ix++; piv.add( 0, ixx); if( recs.get( ixx).p2) ix++;
+        while((ix < num) && (ixx > 0)) {
+	    if (recs.get(--ixx).p2) {
+		ix++;
+		piv.add(0, -ixx);
+		System.err.printf("P2: %.1f: adding %d to pivs\n", f, -ixx);
             }
+            if (recs.get(ixx).p) {
+                ix++; 
+		piv.add(0, ixx); 
+		System.err.printf("P1: %.1f: adding %d to pivs\n", f, ixx);
+	    }
         }
-        if(( include_lns== true)&& ( lns.p== false)&& ( lns.p2== false)) {
-            int lns_ix= recs.find( lns.date, 0);
-            piv.add( lns_ix);
+        if (include_lns && !lns.p && !lns.p2) {
+            int lns_ix = recs.find(lns.date, 0);
+            piv.add(lns_ix);
         }
         return piv;
     }
+
     public StxData<StxJL> recs() { return recs;}
     public StxJL data( int ix){ return recs.get( ix);}
     public int size() { return recs.size();}
