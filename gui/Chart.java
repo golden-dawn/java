@@ -206,8 +206,10 @@ public class Chart extends JPanel {
 	float last_avg_volume = (avg_vol_sz > 0)?
 	    avg_volumes.get(avg_vol_sz - 1): 0;
 	if(jl1 != null) {
+	    System.err.printf("Before getChannel(), %s, %s\n", stk_name, ed);
 	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
 					  price_height, min_price, price_rg);
+	    System.err.printf("After getChannel(), %s, %s\n", stk_name, ed);
 	    if(pts != null) {
 		g2.setPaint( Color.yellow);
 		g2.draw(new Line2D.Double(pts.get(0), pts.get(1),
@@ -215,7 +217,9 @@ public class Chart extends JPanel {
 		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
 					  pts.get(6), pts.get(7)));
 	    }
+	    System.err.printf("Before getOBV(), %s, %s\n", stk_name, ed);
 	    String obv_str = getOBV(jl1, last_avg_volume);
+	    System.err.printf("After getOBV(), %s, %s\n", stk_name, ed);
 	    g2.drawString(obv_str, d.width / 2 - 350, 15);
 	    g2.setPaint( Color.darkGray);
 	}
@@ -263,8 +267,13 @@ public class Chart extends JPanel {
 	StxOBV obv = new StxOBV(ts, jl);
 	List<Integer> pivots = jl.pivots(4, true);
 	StringBuffer udv_sb = new StringBuffer("");
-	if(pivots.size() >= 5) {
-	    StxJL piv_0 = jl.data(pivots.get(0));
+	System.err.printf("%.1f: found %d pivots\n", jl.getFactor(), 
+			  pivots.size());
+	if(pivots.size() >= 4) {
+	    int piv0 = pivots.get(0), abs_piv0 = Math.abs(piv0);
+	    StxJL piv_0 = jl.data(abs_piv0);
+	    System.err.printf("%.1f: piv_0.date = %s\n", jl.getFactor(), 
+			      piv_0.date);
 	    int ixx = 0, start = ts.find(piv_0.date, 0);
 	    int udv_end = ts.currentPosition();
 	    for(int piv: pivots) {
@@ -272,7 +281,8 @@ public class Chart extends JPanel {
 		    ixx++;
 		    continue;
 		}
-		StxJL rec = jl.data(piv);
+		int abs_piv = Math.abs(piv);
+		StxJL rec = jl.data(abs_piv);
 		int udv_start = ts.find(rec.date, 0);
 		if (udv_start < udv_end)
 		    udv_start++;
@@ -369,12 +379,15 @@ public class Chart extends JPanel {
 	List<Double> y_lst = new ArrayList<Double>();
 	List<Integer> pivots = jl1.pivots(4, false);
 	for(int piv: pivots) {
-	    StxJL rec = jl1.data(piv);
-	    x_lst.add(last_day_x - day_width * (jl1.size() - piv - 1));
-	    y_lst.add(yyp - price_height * (rec.c - min_price) / price_rg);
-	    if(rec.p2) {
-		x_lst.add(last_day_x - day_width * (jl1.size() - piv));
-		y_lst.add(yyp - price_height * (rec.c2 - min_price) / price_rg);
+	    int abs_piv = Math.abs(piv);
+	    StxJL rec = jl1.data(abs_piv);
+	    if (piv > 0) {
+		x_lst.add(last_day_x - day_width * (jl1.size() - abs_piv - 1));
+		y_lst.add(yyp - price_height * (rec.c - min_price) / price_rg);
+	    } else {
+		x_lst.add(last_day_x - day_width * (jl1.size() - abs_piv - 1));
+		y_lst.add(yyp - price_height * (rec.c2 - min_price) / 
+			  price_rg);
 	    }
 	}
 	if(x_lst.size() < 4)
