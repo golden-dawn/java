@@ -206,10 +206,10 @@ public class Chart extends JPanel {
 	float last_avg_volume = (avg_vol_sz > 0)?
 	    avg_volumes.get(avg_vol_sz - 1): 0;
 	if(jl1 != null) {
-	    System.err.printf("Before getChannel(), %s, %s\n", stk_name, ed);
+// 	    System.err.printf("Before getChannel(), %s, %s\n", stk_name, ed);
 	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
 					  price_height, min_price, price_rg);
-	    System.err.printf("After getChannel(), %s, %s\n", stk_name, ed);
+// 	    System.err.printf("After getChannel(), %s, %s\n", stk_name, ed);
 	    if(pts != null) {
 		g2.setPaint( Color.yellow);
 		g2.draw(new Line2D.Double(pts.get(0), pts.get(1),
@@ -217,9 +217,9 @@ public class Chart extends JPanel {
 		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
 					  pts.get(6), pts.get(7)));
 	    }
-	    System.err.printf("Before getOBV(), %s, %s\n", stk_name, ed);
+// 	    System.err.printf("Before getOBV(), %s, %s\n", stk_name, ed);
 	    String obv_str = getOBV(jl1, last_avg_volume);
-	    System.err.printf("After getOBV(), %s, %s\n", stk_name, ed);
+// 	    System.err.printf("After getOBV(), %s, %s\n", stk_name, ed);
 	    g2.drawString(obv_str, d.width / 2 - 350, 15);
 	    g2.setPaint( Color.darkGray);
 	}
@@ -267,13 +267,13 @@ public class Chart extends JPanel {
 	StxOBV obv = new StxOBV(ts, jl);
 	List<Integer> pivots = jl.pivots(4, true);
 	StringBuffer udv_sb = new StringBuffer("");
-	System.err.printf("%.1f: found %d pivots\n", jl.getFactor(), 
-			  pivots.size());
+// 	System.err.printf("%.1f: found %d pivots\n", jl.getFactor(), 
+// 			  pivots.size());
 	if(pivots.size() >= 4) {
 	    int piv0 = pivots.get(0), abs_piv0 = Math.abs(piv0);
 	    StxJL piv_0 = jl.data(abs_piv0);
-	    System.err.printf("%.1f: piv_0.date = %s\n", jl.getFactor(), 
-			      piv_0.date);
+// 	    System.err.printf("%.1f: piv_0.date = %s\n", jl.getFactor(), 
+// 			      piv_0.date);
 	    int ixx = 0, start = ts.find(piv_0.date, 0);
 	    int udv_end = ts.currentPosition();
 	    for(int piv: pivots) {
@@ -283,20 +283,12 @@ public class Chart extends JPanel {
 		}
 		int abs_piv = Math.abs(piv);
 		StxJL rec = jl.data(abs_piv);
-		int udv_start = ts.find(rec.date, 0);
-		if (udv_start < udv_end)
-		    udv_start++;
-		float res = obv.obv(udv_start, udv_end);
+		float res = obv.obv(piv, udv_end);
 		udv_sb.append(" P").append(ixx).append(": ");
-		udv_sb.append(String.format("%7.2f [%4.1f]", rec.c,
+		udv_sb.append(String.format("%7.2f [%4.1f]", 
+					    (piv < 0)? rec.c2: rec.c,
 					    res / last_avg_volume));
 		ixx++;
-		if(rec.p2) {
-		    udv_sb.append(" P").append(ixx).append(": ");
-		    udv_sb.append(String.format("%7.2f [%4.1f]", rec.c2,
-						res / last_avg_volume));
-		    ixx++;
-		}
 	    }
 	}
 	return udv_sb.toString();
