@@ -13,6 +13,7 @@ import javax.swing.text.StyleConstants;
 
 import core.StxCal;
 import core.StxRec;
+import indicators.StxOBV;
 import jl.StxJL;
 import jl.StxxJL;
  
@@ -242,10 +243,12 @@ public class JLDisplay extends JScrollPane {
         } 
     }
     
-    public void printLastLine( StxRec r, double f) {
-        append( String.format( "%10s %.2f %.2f %.2f %.2f %,.0f  %.2f",
-			       invisible? String.valueOf(StxCal.numBusDays(first_date, r.date)): r.date,
-                               r.o, r.h, r.l, r.c, r.v, f));
+    public void printLastLine(StxRec r, double f) {
+	String r_date = r.date;
+	if (invisible)
+	    r_date = String.valueOf(StxCal.numBusDays(first_date, r.date));
+        append(String.format("%10s %.2f %.2f %.2f %.2f %,.0f  %.2f",
+			     r_date, r.o, r.h, r.l, r.c, r.v, f));
     }
 
     public void newSize( int w, int h) {
@@ -255,14 +258,15 @@ public class JLDisplay extends JScrollPane {
         return d.getText( 0, d.getLength());
     }
     public void setTextPanelBackground( Color col) { jtp.setBackground( col);}
-    public StxxJL runJL( String stk, String sd, String ed, float ff, int w, 
+    public StxxJL runJL(String stk, String sd, String ed, float ff, int w, 
 			 int pivs, String eod_tbl, String split_tbl) {
         clear();
-        int vw= 1;              
-        StxxJL sjl= new StxxJL( stk, sd, ed, ff, w, vw, eod_tbl, split_tbl);
-        sjl.jl( ed);
+        int vw = 1;              
+        StxxJL sjl = new StxxJL(stk, sd, ed, ff, w, vw, eod_tbl, split_tbl);
+        sjl.jl(ed);
+	StxOBV obv = new StxOBV(sjl);
 	first_date = sjl.data(0).date;
-        List<Integer> pivots= sjl.pivots( pivs, false);
+        List<Integer> pivots = sjl.pivots(pivs, false);
         for(int piv: pivots) {
 	    if (piv < 0)
 		continue;
