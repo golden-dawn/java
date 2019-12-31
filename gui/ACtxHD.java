@@ -276,13 +276,13 @@ public class ACtxHD implements KeyListener, ActionListener {
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
         jld1= new JLDisplay( hd11 + 40, 220, 12, invisible.isSelected());
-        addC( jpu, jld1, 5, 110, resX- hd11- 80, 290);
+        addC( jpu, jld1, 5, 110, resX- hd11, 290);
         addC( jpu, jlfl2,  5, 400, 80, 20);
         jld2= new JLDisplay( hd11- 10, 220, 12, invisible.isSelected());
-        addC( jpu, jld2, 5, 420, resX- hd11- 80, 290);
+        addC( jpu, jld2, 5, 420, resX- hd11, 290);
         addC( jpu, jlfl3,  5, 710, 80, 20);
         jld3= new JLDisplay( hd11- 10, 220, 12, invisible.isSelected());
-        addC( jpu, jld3, 5, 730, resX- hd11- 80, 290);
+        addC( jpu, jld3, 5, 730, resX- hd11, 290);
         jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
 
 	int vert_div = 14 * resY / 19;
