@@ -54,12 +54,16 @@ public class StxxJL {
             else recDay( ix, StxJL.None, StxJL.None);
     }
 
-    
-    public float avgRange( List<StxRec> data, int ix, int w) {
-        float res= 0; int s= ix- w + 1; if( s< 0) s= 0; int ww= ix- s + 1;
-        for( int ixx= s; ixx<= ix; ++ixx)
-            res+= data.get( ixx).trueRange(( ixx== 0)? null: data.get( ixx- 1));
-        return res/ ww;
+    public float avgRange(List<StxRec> data, int ix, int w) {
+        float res = 0; 
+	int s = ix - w + 1; 
+	if (s < 0) 
+	    s = 0;
+	int ww = ix - s + 1;
+        for(int ixx = s; ixx <= ix; ++ixx)
+            res += data.get(ixx).trueRange((ixx == 0)? null: 
+					   data.get(ixx - 1));
+        return res / ww;
     }
   
     
@@ -213,20 +217,22 @@ public class StxxJL {
             append( " DT=").append( pf( lp[ StxJL.DT])).
             append( " NRe=").append( pf( lp[ StxJL.NRe])).
             append( " SRe=").append( pf( lp[ StxJL.SRe])).
-            append( " m_NRa=").append( pf(  lp[ StxJL.m_NRa]))
-            .append( " m_NRe=").append( pf(lp[ StxJL.m_NRe])).append( "\n");
+            append( " m_NRa=").append( pf(  lp[ StxJL.m_NRa])).
+            append( " m_NRe=").append( pf(lp[ StxJL.m_NRe])).append( "\n");
         return sb.toString();
     }
     public String toString(){
         return stk+ "\n"+ (( recs!= null)? recs.toString(): "");
     }
     public ArrayList<StxJL> data() { return recs.data(); }
+    public StxTS<StxRec> stk_data() { return data; }
     public StxRec lastDay() { return  data.get( data.size()- 1); }
     public String lastDayStr() {
         StringBuilder sb= new StringBuilder();
         StxRec r= data.get( data.size()- 1);
-        sb.append( String.format( "%s %.2f %.2f %.2f %.2f %.1f [ %.2f]", r.date,
-                                  r.o, r.h, r.l, r.c, vi, factorPrice()));
+        sb.append( String.format( "%s %.2f %.2f %.2f %.2f %.1f [ %.2f]", 
+				  r.date, r.o, r.h, r.l, r.c, vi, 
+				  factorPrice()));
         return  sb.toString();
     }
     public StxJL last() { return  recs.last();}
@@ -241,7 +247,7 @@ public class StxxJL {
             List<Integer> rec_pivs = rec.pxx();
             Integer rec_p = rec_pivs.get(0), rec_p2 = rec_pivs.get(1);
             if ((rec_p2 != null) && (rec_p2 <= xx)) {
-		System.err.printf("P2: %.1f: adding %d to pivs\n", f, -ixx);
+// 		System.err.printf("P2: %.1f: adding %d to pivs\n", f, -ixx);
                 piv.add(0, -ixx); 
 		if (++ix >= num)
 		    break;
@@ -249,7 +255,7 @@ public class StxxJL {
             if ((rec_p != null) && (rec_p <= xx)) {
 		ix++;
 		piv.add(0, ixx);
-		System.err.printf("P1: %.1f: adding %d to pivs\n", f, ixx);
+// 		System.err.printf("P1: %.1f: adding %d to pivs\n", f, ixx);
 	    }
             --ixx;
         }
@@ -267,17 +273,17 @@ public class StxxJL {
 	    if (recs.get(--ixx).p2) {
 		ix++;
 		piv.add(0, -ixx);
-		System.err.printf("P2: %.1f: adding %d to pivs\n", f, -ixx);
+// 		System.err.printf("P2: %.1f: adding %d to pivs\n", f, -ixx);
             }
             if (recs.get(ixx).p) {
                 ix++; 
 		piv.add(0, ixx); 
-		System.err.printf("P1: %.1f: adding %d to pivs\n", f, ixx);
+// 		System.err.printf("P1: %.1f: adding %d to pivs\n", f, ixx);
 	    }
         }
-        if (include_lns && !lns.p && !lns.p2) {
+        if (include_lns) {
             int lns_ix = recs.find(lns.date, 0);
-            piv.add(lns_ix);
+	    piv.add(lns_ix * (lns.p? -1: 1));
         }
         return piv;
     }
