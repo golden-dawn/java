@@ -174,14 +174,14 @@ public class JLDisplay extends JScrollPane {
 			       (StxCal.numBusDays(first_date, jlr.date)): 
 			       jlr.date));
 	printRecBody(jlr);
-	append(String.format("%6.1f", obv1 / jlr.vr));
+	append(String.format("%6.1f", obv1));
 	append("\n");
 	if (jlr.c2 != 0) {
             append(String.format("%10s|", invisible? String.valueOf
 				 (StxCal.numBusDays(first_date, jlr.date)): 
 				 jlr.date));
             printRecBody2(jlr);
-	    append(String.format("%6.1f", obv2 / jlr.vr));
+	    append(String.format("%6.1f", obv2));
             append("\n");
         }
     }
