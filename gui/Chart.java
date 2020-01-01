@@ -286,8 +286,7 @@ public class Chart extends JPanel {
 		float res = obv.obv(piv, udv_end);
 		udv_sb.append(" P").append(ixx).append(": ");
 		udv_sb.append(String.format("%7.2f [%4.1f]", 
-					    (piv < 0)? rec.c2: rec.c,
-					    res / last_avg_volume));
+					    (piv < 0)? rec.c2: rec.c, res));
 		ixx++;
 	    }
 	}
