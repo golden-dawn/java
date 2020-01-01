@@ -36,11 +36,11 @@ public class StxOBV {
 	int start_piv_state = (start_jl > 0)? start_rec.s: start_rec.s2;
 	if ((sjl.up(start_piv_state) && srs.hiB4Lo()) || 
 	    (sjl.dn(start_piv_state) && !srs.hiB4Lo()))
-	    obv += start_rec.obv2;
-	obv += start_rec.obv3;
+	    obv += start_rec.obv2 / start_rec.vr;
+	obv += start_rec.obv3 / start_rec.vr;
 	for(int ix = jls + 1; ix <= jle; ix++) {
 	    StxJL jlr = sjl.data(ix);
-	    obv += (jlr.obv1 + jlr.obv2 + jlr.obv3);
+	    obv += (jlr.obv1 + jlr.obv2 + jlr.obv3) / jlr.vr;
 	}
 	return obv;
     }
