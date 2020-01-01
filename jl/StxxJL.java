@@ -81,8 +81,10 @@ public class StxxJL {
         _f = f * avg_rg;
 	data.nextDay(1);
         Float ratio = data.getSplit(data.rel(0).date);
-        if (ratio != null)
+        if (ratio != null) {
 	    adjustForSplits(ratio.floatValue());
+	    adjustRecordsForSplit(ix, ratio.floatValue());
+	}
         switch(ls.s()) {
         case StxJL.SRa: 
 	    sRa(ix, _f); 
@@ -319,8 +321,9 @@ public class StxxJL {
     public StxJL data( int ix){ return recs.get( ix);}
     public int size() { return recs.size();}
 
-    private void adjustRecordsForSplit( int ix, float split_ratio) {
-        for( int ixx= 0; ixx< ix; ixx++) recs.get( ixx).split( split_ratio);
+    private void adjustRecordsForSplit(int ix, float split_ratio) {
+        for(int ixx = 0; ixx < ix; ixx++)
+	    recs.get(ixx).split(split_ratio);
     }
 
     public void setFactor( float f) { this.f= f; }
