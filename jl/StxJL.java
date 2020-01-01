@@ -40,7 +40,15 @@ public class StxJL extends StxRecord {
         super( r.date, 0); c= r.c; s= r.s; vr= r.vr; p= r.p;
         c2= r.c2; s2= r.s2; p2= r.p2; this.arg= r.arg;
     }
-    public void split( float s) { c*= s; c2*= s; vr/= s; arg*= s; }
+    public void split(float s) {
+	c *= s;
+	c2 *= s;
+	vr /= s;
+	obv1 /= s;
+	obv2 /= s;
+	obv3 /= s;
+	arg *= s;
+    }
     public void dividend( float d) { c-= d; c2-= d; }
 
     public float c(){ return( c2== 0)? c: c2; }
