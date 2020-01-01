@@ -65,33 +65,60 @@ public class StxxJL {
 					   data.get(ixx - 1));
         return res / ww;
     }
-  
-    
-    public void next( int ix) {
-        _f= f* avg_rg; data.nextDay( 1);
-        Float ratio= data.getSplit( data.rel( 0).date);
-        if( ratio!= null) adjustForSplits( ratio.floatValue());
-        switch( ls.s()) {
-        case StxJL.SRa: sRa( ix, _f); break; case StxJL.NRa: nRa( ix, _f);break;
-        case StxJL.UT:  uT( ix, _f);  break; case StxJL.DT:  dT( ix, _f); break;
-        case StxJL.NRe: nRe( ix, _f); break; case StxJL.SRe: sRe( ix, _f);break;
-        };
-        avg_rg= avgRange( data.data(), ix, w);
+
+    public float avgVolume(List<StxRec> data, int ix, int w) {
+        float res = 0;
+	int s = ix - w + 1; 
+	if (s < 0) 
+	    s = 0;
+	int ww = ix - s + 1;
+        for(int ixx = s; ixx <= ix; ++ixx)
+            res += data.get(ixx).v;
+        return res / ww;
     }
 
-    private void adjustForSplits( float ratio) {
-        for( int ix= 0; ix< lp.length; ++ix)
-            lp[ ix]*= ratio;
+    public void next(int ix) {
+        _f = f * avg_rg;
+	data.nextDay(1);
+        Float ratio = data.getSplit(data.rel(0).date);
+        if (ratio != null)
+	    adjustForSplits(ratio.floatValue());
+        switch(ls.s()) {
+        case StxJL.SRa: 
+	    sRa(ix, _f); 
+	    break; 
+	case StxJL.NRa: 
+	    nRa(ix, _f);
+	    break;
+        case StxJL.UT:
+	    uT(ix, _f);
+	    break;
+	case StxJL.DT:
+	    dT( ix, _f);
+	    break;
+        case StxJL.NRe:
+	    nRe( ix, _f);
+	    break;
+	case StxJL.SRe:
+	    sRe( ix, _f);
+	    break;
+        };
+        avg_rg = avgRange(data.data(), ix, w);
+        vi = avgVolume(data.data(), ix, w);
+    }
+
+    private void adjustForSplits(float ratio) {
+        for(int ix = 0; ix < lp.length; ++ix)
+            lp[ix] *= ratio;
         //lns.split( ratio);
     }
 
     private void recDay(int ix, int sh, int sl) {
         StxRec sr = data.get(ix);
-	float prev_c = (ix == 0)? sr.o: data.get(ix - 1).c;
-        vi= 0;//StxCalc.mfi( data.data(), ix, vw);
         StxJL jlr= new StxJL( sr.date, avg_rg, vi, recs.size());
+	float prev_c = (ix == 0)? sr.o: data.get(ix - 1).c;
 	jlr.setOBV(sr, prev_c); 
-	recs.add( jlr);
+	recs.add(jlr);
         if(( sh!= StxJL.None)&& ( sl!= StxJL.None)) {
             if( sr.hiB4Lo()){ r( jlr, sr, sh); r( jlr, sr, sl);}
             else{ r( jlr, sr, sl); r( jlr, sr, sh);}
