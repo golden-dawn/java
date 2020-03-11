@@ -8,12 +8,6 @@ import javax.swing.event.ChangeListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -21,28 +15,19 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.HashMap;
 import java.util.TreeMap;
-import java.util.concurrent.ThreadLocalRandom;
-
-import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 
 import core.StxCal;
 import core.StxDB;
-import core.StxRec;
 import jl.StxxJL;
 
 // TODO:
