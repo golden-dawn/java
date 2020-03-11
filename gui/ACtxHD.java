@@ -8,12 +8,8 @@ import javax.swing.event.ChangeListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -24,37 +20,23 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 
 import core.StxCal;
 import core.StxDB;
-import core.StxRec;
 import jl.StxxJL;
-
-// TODO:
-//v1. Add a strike and an expiry text fields, as well as an OK button
-//v2. Replace BUY with CALL and SELL with PUT
-//v3. Get a text area with the option prices for the selected strike and expiry
-//v4. Write SQL code that gets the options from the database
-// 5. Create another text area that shows the current open trades
-// 6. Create a trading activity label
-//v7. Replace the strike and expiry labels with dropdown menus
-//v8. Adjust the logging to capture both spots, as well as option prices
 
 public class ACtxHD implements KeyListener, ActionListener {
     static JFrame jf; 
@@ -66,7 +48,9 @@ public class ACtxHD implements KeyListener, ActionListener {
     private JButton call, put, c_call, c_put;
     private JButton wl_add, wl_trg, wl_mark, wl_clear, wl_clear_all;
     private JTextField wl_date, wl_spread, wl_days, wl_setups;
-    private JComboBox exp, strike, capital, setups_or_trades;
+    private JComboBox<String> exp, setups_or_trades;
+    private JComboBox<Float> strike;
+    private JComboBox<Integer> capital;
     private JCheckBox invisible;
     private JLDisplay jld1, jld2, jld3, opts, trades, setups;
     private JLabel jlfl1, jlfl2, jlfl3, trade_status;
@@ -78,8 +62,6 @@ public class ACtxHD implements KeyListener, ActionListener {
     // <cp, expiry, strike> =>
     // <in_date, in_price, in_range, in_opt_px, crt_bid, crt_ask, crt_spot
     String last_scale= "3M", crt_date;
-    private String trade_type = "", trade_date;
-    private float trade_price, trade_daily_range;
     List<String[]> entries = new ArrayList<String[]>();
     int crt_pos = 0;
     TreeMap<String, Integer> trend_map= new TreeMap<String, Integer>();
@@ -90,15 +72,15 @@ public class ACtxHD implements KeyListener, ActionListener {
         
         Calendar c= new GregorianCalendar();
         yr= c.get( Calendar.YEAR);
-	last_opt_date = String.format("%d-12-31", (yr - 1));
+        last_opt_date = String.format("%d-12-31", (yr - 1));
         String d= String.format( "%d-%02d-%02d", yr,
                                  1+ c.get( Calendar.MONTH),
                                  c.get( Calendar.DAY_OF_MONTH));
         new StxCal( yr+ 2);
-	this.crt_date = d;
+        this.crt_date = d;
         if( StxCal.isBusDay( d)== false)
             d= StxCal.prevBusDay( d);
-	log_fname = String.format("../trades/%s.txt", d);
+        log_fname = String.format("../trades/%s.txt", d);
         jf= new JFrame( "ACTX");
         etf= new JTextField( d); etf.setCaretColor( Color.white);
         etf.setName( "ETF"); etf.addKeyListener( this);
@@ -114,15 +96,15 @@ public class ACtxHD implements KeyListener, ActionListener {
         jlfl2 = new JLabel("Factor: "+ jlf2.getText());
         jlfl3 = new JLabel("Factor: "+ jlf3.getText());
         jlp= new JTextField( "16"); jlp.setCaretColor( Color.white);
-	invisible = new JCheckBox("Invisible");
-	invisible.setSelected(false);
+        invisible = new JCheckBox("Invisible");
+        invisible.setSelected(false);
         jpu= new JPanel( null);
         jpu.setBackground( Color.black);
         jpu.setForeground( Color.lightGray);
-	addC( jpu, ntf, 15, 7, 60, 25);
+        addC( jpu, ntf, 15, 7, 60, 25);
         addC( jpu, etf, 75, 7, 100, 25);
         etf.setForeground(invisible.isSelected()? Color.black: 
-			  Color.lightGray);
+                          Color.lightGray);
         fwd= new JButton( "+"); fwd.addActionListener( this);
         bak= new JButton( "-"); bak.addActionListener( this);
         rewind = new JButton("<");
@@ -136,7 +118,7 @@ public class ACtxHD implements KeyListener, ActionListener {
         pick_stk.addActionListener(this);
         addC( jpu, pick_stk, 500, 7, 50, 25);
         jb1m= new JButton( "1M");
-	jb1m.setOpaque(true);
+        jb1m.setOpaque(true);
         jb1m.addActionListener( this);
         addC( jpu, jb1m, 15, 35, 55, 15);
         jb3m= new JButton( "3M");
@@ -168,7 +150,7 @@ public class ACtxHD implements KeyListener, ActionListener {
         addC( jpu, jlf2,  90, 55, 50, 20);
         addC( jpu, jlf3,  140, 55, 50, 20);
         addC( jpu, jlp,  190, 55, 50, 20);
-	
+        
         jp_trd = new JPanel(null);
         jp_trd.setBackground(Color.black);
         jp_trd.setForeground(Color.lightGray);
@@ -176,103 +158,103 @@ public class ACtxHD implements KeyListener, ActionListener {
         put = new JButton("PUT"); put.addActionListener(this);
         c_call = new JButton("CLOSE CALL"); c_call.addActionListener(this);
         c_put = new JButton("CLOSE PUT"); c_put.addActionListener(this);
-	strike = new JComboBox<Float>();
-	strike.setEditable(true);
-	strike.getEditor().getEditorComponent().addKeyListener
-	    (new KeyAdapter() {
-		    @Override
-		    public void keyReleased(KeyEvent event) {
-			// System.err.printf("event.getKeyCode() = %d\n",
-			// 		   event.getKeyCode());
-			if (event.getKeyCode() == KeyEvent.VK_F1) {
-			    etf.requestFocusInWindow();
-			}
-		    }
-		});	
-	exp = new JComboBox<String>();
-	exp.setEditable(true);
-	exp.getEditor().getEditorComponent().addKeyListener
-	    (new KeyAdapter() {
-		    @Override
-		    public void keyReleased(KeyEvent event) {
-			if (event.getKeyCode() == KeyEvent.VK_F1) {
-			    etf.requestFocusInWindow();
-			}
-		    }
-		});	
-	capital = new JComboBox<Float>();
-	capital.getEditor().getEditorComponent().addKeyListener
-	    (new KeyAdapter() {
-		    @Override
-		    public void keyReleased(KeyEvent event) {
-			if (event.getKeyCode() == KeyEvent.VK_F1) {
-			    etf.requestFocusInWindow();
-			}
-		    }
-		});	
-	capital.setEditable(true);
-	capital.addItem(125);
-	capital.addItem(250);
-	capital.addItem(500);
-	capital.addItem(750);
-	capital.addItem(1000);
-	capital.addItem(1500);
-	capital.addItem(2000);
-	capital.setSelectedIndex(2);
-	opts = new JLDisplay(600, 100, 12, invisible.isSelected());
-	trades = new JLDisplay(600, 100, 12, invisible.isSelected());
-	setups = new JLDisplay(600, 100, 12, invisible.isSelected());
-	trade_status = new JLabel("GETTING STARTED . . .");
+        strike = new JComboBox<Float>();
+        strike.setEditable(true);
+        strike.getEditor().getEditorComponent().addKeyListener
+            (new KeyAdapter() {
+                    @Override
+                    public void keyReleased(KeyEvent event) {
+                        // System.err.printf("event.getKeyCode() = %d\n",
+                        //                 event.getKeyCode());
+                        if (event.getKeyCode() == KeyEvent.VK_F1) {
+                            etf.requestFocusInWindow();
+                        }
+                    }
+                });     
+        exp = new JComboBox<String>();
+        exp.setEditable(true);
+        exp.getEditor().getEditorComponent().addKeyListener
+            (new KeyAdapter() {
+                    @Override
+                    public void keyReleased(KeyEvent event) {
+                        if (event.getKeyCode() == KeyEvent.VK_F1) {
+                            etf.requestFocusInWindow();
+                        }
+                    }
+                });     
+        capital = new JComboBox<Integer>();
+        capital.getEditor().getEditorComponent().addKeyListener
+            (new KeyAdapter() {
+                    @Override
+                    public void keyReleased(KeyEvent event) {
+                        if (event.getKeyCode() == KeyEvent.VK_F1) {
+                            etf.requestFocusInWindow();
+                        }
+                    }
+                });     
+        capital.setEditable(true);
+        capital.addItem(125);
+        capital.addItem(250);
+        capital.addItem(500);
+        capital.addItem(750);
+        capital.addItem(1000);
+        capital.addItem(1500);
+        capital.addItem(2000);
+        capital.setSelectedIndex(2);
+        opts = new JLDisplay(600, 100, 12, invisible.isSelected());
+        trades = new JLDisplay(600, 100, 12, invisible.isSelected());
+        setups = new JLDisplay(600, 100, 12, invisible.isSelected());
+        trade_status = new JLabel("GETTING STARTED . . .");
 
         wl_add = new JButton("WL ADD"); wl_add.addActionListener(this);
         wl_trg = new JButton("WL TRG"); wl_trg.addActionListener(this);
         wl_mark = new JButton("WL MARK"); wl_mark.addActionListener(this);
         wl_clear = new JButton("WL CLEAR"); wl_clear.addActionListener(this);
         wl_clear_all = new JButton("WL CLEAR ALL"); 
-	wl_clear_all.addActionListener(this);
-	wl_date = new JTextField(d);
+        wl_clear_all.addActionListener(this);
+        wl_date = new JTextField(d);
         wl_date.setCaretColor(Color.white);
         wl_date.setName("WLDT"); 
-	wl_date.addKeyListener(this);
-	wl_spread = new JTextField("15");
+        wl_date.addKeyListener(this);
+        wl_spread = new JTextField("15");
         wl_spread.setCaretColor(Color.white);
         wl_spread.setName("WLS"); 
-	wl_spread.addKeyListener(this);
-	wl_days = new JTextField("8");
+        wl_spread.addKeyListener(this);
+        wl_days = new JTextField("8");
         wl_days.setCaretColor(Color.white);
         wl_days.setName("WLD"); 
-	wl_days.addKeyListener(this);
-	wl_setups = new JTextField("3");
+        wl_days.addKeyListener(this);
+        wl_setups = new JTextField("3");
         wl_setups.setCaretColor(Color.white);
         wl_setups.setName("WLSTP"); 
-	wl_setups.addKeyListener(this);
-	setups_or_trades = new JComboBox<String>();
-	setups_or_trades.setEditable(false);
-	setups_or_trades.addItem("Trades");
-	setups_or_trades.addItem("Setups");
-	setups_or_trades.setSelectedIndex(0);
-	
+        wl_setups.addKeyListener(this);
+        setups_or_trades = new JComboBox<String>();
+        setups_or_trades.setEditable(false);
+        setups_or_trades.addItem("Trades");
+        setups_or_trades.addItem("Setups");
+        setups_or_trades.setSelectedIndex(0);
+        
         addC(jp_trd, call, 5, 5, 80, 15);
         addC(jp_trd, put, 85, 5, 80, 15);
         addC(jp_trd, c_call, 165, 5, 120, 15);
         addC(jp_trd, c_put, 285, 5, 120, 15);
-	addC(jp_trd, strike, 405, 0, 80, 20);
-	addC(jp_trd, exp, 485, 0, 160, 20);
-	addC(jp_trd, capital, 645, 0, 80, 20);
-	addC(jp_trd, trade_status, 765, 5, 550, 15);
-	addC(jp_trd, opts, 5, 20, 505, 155);
-	addC(jp_trd, trades, 510, 20, 655, 155);
-	addC(jp_trd, setups, 1170, 20, 200, 155);
-	addC(jp_trd, wl_add, 5, 185, 60, 20);
-	addC(jp_trd, wl_trg, 65, 185, 60, 20);
-	addC(jp_trd, wl_mark, 125, 185, 70, 20);
-	addC(jp_trd, wl_clear, 195, 185, 80, 20);
-	addC(jp_trd, wl_clear_all, 495, 185, 120, 20);
-	addC(jp_trd, wl_date, 275, 185, 100, 25);
-	addC(jp_trd, wl_spread, 375, 185, 40, 25);
- 	addC(jp_trd, wl_days, 415, 185, 40, 25);
- 	addC(jp_trd, wl_setups, 455, 185, 40, 25);
-	addC(jp_trd, setups_or_trades, 615, 185, 100, 20);	
+        addC(jp_trd, strike, 405, 0, 80, 20);
+        addC(jp_trd, exp, 485, 0, 160, 20);
+        addC(jp_trd, capital, 645, 0, 80, 20);
+        addC(jp_trd, trade_status, 765, 5, 550, 15);
+        addC(jp_trd, opts, 5, 20, 505, 155);
+        addC(jp_trd, trades, 510, 20, 655, 155);
+        addC(jp_trd, setups, 1170, 20, 200, 155);
+        addC(jp_trd, wl_add, 5, 185, 60, 20);
+        addC(jp_trd, wl_trg, 65, 185, 60, 20);
+        addC(jp_trd, wl_mark, 125, 185, 70, 20);
+        addC(jp_trd, wl_clear, 195, 185, 80, 20);
+        addC(jp_trd, wl_clear_all, 495, 185, 120, 20);
+        addC(jp_trd, wl_date, 275, 185, 100, 25);
+        addC(jp_trd, wl_spread, 375, 185, 40, 25);
+        addC(jp_trd, wl_days, 415, 185, 40, 25);
+        addC(jp_trd, wl_setups, 455, 185, 40, 25);
+        addC(jp_trd, setups_or_trades, 615, 185, 100, 20);      
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
         jld1= new JLDisplay( hd11 + 40, 220, 12, invisible.isSelected());
@@ -285,22 +267,22 @@ public class ACtxHD implements KeyListener, ActionListener {
         addC( jpu, jld3, 5, 730, resX- hd11, 290);
         jtp_jl= new JTabbedPane( JTabbedPane.BOTTOM);
 
-	int vert_div = 14 * resY / 19;
+        int vert_div = 14 * resY / 19;
         JSplitPane jspv= new JSplitPane( JSplitPane.VERTICAL_SPLIT,
                                          jtp_jl, jp_trd);
         jspv.setOneTouchExpandable(true);
         jspv.setDividerLocation(vert_div);
 
-	jtp_jl.addChangeListener(new ChangeListener() {
-		public void stateChanged(ChangeEvent e) {
-		    Chart cc = (Chart)jtp_jl.getSelectedComponent();
-		    if((cc != null) && (ntf.getText() != cc.stk_name)) {
-			ntf.setText(cc.stk_name);
-			etf.setText(cc.ts.currentDate());
-		    }
-		}
-	    });
-	
+        jtp_jl.addChangeListener(new ChangeListener() {
+                public void stateChanged(ChangeEvent e) {
+                    Chart cc = (Chart)jtp_jl.getSelectedComponent();
+                    if((cc != null) && (ntf.getText() != cc.stk_name)) {
+                        ntf.setText(cc.stk_name);
+                        etf.setText(cc.ts.currentDate());
+                    }
+                }
+            });
+        
         JSplitPane jspu= new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
                                          jspv, jpu);
         jspu.setOneTouchExpandable( true);
@@ -313,132 +295,132 @@ public class ACtxHD implements KeyListener, ActionListener {
     }
     public void keyPressed( KeyEvent e) {
         try {
-	    //  F1 = 112
-	    //  F2 = 113
-	    //  F3 = 114
-	    //  F4 = 115
-	    //  F5 = 116
-	    //  F6 = 117
-	    //  F7 = 118
-	    //  F8 = 119
-	    //  F9 = 120
-	    // F10 = 121
-	    // F11 = 122
-	    // F12 = 123
+            //  F1 = 112
+            //  F2 = 113
+            //  F3 = 114
+            //  F4 = 115
+            //  F5 = 116
+            //  F6 = 117
+            //  F7 = 118
+            //  F8 = 119
+            //  F9 = 120
+            // F10 = 121
+            // F11 = 122
+            // F12 = 123
             int cd= e.getKeyCode(); String src= e.getComponent().getName();
-// 	    System.err.printf("cd = %d, src = %s\n", cd, src);
+//          System.err.printf("cd = %d, src = %s\n", cd, src);
             if( src.equals( "ETF")) {
                 String ed= etf.getText();
                 if (cd == 38) 
-		    etf.setText(StxCal.nextBusDay(ed));
-		if (cd == 40)
- 		    etf.setText(StxCal.prevBusDay(ed));
-		handleCommonKeys(cd);
+                    etf.setText(StxCal.nextBusDay(ed));
+                if (cd == 40)
+                    etf.setText(StxCal.prevBusDay(ed));
+                handleCommonKeys(cd);
             } else if (src.equals("NTF")) {
-		handleCommonKeys(cd);
+                handleCommonKeys(cd);
                 if(cd == 38) 
-		    moveTabRight();
+                    moveTabRight();
                 if(cd == 40) 
-		    moveTabLeft();
+                    moveTabLeft();
             } else if (src.equals("WLS") || src.equals("WLD") || 
-		       src.equals("WLSTP")) {
-		if (cd == KeyEvent.VK_F1)
-		    etf.requestFocusInWindow();
-		if (cd == KeyEvent.VK_F2)
-		    ntf.requestFocusInWindow();
-		if (cd == KeyEvent.VK_F3)
-		    wl_date.requestFocusInWindow();
-	    } else if (src.equals("WLDT")) {
+                       src.equals("WLSTP")) {
+                if (cd == KeyEvent.VK_F1)
+                    etf.requestFocusInWindow();
+                if (cd == KeyEvent.VK_F2)
+                    ntf.requestFocusInWindow();
+                if (cd == KeyEvent.VK_F3)
+                    wl_date.requestFocusInWindow();
+            } else if (src.equals("WLDT")) {
                 String ed = wl_date.getText();
                 if (cd == 38) 
-		    wl_date.setText(StxCal.nextBusDay(ed));
-		if (cd == 40)
- 		    wl_date.setText(StxCal.prevBusDay(ed));
-		handleCommonKeys(cd);
-	    }
+                    wl_date.setText(StxCal.nextBusDay(ed));
+                if (cd == 40)
+                    wl_date.setText(StxCal.prevBusDay(ed));
+                handleCommonKeys(cd);
+            }
         } catch (Exception exc) {
             exc.printStackTrace(System.err);
         }
     }
 
     private void moveTabRight() throws Exception {
-	int sel_ix = jtp_jl.getSelectedIndex() + 1;
-	if (sel_ix >= jtp_jl.getTabCount())
-	    sel_ix = 0;
-	jtp_jl.setSelectedIndex(sel_ix);
-	go();
+        int sel_ix = jtp_jl.getSelectedIndex() + 1;
+        if (sel_ix >= jtp_jl.getTabCount())
+            sel_ix = 0;
+        jtp_jl.setSelectedIndex(sel_ix);
+        go();
     }
 
     private void moveTabLeft() throws Exception {
-	int sel_ix = jtp_jl.getSelectedIndex() - 1;
-	if(sel_ix < 0)
-	    sel_ix = jtp_jl.getTabCount() - 1;
-	jtp_jl.setSelectedIndex(sel_ix);
-	go();
+        int sel_ix = jtp_jl.getSelectedIndex() - 1;
+        if(sel_ix < 0)
+            sel_ix = jtp_jl.getTabCount() - 1;
+        jtp_jl.setSelectedIndex(sel_ix);
+        go();
     }
 
     private void markTab() {
-	int ix = jtp_jl.getSelectedIndex();
-	jtp_jl.setToolTipTextAt(ix, wl_date.getText());
-	jtp_jl.setBackgroundAt(ix, Color.yellow);
+        int ix = jtp_jl.getSelectedIndex();
+        jtp_jl.setToolTipTextAt(ix, wl_date.getText());
+        jtp_jl.setBackgroundAt(ix, Color.yellow);
     }
 
     private void clearTab() {
-	int ix = jtp_jl.getSelectedIndex();
-	jtp_jl.setToolTipTextAt(ix, null);
-	jtp_jl.setBackgroundAt(ix, null);
+        int ix = jtp_jl.getSelectedIndex();
+        jtp_jl.setToolTipTextAt(ix, null);
+        jtp_jl.setBackgroundAt(ix, null);
     }
 
     private void handleCommonKeys(int cd) throws Exception {
-	if (cd == KeyEvent.VK_ENTER) 
-	    go();
-	if (cd == 33) {
-	    increaseScale();
-	    go();
-	}
-	if (cd == 34) {
-	    decreaseScale();
-	    go();
-	}
-	if (cd == 35 || cd == 36) {
-	    move(cd);
-	    go();
-	}
-	if (cd == 46) // KeyEvent.VK_GREATER
-	    moveTabRight();
-	if (cd == 44) // KeyEvent.VK_LESS
-	    moveTabLeft();
-	if (cd == KeyEvent.VK_OPEN_BRACKET) 
-	    markTab();
-	if (cd == KeyEvent.VK_CLOSE_BRACKET) 
-	    clearTab();
-	if (cd == KeyEvent.VK_F1)
-	    openTrade("CALL");
-	else if (cd == 113)
-	    openTrade("PUT");
-	else if (cd == 114)
-	    closeTrade("CLOSE CALL");
-	else if (cd == 115)
-	    closeTrade("CLOSE PUT");
-	else if (cd == 116)
-	    strike.requestFocusInWindow();
-	else if (cd == 117)
-	    exp.requestFocusInWindow();
-	else if (cd == 118)
-	    capital.requestFocusInWindow();
-	else if (cd == 123) {
-	    int sel_ix = jtp_jl.getSelectedIndex();
-	    jtp_jl.remove(sel_ix);
-	    if(sel_ix >= jtp_jl.getTabCount())
-		sel_ix = jtp_jl.getTabCount() - 1;
-	    jtp_jl.setSelectedIndex(sel_ix);
-	} else if (cd == 120) {
-	    decreaseScale();
-	    go();
-	} else if (cd == 121) {
-	    increaseScale();
-	    go();
-	}
+        if (cd == KeyEvent.VK_ENTER) 
+            go();
+        if (cd == 33) {
+            increaseScale();
+            go();
+        }
+        if (cd == 34) {
+            decreaseScale();
+            go();
+        }
+        if (cd == 35 || cd == 36) {
+            move(cd);
+            go();
+        }
+        if (cd == 46) // KeyEvent.VK_GREATER
+            moveTabRight();
+        if (cd == 44) // KeyEvent.VK_LESS
+            moveTabLeft();
+        if (cd == KeyEvent.VK_OPEN_BRACKET) 
+            markTab();
+        if (cd == KeyEvent.VK_CLOSE_BRACKET) 
+            clearTab();
+        if (cd == KeyEvent.VK_F1)
+            openTrade("CALL");
+        else if (cd == 113)
+            openTrade("PUT");
+        else if (cd == 114)
+            closeTrade("CLOSE CALL");
+        else if (cd == 115)
+            closeTrade("CLOSE PUT");
+        else if (cd == 116)
+            strike.requestFocusInWindow();
+        else if (cd == 117)
+            exp.requestFocusInWindow();
+        else if (cd == 118)
+            capital.requestFocusInWindow();
+        else if (cd == 123) {
+            int sel_ix = jtp_jl.getSelectedIndex();
+            jtp_jl.remove(sel_ix);
+            if(sel_ix >= jtp_jl.getTabCount())
+                sel_ix = jtp_jl.getTabCount() - 1;
+            jtp_jl.setSelectedIndex(sel_ix);
+        } else if (cd == 120) {
+            decreaseScale();
+            go();
+        } else if (cd == 121) {
+            increaseScale();
+            go();
+        }
     }
     
     private void decreaseScale() {
@@ -535,16 +517,16 @@ public class ACtxHD implements KeyListener, ActionListener {
     public void go() throws Exception {
 
         String jls, s, e= etf.getText(), tooltip_text = null;
-	Color bg_color = null;
+        Color bg_color = null;
         String n= ntf.getText();
         int idx, w= 20, p= Integer.parseInt( jlp.getText());
         float f1= Float.parseFloat( jlf1.getText());
         float f2= Float.parseFloat( jlf2.getText());
         float f3= Float.parseFloat( jlf3.getText());
-	etf.setForeground(invisible.isSelected()? Color.black: 
-			  Color.lightGray);
-	ntf.setForeground(invisible.isSelected()? Color.black: 
-			  Color.lightGray);
+        etf.setForeground(invisible.isSelected()? Color.black: 
+                          Color.lightGray);
+        ntf.setForeground(invisible.isSelected()? Color.black: 
+                          Color.lightGray);
         jlfl1.setText("Factor: "+ jlf1.getText());
         jlfl2.setText("Factor: "+ jlf2.getText());
         updateSetupPanel();
@@ -554,29 +536,29 @@ public class ACtxHD implements KeyListener, ActionListener {
         s= "1901-01-02";
         idx= jtp_jl.indexOfTab( n);
         if( idx!= -1) {
-	    tooltip_text = jtp_jl.getToolTipTextAt(idx);
-	    bg_color = jtp_jl.getBackgroundAt(idx);
+            tooltip_text = jtp_jl.getToolTipTextAt(idx);
+            bg_color = jtp_jl.getBackgroundAt(idx);
             jtp_jl.remove( idx); 
-	}
+        }
         jl1 = jld1.runJL(n, jls, e, f1, w, p, dbetf.getText(),
-			 dbstf.getText());
+                         dbstf.getText());
         // jld1.append( analysis( e));
         jl2 = jld2.runJL(n, jls, e, f2, w, p, dbetf.getText(),
-			 dbstf.getText());
+                         dbstf.getText());
         // jld2.append( analysis( e));
         jl3 = jld3.runJL(n, jls, e, f3, w, p, dbetf.getText(),
-			 dbstf.getText());
+                         dbstf.getText());
         chrt= new Chart(n, s, e, true, dbetf.getText(), dbstf.getText(), 
-			jl1, jl2, jl3, invisible.isSelected());
+                        jl1, jl2, jl3, invisible.isSelected());
         chrt.setScale(last_scale);
-	if (idx == -1)
-	    idx = jtp_jl.getTabCount();
+        if (idx == -1)
+            idx = jtp_jl.getTabCount();
         jtp_jl.insertTab(n, null, chrt, tooltip_text, idx);
-	jtp_jl.setBackgroundAt(idx, bg_color);
+        jtp_jl.setBackgroundAt(idx, bg_color);
         jtp_jl.setSelectedIndex(jtp_jl.indexOfTab(n));
-	getOptions();
-	updateTradeStatus();
-	updateSetupStatus();
+        getOptions();
+        updateTradeStatus();
+        updateSetupStatus();
     }
 
     private void updateSetupPanel() {
@@ -611,11 +593,11 @@ public class ACtxHD implements KeyListener, ActionListener {
 
     public void addC(JPanel p, JComponent c, int x, int y, int h, int w) {
         c.setBackground(Color.black);
-	c.setOpaque(true);
-	if (c instanceof JButton)
-	    c.setForeground(Color.black);
-	else
-	    c.setForeground(Color.lightGray);
+        c.setOpaque(true);
+        if (c instanceof JButton)
+            c.setForeground(Color.black);
+        else
+            c.setForeground(Color.lightGray);
         p.add(c); c.setBounds(x, y, h, w);
     }
 
@@ -648,396 +630,390 @@ public class ACtxHD implements KeyListener, ActionListener {
         if (ae.getSource() == fwd) moveDate( 1);
         if (ae.getSource() == bak) moveDate( -1);
         if (ae.getSource() == rewind) {
-	    String rewind_date = cc.rewind();
-	    etf.setText(rewind_date);
-	    try {
-		go();
-	    } catch( Exception exc) {
-		exc.printStackTrace(System.err);
-	    }
-	}
-	if (ae.getSource() == pick_stk) {
-	    String stk = "NFLX";
-	    try {
-		List<String> lines = Files.readAllLines
-		    (new File("../super_liquid_stx.txt").
-		     toPath(), Charset.defaultCharset());
-		stk = lines.get(ThreadLocalRandom.current().nextInt
-				(0, lines.size()));
-	    } catch(IOException ioe) {
-		ioe.printStackTrace(System.err);
-	    }
-	    ntf.setText(stk);
-	    try {
-		go();
-	    } catch( Exception exc) {
-		exc.printStackTrace(System.err);
-	    }	    
-	}
-	if (ae.getSource() == wl_add) {
-	    String table_name = setups_or_trades.getSelectedItem().toString().
-		toLowerCase();
-	    List<String> stx = table_name.equals("setups")? getSetupStocks():
-		getTradeStocks();
-	    for(String stk: stx) {
-		ntf.setText(stk);
-		etf.setText(wl_date.getText());
-		try {
-		    go();
-		} catch( Exception exc) {
-		    exc.printStackTrace(System.err);
-		}
-	    }
-	}
-	if (ae.getSource() == wl_trg) {
-	    String table_name = setups_or_trades.getSelectedItem().toString().
-		toLowerCase();
-	    wl_date.setText(StxCal.nextBusDay(wl_date.getText()));
-	    if (table_name.equals("setups")) {
-		List<String> stx = getSetupStocks(true);
-		for (int ix = jtp_jl.getTabCount() - 1; ix >= 0; ix--) {
-		    String stk = jtp_jl.getTitleAt(ix);
-		    if (!stx.contains(stk) && 
-			(jtp_jl.getToolTipTextAt(ix) == null))
-			jtp_jl.remove(ix);
-		    else {
-			ntf.setText(stk);
-			etf.setText(wl_date.getText());
-			try {
-			    go();
-			} catch( Exception exc) {
-			    exc.printStackTrace(System.err);
-			}
-		    }
-		}
-	    } else {
-		for (int ix = jtp_jl.getTabCount() - 1; ix >= 0; ix--) {
-		    String stk = jtp_jl.getTitleAt(ix);
-		    ntf.setText(stk);
-		    etf.setText(wl_date.getText());
-		    try {
-			go();
-		    } catch( Exception exc) {
-			exc.printStackTrace(System.err);
-		    }
-		}
-	    }
-	}
-	if (ae.getSource() == wl_mark)
-	    markTab();
-	if (ae.getSource() == wl_clear) 
-	    clearTab();
-	if (ae.getSource() == wl_clear_all) {
-	    for (int ix = jtp_jl.getTabCount() - 1; ix >= 0; ix--) {
-		if (jtp_jl.getToolTipTextAt(ix) == null)
-		    jtp_jl.remove(ix);
-	    }
-	}
-	// TODO: pushing call or put should retrieve all the relevant
-	// options pushing close call or close put should get some
-	// default open options there should also be a trade command,
-	// that happens when the trade button is pushed
+            String rewind_date = cc.rewind();
+            etf.setText(rewind_date);
+            try {
+                go();
+            } catch( Exception exc) {
+                exc.printStackTrace(System.err);
+            }
+        }
+        if (ae.getSource() == pick_stk) {
+            String stk = "NFLX";
+            try {
+                List<String> lines = Files.readAllLines
+                    (new File("../super_liquid_stx.txt").
+                     toPath(), Charset.defaultCharset());
+                stk = lines.get(ThreadLocalRandom.current().nextInt
+                                (0, lines.size()));
+            } catch(IOException ioe) {
+                ioe.printStackTrace(System.err);
+            }
+            ntf.setText(stk);
+            try {
+                go();
+            } catch( Exception exc) {
+                exc.printStackTrace(System.err);
+            }       
+        }
+        if (ae.getSource() == wl_add) {
+            String table_name = setups_or_trades.getSelectedItem().toString().
+                toLowerCase();
+            List<String> stx = table_name.equals("setups")? getSetupStocks():
+                getTradeStocks();
+            for(String stk: stx) {
+                ntf.setText(stk);
+                etf.setText(wl_date.getText());
+                try {
+                    go();
+                } catch( Exception exc) {
+                    exc.printStackTrace(System.err);
+                }
+            }
+        }
+        if (ae.getSource() == wl_trg) {
+            String table_name = setups_or_trades.getSelectedItem().toString().
+                toLowerCase();
+            wl_date.setText(StxCal.nextBusDay(wl_date.getText()));
+            if (table_name.equals("setups")) {
+                List<String> stx = getSetupStocks(true);
+                for (int ix = jtp_jl.getTabCount() - 1; ix >= 0; ix--) {
+                    String stk = jtp_jl.getTitleAt(ix);
+                    if (!stx.contains(stk) && 
+                        (jtp_jl.getToolTipTextAt(ix) == null))
+                        jtp_jl.remove(ix);
+                    else {
+                        ntf.setText(stk);
+                        etf.setText(wl_date.getText());
+                        try {
+                            go();
+                        } catch( Exception exc) {
+                            exc.printStackTrace(System.err);
+                        }
+                    }
+                }
+            } else {
+                for (int ix = jtp_jl.getTabCount() - 1; ix >= 0; ix--) {
+                    String stk = jtp_jl.getTitleAt(ix);
+                    ntf.setText(stk);
+                    etf.setText(wl_date.getText());
+                    try {
+                        go();
+                    } catch( Exception exc) {
+                        exc.printStackTrace(System.err);
+                    }
+                }
+            }
+        }
+        if (ae.getSource() == wl_mark)
+            markTab();
+        if (ae.getSource() == wl_clear) 
+            clearTab();
+        if (ae.getSource() == wl_clear_all) {
+            for (int ix = jtp_jl.getTabCount() - 1; ix >= 0; ix--) {
+                if (jtp_jl.getToolTipTextAt(ix) == null)
+                    jtp_jl.remove(ix);
+            }
+        }
         if(cmd_name.equals("CALL") || cmd_name.equals("PUT"))
-	    openTrade(cmd_name);
-	if(cmd_name.equals("CLOSE CALL") || cmd_name.equals("CLOSE PUT"))
-	    closeTrade(cmd_name);
-	}
+            openTrade(cmd_name);
+        if(cmd_name.equals("CLOSE CALL") || cmd_name.equals("CLOSE PUT"))
+            closeTrade(cmd_name);
+        }
 
     private List<String> getTradeStocks() {
-	String dt = wl_date.getText();
-	List<String> res = new ArrayList<String>();
-	StringBuilder q = new StringBuilder("SELECT DISTINCT stk FROM ");
-	q.append("trades WHERE in_dt='").append(dt).append("'");
-	System.err.println("getTradeStocks: q = " + q.toString());
- 	try {
+        String dt = wl_date.getText();
+        List<String> res = new ArrayList<String>();
+        StringBuilder q = new StringBuilder("SELECT DISTINCT stk FROM ");
+        q.append("trades WHERE in_dt='").append(dt).append("'");
+        System.err.println("getTradeStocks: q = " + q.toString());
+        try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet sret = sdb.get1(q.toString());
-	    while(sret.next())
-		res.add(sret.getString(1));
+            while(sret.next())
+                res.add(sret.getString(1));
         } catch( Exception ex) {
-	    System.err.println("Failed to get trades: ");
+            System.err.println("Failed to get trades: ");
             ex.printStackTrace(System.err);
         }
-	return res;
-    }	 
+        return res;
+    }    
     
     private List<String> getSetupStocks() {
-	return getSetupStocks(false);
+        return getSetupStocks(false);
     }
 
     private List<String> getSetupStocks(boolean triggered_only) {
-	String crt_dt = wl_date.getText();
-	String dt = (!triggered_only) ? StxCal.nextBusDay(crt_dt): crt_dt;
-	int spread = Integer.parseInt(wl_spread.getText());
-	int days = Integer.parseInt(wl_days.getText());
-	int setups = Integer.parseInt(wl_setups.getText()), stk_setups = 0;
-	List<String> res = new ArrayList<String>();
-	HashMap<String, Integer> dct = new HashMap<String, Integer>();
-	String sdt = StxCal.moveBusDays(crt_dt, -days);
-	StringBuilder q = new StringBuilder("SELECT DISTINCT stk FROM ");
-	q.append("setups WHERE dt='").append(dt).append("' AND ").
-	    append("setup IN ('JC_1234', 'JC_5DAYS')");
-	if (triggered_only)
-	    q.append(" AND triggered=true");
-	System.err.println("getSetupStocks: q = " + q.toString());
-	String expiry = StxCal.getMonthlyExpiration(dt);
- 	try {
+        String crt_dt = wl_date.getText();
+        String dt = (!triggered_only) ? StxCal.nextBusDay(crt_dt): crt_dt;
+        int spread = Integer.parseInt(wl_spread.getText());
+        int days = Integer.parseInt(wl_days.getText());
+        int setups = Integer.parseInt(wl_setups.getText()), stk_setups = 0;
+        List<String> res = new ArrayList<String>();
+        HashMap<String, Integer> dct = new HashMap<String, Integer>();
+        String sdt = StxCal.moveBusDays(crt_dt, -days);
+        StringBuilder q = new StringBuilder("SELECT DISTINCT stk FROM ");
+        q.append("setups WHERE dt='").append(dt).append("' AND ").
+            append("setup IN ('JC_1234', 'JC_5DAYS')");
+        if (triggered_only)
+            q.append(" AND triggered=true");
+        System.err.println("getSetupStocks: q = " + q.toString());
+        String expiry = StxCal.getMonthlyExpiration(dt);
+        try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet sret = sdb.get1(q.toString());
-	    while(sret.next()) {
-		String stk = sret.getString(1);
-		StringBuilder q1 = new StringBuilder();
-		q1.append("SELECT opt_spread from leaders where expiry='").
-		    append(expiry).append("' AND stk='").append(stk).
-		    append("'");
-		ResultSet rset1 = sdb.get(q1.toString());
-		while (rset1.next())
-		    dct.put(stk, rset1.getInt(1));
-	    }
-	    for (Map.Entry<String, Integer> entry: dct.entrySet()) {
-		String stk = entry.getKey();
-		if (entry.getValue() <= spread) {
-		    StringBuilder q2 = new StringBuilder();
-		    q2.append("SELECT count(*) FROM setups WHERE dt BETWEEN").
-			append(" '").append(sdt).append("' AND '").
-			append(crt_dt).append("' AND stk='").append(stk).
-			append("' AND setup IN ('GAP_HV', 'STRONG_CLOSE')");
-		    ResultSet rset2 = sdb.get(q2.toString());
-		    stk_setups = 0;
-		    while (rset2.next())
-			stk_setups = rset2.getInt(1);
-		    if (stk_setups >= setups)
-			res.add(stk);
-		}
-	    }
+            while(sret.next()) {
+                String stk = sret.getString(1);
+                StringBuilder q1 = new StringBuilder();
+                q1.append("SELECT opt_spread from leaders where expiry='").
+                    append(expiry).append("' AND stk='").append(stk).
+                    append("'");
+                ResultSet rset1 = sdb.get(q1.toString());
+                while (rset1.next())
+                    dct.put(stk, rset1.getInt(1));
+            }
+            for (Map.Entry<String, Integer> entry: dct.entrySet()) {
+                String stk = entry.getKey();
+                if (entry.getValue() <= spread) {
+                    StringBuilder q2 = new StringBuilder();
+                    q2.append("SELECT count(*) FROM setups WHERE dt BETWEEN").
+                        append(" '").append(sdt).append("' AND '").
+                        append(crt_dt).append("' AND stk='").append(stk).
+                        append("' AND setup IN ('GAP_HV', 'STRONG_CLOSE')");
+                    ResultSet rset2 = sdb.get(q2.toString());
+                    stk_setups = 0;
+                    while (rset2.next())
+                        stk_setups = rset2.getInt(1);
+                    if (stk_setups >= setups)
+                        res.add(stk);
+                }
+            }
         } catch( Exception ex) {
-	    System.err.println("Failed to get setups: ");
+            System.err.println("Failed to get setups: ");
             ex.printStackTrace(System.err);
         }
-	return res;
+        return res;
     }
 
     private void openTrade(String cmd_name) {
-	String dt = etf.getText();
-	String expiry =
-	    StxCal.getMonthlyExpiration(dt, exp.getSelectedIndex() + 1);
-	StxTrade trd = new StxTrade(ntf.getText(), cmd_name, expiry, dt,
-				    (Float)strike.getSelectedItem(),
-				    chrt.getSR(dt).c, jl1.avgRg(),
-				    Float.parseFloat(capital.
-						     getSelectedItem().
-						     toString()), 
-				    false, crt_date);
-	trade_ix.put(trd.key(), trade_list.size());
-	trade_list.add(trd);
-	updateTradeStatus();
-	String trade_key = String.format
-	    ("%s_%s_%d_%.2f", ntf.getText(), cmd_name,
-	     StxCal.numBusDaysExpiry(dt, expiry), strike.getSelectedItem());
-	trade_status.setText(String.format("OPENED %s", trade_key));
-	markTab();
+        String dt = etf.getText();
+        String expiry =
+            StxCal.getMonthlyExpiration(dt, exp.getSelectedIndex() + 1);
+        StxTrade trd = new StxTrade(ntf.getText(), cmd_name, expiry, dt,
+                                    (Float)strike.getSelectedItem(),
+                                    chrt.getSR(dt).c, jl1.avgRg(),
+                                    Float.parseFloat(capital.
+                                                     getSelectedItem().
+                                                     toString()), 
+                                    false, crt_date);
+        trade_ix.put(trd.key(), trade_list.size());
+        trade_list.add(trd);
+        updateTradeStatus();
+        String trade_key = String.format
+            ("%s_%s_%d_%.2f", ntf.getText(), cmd_name,
+             StxCal.numBusDaysExpiry(dt, expiry), strike.getSelectedItem());
+        trade_status.setText(String.format("OPENED %s", trade_key));
+        markTab();
     }
 
     private void closeTrade(String cmd_name) {
-	String cp = cmd_name.equals("CLOSE CALL")? "c": "p";
-	String dt = etf.getText();
-	String expiry =
-	    StxCal.getMonthlyExpiration(dt, exp.getSelectedIndex() + 1);
-	String trade_key = String.format("%s_%s_%s_%.2f", ntf.getText(), cp,
-					 expiry, strike.getSelectedItem());
-	int ix = trade_ix.get(trade_key);
-	StxTrade trd = trade_list.get(ix);
-	trd.close(log_fname);
-	updateTradeStatus();
-	String trd_key = String.format("%s_%s_%d_%.2f", ntf.getText(), cp,
-				       StxCal.numBusDaysExpiry(dt, expiry),
-				       strike.getSelectedItem());
-	trade_status.setText(String.format("CLOSED %s", trd_key));
-	clearTab();
+        String cp = cmd_name.equals("CLOSE CALL")? "c": "p";
+        String dt = etf.getText();
+        String expiry =
+            StxCal.getMonthlyExpiration(dt, exp.getSelectedIndex() + 1);
+        String trade_key = String.format("%s_%s_%s_%.2f", ntf.getText(), cp,
+                                         expiry, strike.getSelectedItem());
+        int ix = trade_ix.get(trade_key);
+        StxTrade trd = trade_list.get(ix);
+        trd.close(log_fname);
+        updateTradeStatus();
+        String trd_key = String.format("%s_%s_%d_%.2f", ntf.getText(), cp,
+                                       StxCal.numBusDaysExpiry(dt, expiry),
+                                       strike.getSelectedItem());
+        trade_status.setText(String.format("CLOSED %s", trd_key));
+        clearTab();
     }
 
     private void updateTradeStatus() {
-	String dt = etf.getText();
-	float cc = chrt.getSR(dt).c;
-	trades.clear();
-	for(StxTrade trd: trade_list) {
-	    trd.update(dt, cc, log_fname);
-	    trades.append(trd.ui_entry());
-	}
+        String dt = etf.getText();
+        float cc = chrt.getSR(dt).c;
+        trades.clear();
+        for(StxTrade trd: trade_list) {
+            trd.update(dt, cc, log_fname);
+            trades.append(trd.ui_entry());
+        }
     }
 
     private void updateSetupStatus() {
-	String edt = etf.getText(), sdt;
-	int days = 5;
-	try {
-	    days = Integer.parseInt(wl_days.getText());
-	} catch (Exception ex) {
-	    System.err.println("Failed to get num days for setups:");
+        String edt = etf.getText(), sdt;
+        int days = 5;
+        try {
+            days = Integer.parseInt(wl_days.getText());
+        } catch (Exception ex) {
+            System.err.println("Failed to get num days for setups:");
             ex.printStackTrace(System.err);
-	}
-	setups.clear();
-	sdt = StxCal.moveBusDays(edt, -days);
-	StringBuilder q = new StringBuilder("SELECT * FROM setups WHERE ");
-	q.append("stk='").append(ntf.getText()).append("' AND dt BETWEEN '").
-	    append(sdt).append("' AND '").append(edt).append("' AND setup ").
-	    append("IN ('GAP_HV', 'STRONG_CLOSE') ORDER BY dt DESC");
- 	try {
+        }
+        setups.clear();
+        sdt = StxCal.moveBusDays(edt, -days);
+        StringBuilder q = new StringBuilder("SELECT * FROM setups WHERE ");
+        q.append("stk='").append(ntf.getText()).append("' AND dt BETWEEN '").
+            append(sdt).append("' AND '").append(edt).append("' AND setup ").
+            append("IN ('GAP_HV', 'STRONG_CLOSE') ORDER BY dt DESC");
+        try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet rset = sdb.get1(q.toString());
-	    while(rset.next()) {
-		int num_days = StxCal.numBusDays(rset.getString(1), edt);
-		String display_setup = rset.getString(3).equals("GAP_HV")?
-		    "GAP": "SC";
-		String stp = String.format("D_%d %s\n", num_days, 
-					   display_setup);
-		String dir = rset.getString(4);
-		setups.append(stp, dir.equals("U")? Color.green: Color.red);
-	    }
+            while(rset.next()) {
+                int num_days = StxCal.numBusDays(rset.getString(1), edt);
+                String display_setup = rset.getString(3).equals("GAP_HV")?
+                    "GAP": "SC";
+                String stp = String.format("D_%d %s\n", num_days, 
+                                           display_setup);
+                String dir = rset.getString(4);
+                setups.append(stp, dir.equals("U")? Color.green: Color.red);
+            }
         } catch( Exception ex) {
-	    System.err.println("Failed to get setups: ");
+            System.err.println("Failed to get setups: ");
             ex.printStackTrace(System.err);
         }
     }
     
     private void getOptions() {
-	String und = ntf.getText(), ed = etf.getText();
-	if(und == null || und.equals("") || ed == null || ed.equals(""))
-	    return;
-	List<String> expiries = StxCal.expiries(ed, 2);
-	List<Float> strikes = new ArrayList<Float>();
-	float min_dist = 10000;
-	int atm_ix = -1, strike_ix = -1;
-	float cc = chrt.getSR(ed).c;
-	String opt_tbl = "options";
-	String dt_col = (StxCal.cmp(last_opt_date, ed) <= 0)? "date": "dt";
-	StringBuilder q1= new StringBuilder("SELECT DISTINCT strike FROM ");
-	q1.append("options WHERE und='").append(und).append("' AND ").
-	    append("dt='").append(ed).append("' AND expiry='").
-	    append(expiries.get(1)).append("' ").append("ORDER BY strike");
-	// System.err.println("q1 = " + q1.toString());
- 	try {
+        String und = ntf.getText(), ed = etf.getText();
+        if(und == null || und.equals("") || ed == null || ed.equals(""))
+            return;
+        List<String> expiries = StxCal.expiries(ed, 2);
+        List<Float> strikes = new ArrayList<Float>();
+        float min_dist = 10000;
+        int atm_ix = -1, strike_ix = -1;
+        float cc = chrt.getSR(ed).c;
+        StringBuilder q1= new StringBuilder("SELECT DISTINCT strike FROM ");
+        q1.append("options WHERE und='").append(und).append("' AND ").
+            append("dt='").append(ed).append("' AND expiry='").
+            append(expiries.get(1)).append("' ").append("ORDER BY strike");
+        // System.err.println("q1 = " + q1.toString());
+        try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet rset = sdb.get(q1.toString());
-	    while(rset.next()) {
-		strike_ix++;
-		float s = (float)(rset.getInt(1) / 100.0);
-		float dist = Math.abs(s - cc);
-		if(dist <= min_dist) {
-		    min_dist = dist;
-		    atm_ix = strike_ix;
-		}
-		strikes.add(s);
-	    }
-	    if(strikes.size() == 0) {
-		String q1_1 = q1.toString().replace(expiries.get(1),
-						    expiries.get(0));
-		ResultSet rset1 = sdb.get(q1_1);
-		while(rset1.next()) {
-		    strike_ix++;
-		    float s = (float)(rset1.getInt(1) / 100.0);
-		    float dist = Math.abs(s - cc);
-		    if(dist <= min_dist) {
-			min_dist = dist;
-			atm_ix = strike_ix;
-		    }
-		    strikes.add(s);
-		}
-	    }
+            while(rset.next()) {
+                strike_ix++;
+                float s = (float)(rset.getInt(1) / 100.0);
+                float dist = Math.abs(s - cc);
+                if(dist <= min_dist) {
+                    min_dist = dist;
+                    atm_ix = strike_ix;
+                }
+                strikes.add(s);
+            }
+            if(strikes.size() == 0) {
+                String q1_1 = q1.toString().replace(expiries.get(1),
+                                                    expiries.get(0));
+                ResultSet rset1 = sdb.get(q1_1);
+                while(rset1.next()) {
+                    strike_ix++;
+                    float s = (float)(rset1.getInt(1) / 100.0);
+                    float dist = Math.abs(s - cc);
+                    if(dist <= min_dist) {
+                        min_dist = dist;
+                        atm_ix = strike_ix;
+                    }
+                    strikes.add(s);
+                }
+            }
         } catch( Exception ex) {
-	    System.err.println("Failed to get strikes for " + und + ":");
+            System.err.println("Failed to get strikes for " + und + ":");
             ex.printStackTrace(System.err);
         }
-	opts.clear();
-	if(invisible.isSelected())
-	    opts.append(String.format
-			("%10d                            %10d\n",
-			 StxCal.numBusDaysExpiry(ed, expiries.get(0)),
-			 StxCal.numBusDaysExpiry(ed, expiries.get(1))));
-	else
-	    opts.append(String.format("%s                            %s\n",
-				      expiries.get(0), expiries.get(1)));
-	List<Float> sel_strikes = new ArrayList<Float>();
-	int len = strikes.size();
-	if(atm_ix > 1) sel_strikes.add(strikes.get(atm_ix - 2));
-	if(atm_ix > 0) sel_strikes.add(strikes.get(atm_ix - 1));
-	if(atm_ix >= 0) sel_strikes.add(strikes.get(atm_ix));
-	if(atm_ix < len - 1) sel_strikes.add(strikes.get(atm_ix + 1));
-	if(atm_ix < len - 2) sel_strikes.add(strikes.get(atm_ix + 2));
-	if(sel_strikes.size() == 0)
-	    return;
-	HashMap<Float, HashMap<String, HashMap<String, String>>> opt_dct =
-	    new HashMap<Float, HashMap<String, HashMap<String, String>>>();
-	for(float s: sel_strikes) {
-	    HashMap<String, HashMap<String, String>> strike_dct =
-		new HashMap<String, HashMap<String, String>>();
-	    for(String expiry: expiries) {
-		HashMap<String, String> exp_dct = new HashMap<String, String>();
-		exp_dct.put("c", "            ");
-		exp_dct.put("p", "            ");
-		strike_dct.put(expiry, exp_dct);
-	    }
-	    opt_dct.put(s, strike_dct);
-	}
-	StringBuffer s_sb = new StringBuffer("(");
-	strike_ix = 0;
-	for(float s: sel_strikes) {
-	    if(strike_ix > 0) s_sb.append(",");
-	    s_sb.append((int)(s * 100));
-	    ++strike_ix;
-	}
-	s_sb.append(")");
-	StringBuilder q2= new StringBuilder("SELECT * FROM options");
-	q2.append(" WHERE und='").append(und).append( "' AND dt='").
-	    append(ed).append("' and expiry in ('").
-	    append(expiries.get(0)).append("', '").
-	    append(expiries.get(1)).append("') and strike in ").
-	    append(s_sb.toString()).append(" order by expiry, strike, cp");
-	// System.err.println(q2.toString());
-	try {
+        opts.clear();
+        if(invisible.isSelected())
+            opts.append(String.format
+                        ("%10d                            %10d\n",
+                         StxCal.numBusDaysExpiry(ed, expiries.get(0)),
+                         StxCal.numBusDaysExpiry(ed, expiries.get(1))));
+        else
+            opts.append(String.format("%s                            %s\n",
+                                      expiries.get(0), expiries.get(1)));
+        List<Float> sel_strikes = new ArrayList<Float>();
+        int len = strikes.size();
+        if(atm_ix > 1) sel_strikes.add(strikes.get(atm_ix - 2));
+        if(atm_ix > 0) sel_strikes.add(strikes.get(atm_ix - 1));
+        if(atm_ix >= 0) sel_strikes.add(strikes.get(atm_ix));
+        if(atm_ix < len - 1) sel_strikes.add(strikes.get(atm_ix + 1));
+        if(atm_ix < len - 2) sel_strikes.add(strikes.get(atm_ix + 2));
+        if(sel_strikes.size() == 0)
+            return;
+        HashMap<Float, HashMap<String, HashMap<String, String>>> opt_dct =
+            new HashMap<Float, HashMap<String, HashMap<String, String>>>();
+        for(float s: sel_strikes) {
+            HashMap<String, HashMap<String, String>> strike_dct =
+                new HashMap<String, HashMap<String, String>>();
+            for(String expiry: expiries) {
+                HashMap<String, String> exp_dct = new HashMap<String, String>();
+                exp_dct.put("c", "            ");
+                exp_dct.put("p", "            ");
+                strike_dct.put(expiry, exp_dct);
+            }
+            opt_dct.put(s, strike_dct);
+        }
+        StringBuffer s_sb = new StringBuffer("(");
+        strike_ix = 0;
+        for(float s: sel_strikes) {
+            if(strike_ix > 0) s_sb.append(",");
+            s_sb.append((int)(s * 100));
+            ++strike_ix;
+        }
+        s_sb.append(")");
+        StringBuilder q2= new StringBuilder("SELECT * FROM options");
+        q2.append(" WHERE und='").append(und).append( "' AND dt='").
+            append(ed).append("' and expiry in ('").
+            append(expiries.get(0)).append("', '").
+            append(expiries.get(1)).append("') and strike in ").
+            append(s_sb.toString()).append(" order by expiry, strike, cp");
+        // System.err.println(q2.toString());
+        try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet rset = sdb.get(q2.toString());
             while(rset.next()) {
-		String expiry = rset.getString(1), cp = rset.getString(3);
-		float s = (float)(rset.getInt(4) / 100.0);
-		float bid = (float)(rset.getInt(6) / 100.0);
-		float ask = (float)(rset.getInt(7) / 100.0);
-		opt_dct.get(s).get(expiry).
-		    put(cp, String.format("%5.2f/%5.2f ", bid, ask));
-		// System.err.printf("expiry = %s, cp = %s, s = %.2f, bid = %.2f, ask = %.2f\n", expiry, cp, s, bid, ask);
-	    }
+                String expiry = rset.getString(1), cp = rset.getString(3);
+                float s = (float)(rset.getInt(4) / 100.0);
+                float bid = (float)(rset.getInt(6) / 100.0);
+                float ask = (float)(rset.getInt(7) / 100.0);
+                opt_dct.get(s).get(expiry).
+                    put(cp, String.format("%5.2f/%5.2f ", bid, ask));
+                // System.err.printf("expiry = %s, cp = %s, s = %.2f, bid = %.2f, ask = %.2f\n", expiry, cp, s, bid, ask);
+            }
         } catch( Exception ex) {
             System.err.println("Failed to get options for " + und + ":");
             ex.printStackTrace(System.err);
         }
-	exp.removeAllItems();
-	strike.removeAllItems();
-	for(float s: sel_strikes) {
-	    StringBuffer s_row = new StringBuffer();
-	    s_row.append("C:").
-		append(opt_dct.get(s).get(expiries.get(0)).get("c")).
-		append("P:").
-		append(opt_dct.get(s).get(expiries.get(0)).get("p")).
-		append(String.format(" | %6.2f | ", s)).
-		append("C:").
-		append(opt_dct.get(s).get(expiries.get(1)).get("c")).
-		append(" P:").
-		append(opt_dct.get(s).get(expiries.get(1)).get("p")).
-		append("\n");
-	    opts.append(s_row.toString());
-	    strike.addItem(s);
-	}
-	strike.setSelectedItem(strikes.get(atm_ix));
+        exp.removeAllItems();
+        strike.removeAllItems();
+        for(float s: sel_strikes) {
+            StringBuffer s_row = new StringBuffer();
+            s_row.append("C:").
+                append(opt_dct.get(s).get(expiries.get(0)).get("c")).
+                append("P:").
+                append(opt_dct.get(s).get(expiries.get(0)).get("p")).
+                append(String.format(" | %6.2f | ", s)).
+                append("C:").
+                append(opt_dct.get(s).get(expiries.get(1)).get("c")).
+                append(" P:").
+                append(opt_dct.get(s).get(expiries.get(1)).get("p")).
+                append("\n");
+            opts.append(s_row.toString());
+            strike.addItem(s);
+        }
+        strike.setSelectedItem(strikes.get(atm_ix));
 
-	for(String expiry: expiries)
-	    if(invisible.isSelected())
-		exp.addItem(String.format("%d",
-					  StxCal.numBusDaysExpiry(ed, 
-								  expiry)));
-	    else
-		exp.addItem(String.format("%d (%s)",
-					  StxCal.numBusDaysExpiry(ed, expiry),
-					  expiry));
-	exp.setSelectedIndex(1);
+        for(String expiry: expiries)
+            if(invisible.isSelected())
+                exp.addItem(String.format("%d",
+                                          StxCal.numBusDaysExpiry(ed, 
+                                                                  expiry)));
+            else
+                exp.addItem(String.format("%d (%s)",
+                                          StxCal.numBusDaysExpiry(ed, expiry),
+                                          expiry));
+        exp.setSelectedIndex(1);
     }
     
     public static void main( String[] args) {
