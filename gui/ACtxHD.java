@@ -224,7 +224,7 @@ public class ACtxHD implements KeyListener, ActionListener {
         wl_days.setCaretColor(Color.white);
         wl_days.setName("WLD"); 
         wl_days.addKeyListener(this);
-        wl_setups = new JTextField("3");
+        wl_setups = new JTextField("8");
         wl_setups.setCaretColor(Color.white);
         wl_setups.setName("WLSTP"); 
         wl_setups.addKeyListener(this);
@@ -661,8 +661,8 @@ public class ACtxHD implements KeyListener, ActionListener {
             String table_name = setups_or_trades.getSelectedItem().toString().
                 toLowerCase();
 			List<String> stx = table_name.equals("jl_setups")? 
-				getJLSetupStocks(): (table_name.equals("setups")? getSetupStocks():
-                getTradeStocks());
+				getScoredSetupStocks(): (table_name.equals("setups")?
+										 getSetupStocks(): getTradeStocks());
             for(String stk: stx) {
                 ntf.setText(stk);
                 etf.setText(wl_date.getText());
@@ -745,55 +745,27 @@ public class ACtxHD implements KeyListener, ActionListener {
         return getSetupStocks(false);
     }
 
-	private List<String> getJLSetupStocks() {
+	private List<String> getScoredSetupStocks() {
         String crt_dt = wl_date.getText();
         String dt = crt_dt;
-        int setups = Integer.parseInt(wl_setups.getText()), stk_setups = 0;
+        int num_stks = Integer.parseInt(wl_setups.getText());
         List<String> res = new ArrayList<String>();
-        HashMap<String, Integer> dct = new HashMap<String, Integer>();
-        String sdt = StxCal.moveBusDays(crt_dt, -days);
-        StringBuilder q = new StringBuilder("SELECT DISTINCT stk FROM ");
-        q.append("setups WHERE dt='").append(dt).append("' AND ").
-            append("setup IN ('JC_1234', 'JC_5DAYS')");
-        if (triggered_only)
-            q.append(" AND triggered=true");
-        System.err.println("getSetupStocks: q = " + q.toString());
-        String expiry = StxCal.getMonthlyExpiration(dt);
+		HashMap<String, Integer> dct = new HashMap<String, Integer>();
+        StringBuilder q = new StringBuilder("SELECT stk FROM setup_scores ");
+        q.append("WHERE dt='").append(dt).append("' AND trigger_score != 0 ").
+			append("ORDER BY ABS(trigger_score+trend_score) DESC LIMIT ").
+			append(num_stks);
+        System.err.println("getJLSetupStocks: q = " + q.toString());
         try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet sret = sdb.get1(q.toString());
-            while(sret.next()) {
-                String stk = sret.getString(1);
-                StringBuilder q1 = new StringBuilder();
-                q1.append("SELECT opt_spread from leaders where expiry='").
-                    append(expiry).append("' AND stk='").append(stk).
-                    append("'");
-                ResultSet rset1 = sdb.get(q1.toString());
-                while (rset1.next())
-                    dct.put(stk, rset1.getInt(1));
-            }
-            for (Map.Entry<String, Integer> entry: dct.entrySet()) {
-                String stk = entry.getKey();
-                if (entry.getValue() <= spread) {
-                    StringBuilder q2 = new StringBuilder();
-                    q2.append("SELECT count(*) FROM setups WHERE dt BETWEEN").
-                        append(" '").append(sdt).append("' AND '").
-                        append(crt_dt).append("' AND stk='").append(stk).
-                        append("' AND setup IN ('GAP_HV', 'STRONG_CLOSE')");
-                    ResultSet rset2 = sdb.get(q2.toString());
-                    stk_setups = 0;
-                    while (rset2.next())
-                        stk_setups = rset2.getInt(1);
-                    if (stk_setups >= setups)
-                        res.add(stk);
-                }
-            }
+			while(sret.next())
+				res.add(sret.getString(1));
         } catch( Exception ex) {
-            System.err.println("Failed to get setups: ");
+            System.err.println("Failed to get scored setups: ");
             ex.printStackTrace(System.err);
         }
         return res;
-
 	}
 
     private List<String> getSetupStocks(boolean triggered_only) {
