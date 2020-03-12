@@ -746,15 +746,15 @@ public class ACtxHD implements KeyListener, ActionListener {
     }
 
 	private List<String> getScoredSetupStocks() {
-        String crt_dt = wl_date.getText();
-        String dt = crt_dt;
+		String dt = wl_date.getText();
+		String exp = StxCal.getMonthlyExpiration(StxCal.nextBusDay(dt));
         int num_stks = Integer.parseInt(wl_setups.getText());
         List<String> res = new ArrayList<String>();
-		HashMap<String, Integer> dct = new HashMap<String, Integer>();
         StringBuilder q = new StringBuilder("SELECT stk FROM setup_scores ");
-        q.append("WHERE dt='").append(dt).append("' AND trigger_score != 0 ").
-			append("ORDER BY ABS(trigger_score+trend_score) DESC LIMIT ").
-			append(num_stks);
+		q.append("WHERE stk IN (SELECT stk FROM leaders WHERE expiry='").
+			append(exp).append("') AND dt='").append(dt).append("' AND ").
+			append("trigger_score != 0 ORDER BY ABS(trigger_score+").
+			append("trend_score) DESC LIMIT ").append(num_stks);
         System.err.println("getJLSetupStocks: q = " + q.toString());
         try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
