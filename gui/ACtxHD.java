@@ -230,6 +230,7 @@ public class ACtxHD implements KeyListener, ActionListener {
         wl_setups.addKeyListener(this);
         setups_or_trades = new JComboBox<String>();
         setups_or_trades.setEditable(false);
+        setups_or_trades.addItem("JL_Setups");
         setups_or_trades.addItem("Trades");
         setups_or_trades.addItem("Setups");
         setups_or_trades.setSelectedIndex(0);
@@ -659,8 +660,9 @@ public class ACtxHD implements KeyListener, ActionListener {
         if (ae.getSource() == wl_add) {
             String table_name = setups_or_trades.getSelectedItem().toString().
                 toLowerCase();
-            List<String> stx = table_name.equals("setups")? getSetupStocks():
-                getTradeStocks();
+			List<String> stx = table_name.equals("jl_setups")? 
+				getJLSetupStocks(): (table_name.equals("setups")? getSetupStocks():
+                getTradeStocks());
             for(String stk: stx) {
                 ntf.setText(stk);
                 etf.setText(wl_date.getText());
@@ -742,6 +744,57 @@ public class ACtxHD implements KeyListener, ActionListener {
     private List<String> getSetupStocks() {
         return getSetupStocks(false);
     }
+
+	private List<String> getJLSetupStocks() {
+        String crt_dt = wl_date.getText();
+        String dt = crt_dt;
+        int setups = Integer.parseInt(wl_setups.getText()), stk_setups = 0;
+        List<String> res = new ArrayList<String>();
+        HashMap<String, Integer> dct = new HashMap<String, Integer>();
+        String sdt = StxCal.moveBusDays(crt_dt, -days);
+        StringBuilder q = new StringBuilder("SELECT DISTINCT stk FROM ");
+        q.append("setups WHERE dt='").append(dt).append("' AND ").
+            append("setup IN ('JC_1234', 'JC_5DAYS')");
+        if (triggered_only)
+            q.append(" AND triggered=true");
+        System.err.println("getSetupStocks: q = " + q.toString());
+        String expiry = StxCal.getMonthlyExpiration(dt);
+        try {
+            StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
+            ResultSet sret = sdb.get1(q.toString());
+            while(sret.next()) {
+                String stk = sret.getString(1);
+                StringBuilder q1 = new StringBuilder();
+                q1.append("SELECT opt_spread from leaders where expiry='").
+                    append(expiry).append("' AND stk='").append(stk).
+                    append("'");
+                ResultSet rset1 = sdb.get(q1.toString());
+                while (rset1.next())
+                    dct.put(stk, rset1.getInt(1));
+            }
+            for (Map.Entry<String, Integer> entry: dct.entrySet()) {
+                String stk = entry.getKey();
+                if (entry.getValue() <= spread) {
+                    StringBuilder q2 = new StringBuilder();
+                    q2.append("SELECT count(*) FROM setups WHERE dt BETWEEN").
+                        append(" '").append(sdt).append("' AND '").
+                        append(crt_dt).append("' AND stk='").append(stk).
+                        append("' AND setup IN ('GAP_HV', 'STRONG_CLOSE')");
+                    ResultSet rset2 = sdb.get(q2.toString());
+                    stk_setups = 0;
+                    while (rset2.next())
+                        stk_setups = rset2.getInt(1);
+                    if (stk_setups >= setups)
+                        res.add(stk);
+                }
+            }
+        } catch( Exception ex) {
+            System.err.println("Failed to get setups: ");
+            ex.printStackTrace(System.err);
+        }
+        return res;
+
+	}
 
     private List<String> getSetupStocks(boolean triggered_only) {
         String crt_dt = wl_date.getText();
