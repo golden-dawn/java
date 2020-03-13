@@ -870,7 +870,7 @@ public class ACtxHD implements KeyListener, ActionListener {
     }
 
     private void updateSetupStatus() {
-        String edt = etf.getText(), sdt;
+        String edt = etf.getText(), sdt, stk = ntf.getText();
         int days = 5;
         try {
             days = Integer.parseInt(wl_days.getText());
@@ -878,27 +878,59 @@ public class ACtxHD implements KeyListener, ActionListener {
             System.err.println("Failed to get num days for setups:");
             ex.printStackTrace(System.err);
         }
-        setups.clear();
         sdt = StxCal.moveBusDays(edt, -days);
-        StringBuilder q = new StringBuilder("SELECT * FROM setups WHERE ");
-        q.append("stk='").append(ntf.getText()).append("' AND dt BETWEEN '").
-            append(sdt).append("' AND '").append(edt).append("' AND setup ").
-            append("IN ('GAP_HV', 'STRONG_CLOSE') ORDER BY dt DESC");
-        try {
-            StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
-            ResultSet rset = sdb.get1(q.toString());
-            while(rset.next()) {
-                int num_days = StxCal.numBusDays(rset.getString(1), edt);
-                String display_setup = rset.getString(3).equals("GAP_HV")?
-                    "GAP": "SC";
-                String stp = String.format("D_%d %s\n", num_days, 
-                                           display_setup);
-                String dir = rset.getString(4);
-                setups.append(stp, dir.equals("U")? Color.green: Color.red);
+        setups.clear();
+        if (setups_or_trades.getSelectedItem().equals("Setups")) {
+            StringBuilder q = new StringBuilder("SELECT * FROM setups WHERE ");
+            q.append("stk='").append(stk).append("' AND dt BETWEEN '").
+                append(sdt).append("' AND '").append(edt).append("' AND setup ").
+                append("IN ('GAP_HV', 'STRONG_CLOSE') ORDER BY dt DESC");
+            try {
+                StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
+                ResultSet rset = sdb.get1(q.toString());
+                while(rset.next()) {
+                    int num_days = StxCal.numBusDays(rset.getString(1), edt);
+                    String display_setup = rset.getString(3).equals("GAP_HV")?
+                        "GAP": "SC";
+                    String stp = String.format("D_%d %s\n", num_days, 
+                                               display_setup);
+                    String dir = rset.getString(4);
+                    setups.append(stp, dir.equals("U")? Color.green: Color.red);
+                }
+            } catch( Exception ex) {
+                System.err.println("Failed to get setups: ");
+                ex.printStackTrace(System.err);
             }
-        } catch( Exception ex) {
-            System.err.println("Failed to get setups: ");
-            ex.printStackTrace(System.err);
+        } else {
+            StringBuilder q1 = new StringBuilder("SELECT * FROM setup_scores ");
+            q1.append("WHERE stk='").append(stk).append("' AND dt='").
+                append(edt).append("'");
+            StringBuilder q2 = new StringBuilder("SELECT * FROM jl_setups ");
+            q2.append("WHERE stk='").append(stk).append("' AND dt ").
+                append("BETWEEN '").append(sdt).append("' AND '").
+                append(edt).append("' ORDER BY dt DESC");
+            try {
+                StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
+                ResultSet rset = sdb.get1(q1.toString());
+                while(rset.next()) {
+                    String stk_summary = String.format("%s %4d %4d\n",
+                        rset.getString(2), rset.getInt(3), rset.getInt(4));
+                    setups.append(stk_summary, Color.white);
+                }
+                ResultSet sret = sdb.get(q2.toString());
+                while(sret.next()) {
+                    int num_days = StxCal.numBusDays(sret.getString(1), edt);
+                    String setup_name = sret.getString(3).toUpperCase();
+                    String stp_name = (setup_name.length() > 4)? setup_name.substring(0, 4): setup_name;
+                    String stp = String.format("D_%d %4s %4d\n", num_days, 
+                        stp_name, sret.getInt(7));
+                    setups.append(stp, 
+                        sret.getString(5).equals("U")? Color.green: Color.red);
+                }
+            } catch( Exception ex) {
+                System.err.println("Failed to get setups: ");
+                ex.printStackTrace(System.err);
+            }
         }
     }
     
