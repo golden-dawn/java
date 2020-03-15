@@ -216,11 +216,11 @@ public class ACtxHD implements KeyListener, ActionListener {
         wl_date.setCaretColor(Color.white);
         wl_date.setName("WLDT"); 
         wl_date.addKeyListener(this);
-        wl_spread = new JTextField("15");
+        wl_spread = new JTextField("12");
         wl_spread.setCaretColor(Color.white);
         wl_spread.setName("WLS"); 
         wl_spread.addKeyListener(this);
-        wl_days = new JTextField("8");
+        wl_days = new JTextField("5");
         wl_days.setCaretColor(Color.white);
         wl_days.setName("WLD"); 
         wl_days.addKeyListener(this);
@@ -752,8 +752,9 @@ public class ACtxHD implements KeyListener, ActionListener {
         List<String> res = new ArrayList<String>();
         StringBuilder q = new StringBuilder("SELECT stk FROM setup_scores ");
 		q.append("WHERE stk IN (SELECT stk FROM leaders WHERE expiry='").
-			append(exp).append("') AND dt='").append(dt).append("' AND ").
-			append("trigger_score != 0 ORDER BY ABS(trigger_score+").
+            append(exp).append("' AND opt_spread <= ").
+            append(wl_spread.getText()).append(") AND dt='").append(dt).
+            append("' AND trigger_score != 0 ORDER BY ABS(trigger_score+").
 			append("trend_score) DESC LIMIT ").append(num_stks);
         System.err.println("getJLSetupStocks: q = " + q.toString());
         try {
