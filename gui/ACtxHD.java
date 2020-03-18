@@ -47,7 +47,7 @@ public class ACtxHD implements KeyListener, ActionListener {
     private JButton rewind, fwd, bak, pick_stk;
     private JButton call, put, c_call, c_put;
     private JButton wl_add, wl_trg, wl_mark, wl_clear, wl_clear_all;
-    private JTextField wl_date, wl_spread, wl_days, wl_setups;
+    private JTextField wl_date, wl_spread, wl_days, wl_setups, wl_tag;
     private JComboBox<String> exp, setups_or_trades;
     private JComboBox<Float> strike;
     private JComboBox<Integer> capital;
@@ -228,6 +228,10 @@ public class ACtxHD implements KeyListener, ActionListener {
         wl_setups.setCaretColor(Color.white);
         wl_setups.setName("WLSTP"); 
         wl_setups.addKeyListener(this);
+        wl_tag = new JTextField("JL");
+        wl_tag.setCaretColor(Color.white);
+        wl_tag.setName("WLTAG"); 
+        wl_tag.addKeyListener(this);
         setups_or_trades = new JComboBox<String>();
         setups_or_trades.setEditable(false);
         setups_or_trades.addItem("JL_Setups");
@@ -250,12 +254,13 @@ public class ACtxHD implements KeyListener, ActionListener {
         addC(jp_trd, wl_trg, 65, 185, 60, 20);
         addC(jp_trd, wl_mark, 125, 185, 70, 20);
         addC(jp_trd, wl_clear, 195, 185, 80, 20);
-        addC(jp_trd, wl_clear_all, 495, 185, 120, 20);
+        addC(jp_trd, wl_clear_all, 535, 185, 120, 20);
         addC(jp_trd, wl_date, 275, 185, 100, 25);
         addC(jp_trd, wl_spread, 375, 185, 40, 25);
         addC(jp_trd, wl_days, 415, 185, 40, 25);
         addC(jp_trd, wl_setups, 455, 185, 40, 25);
-        addC(jp_trd, setups_or_trades, 615, 185, 100, 20);      
+        addC(jp_trd, wl_tag, 495, 185, 40, 25);
+        addC(jp_trd, setups_or_trades, 655, 185, 100, 20);      
         int hd11= 2* resX/ 3;
         addC( jpu, jlfl1, 5, 90, 80, 20);
         jld1= new JLDisplay( hd11 + 40, 220, 12, invisible.isSelected());
@@ -324,7 +329,7 @@ public class ACtxHD implements KeyListener, ActionListener {
                 if(cd == 40) 
                     moveTabLeft();
             } else if (src.equals("WLS") || src.equals("WLD") || 
-                       src.equals("WLSTP")) {
+                       src.equals("WLSTP") || src.equals("WLTAG")) {
                 if (cd == KeyEvent.VK_F1)
                     etf.requestFocusInWindow();
                 if (cd == KeyEvent.VK_F2)
@@ -727,7 +732,8 @@ public class ACtxHD implements KeyListener, ActionListener {
         String dt = wl_date.getText();
         List<String> res = new ArrayList<String>();
         StringBuilder q = new StringBuilder("SELECT DISTINCT stk FROM ");
-        q.append("trades WHERE in_dt='").append(dt).append("'");
+        q.append("trades WHERE in_dt='").append(dt).append("' AND tag='").
+            append(wl_tag.getText()).append("'");
         System.err.println("getTradeStocks: q = " + q.toString());
         try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
