@@ -48,7 +48,7 @@ public class ACtxHD implements KeyListener, ActionListener {
     private JButton call, put, c_call, c_put;
     private JButton wl_add, wl_trg, wl_mark, wl_clear, wl_clear_all;
     private JTextField wl_date, wl_spread, wl_days, wl_setups, wl_tag;
-    private JComboBox<String> exp, setups_or_trades;
+    private JComboBox<String> exp, setups_or_trades, chart_scale;
     private JComboBox<Float> strike;
     private JComboBox<Integer> capital;
     private JCheckBox invisible;
@@ -117,6 +117,20 @@ public class ACtxHD implements KeyListener, ActionListener {
         pick_stk = new JButton("R");
         pick_stk.addActionListener(this);
         addC( jpu, pick_stk, 500, 7, 50, 25);
+        chart_scale = new JComboBox<String>();
+        chart_scale.setEditable(false);
+        chart_scale.addItem("1M");
+        chart_scale.addItem("3M");
+        chart_scale.addItem("6M");
+        chart_scale.addItem("1Y");
+        chart_scale.addItem("JL");
+        chart_scale.addItem("2Y");
+        chart_scale.addItem("3Y");
+        chart_scale.addItem("5Y");
+        chart_scale.addItem("All");
+        chart_scale.setSelectedIndex(1);
+        chart_scale.addActionListener(this);
+        addC( jpu, chart_scale,  240, 55, 70, 20);
         jb1m= new JButton( "1M");
         jb1m.setOpaque(true);
         jb1m.addActionListener( this);
@@ -600,9 +614,10 @@ public class ACtxHD implements KeyListener, ActionListener {
     public void addC(JPanel p, JComponent c, int x, int y, int h, int w) {
         c.setBackground(Color.black);
         c.setOpaque(true);
-        if (c instanceof JButton)
+        if (c instanceof JButton || c instanceof JComboBox) {
             c.setForeground(Color.black);
-        else
+            c.setBackground(Color.lightGray);
+        } else
             c.setForeground(Color.lightGray);
         p.add(c); c.setBounds(x, y, h, w);
     }
@@ -661,6 +676,11 @@ public class ACtxHD implements KeyListener, ActionListener {
             } catch( Exception exc) {
                 exc.printStackTrace(System.err);
             }       
+        }
+        if (ae.getSource() == chart_scale) {
+            String new_scale = chart_scale.getSelectedItem().toString();
+            cc.setScale(new_scale);
+            last_scale= new_scale;
         }
         if (ae.getSource() == wl_add) {
             String table_name = setups_or_trades.getSelectedItem().toString().
@@ -1087,4 +1107,5 @@ public class ACtxHD implements KeyListener, ActionListener {
             e.printStackTrace( System.err);
         }
     }
+    // TODO: load 4 JL calculations, re-dimension the right panel
 }
