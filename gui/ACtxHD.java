@@ -89,8 +89,8 @@ public class ACtxHD implements KeyListener, ActionListener {
         dtf= new JTextField( "120"); dtf.setCaretColor( Color.white);
         dbetf= new JTextField( "eods"); dbetf.setCaretColor( Color.white);
         dbstf= new JTextField( "dividends"); dbstf.setCaretColor( Color.white);
-        jlf1 = new JTextField( "1.0"); jlf1.setCaretColor( Color.white);
-        jlf2 = new JTextField( "1.5"); jlf2.setCaretColor( Color.white);
+        jlf1 = new JTextField( "0.5"); jlf1.setCaretColor( Color.white);
+        jlf2 = new JTextField( "1.0"); jlf2.setCaretColor( Color.white);
         jlf3 = new JTextField( "2.0"); jlf3.setCaretColor( Color.white);
         jlfl1 = new JLabel("Factor: "+ jlf1.getText());
         jlfl2 = new JLabel("Factor: "+ jlf2.getText());
@@ -962,9 +962,20 @@ public class ACtxHD implements KeyListener, ActionListener {
     }
     
     private void getOptions() {
-        String und = ntf.getText(), ed = etf.getText();
+        String stk = ntf.getText(), und = stk, ed = etf.getText();
         if(und == null || und.equals("") || ed == null || ed.equals(""))
             return;
+        String [] tokens = stk.split("[.]");
+        System.err.printf("%s, tokens.length = %d\n", stk, tokens.length);
+        if (tokens.length == 2) {
+            try {
+                Integer.parseInt(tokens[1]);
+                und = tokens[0];
+                System.err.printf("und = %s\n", und);
+            } catch (Exception ex) {
+                System.err.printf("Exception parsing int from %s\n", tokens[1]);
+            }
+        }
         List<String> expiries = StxCal.expiries(ed, 2);
         List<Float> strikes = new ArrayList<Float>();
         float min_dist = 10000;
