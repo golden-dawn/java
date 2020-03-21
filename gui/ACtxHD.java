@@ -966,15 +966,11 @@ public class ACtxHD implements KeyListener, ActionListener {
         if(und == null || und.equals("") || ed == null || ed.equals(""))
             return;
         String [] tokens = stk.split("[.]");
-        System.err.printf("%s, tokens.length = %d\n", stk, tokens.length);
         if (tokens.length == 2) {
             try {
                 Integer.parseInt(tokens[1]);
                 und = tokens[0];
-                System.err.printf("und = %s\n", und);
-            } catch (Exception ex) {
-                System.err.printf("Exception parsing int from %s\n", tokens[1]);
-            }
+            } catch (Exception ex) {}
         }
         List<String> expiries = StxCal.expiries(ed, 2);
         List<Float> strikes = new ArrayList<Float>();
