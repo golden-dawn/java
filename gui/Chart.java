@@ -270,11 +270,7 @@ public class Chart extends JPanel {
 // 	System.err.printf("%.1f: found %d pivots\n", jl.getFactor(), 
 // 			  pivots.size());
 	if(pivots.size() >= 4) {
-	    int piv0 = pivots.get(0), abs_piv0 = Math.abs(piv0);
-	    StxJL piv_0 = jl.data(abs_piv0);
-// 	    System.err.printf("%.1f: piv_0.date = %s\n", jl.getFactor(), 
-// 			      piv_0.date);
-	    int ixx = 0, start = ts.find(piv_0.date, 0);
+	    int ixx = 0;
 	    int udv_end = ts.currentPosition();
 	    for(int piv: pivots) {
 		if(ixx == 0) {
@@ -301,7 +297,7 @@ public class Chart extends JPanel {
 	if(pivots.size() >= 5) {
 	    StxJL piv_0 = jl.data(pivots.get(0));
 	    // System.err.printf("P0.date = %s\n", piv_0.date);
-	    int ixx = 0, start = ts.find(piv_0.date, 0);
+	    int ixx = 0;
 	    int udv_end = ts.currentPosition();
 	    for(int piv: pivots) {
 		if(ixx == 0) {
