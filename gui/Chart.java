@@ -38,16 +38,16 @@ public class Chart extends JPanel {
     public Chart( String stk_name, String sd, String ed) {
         super( null);
         this.stk_name = stk_name;
-	System.err.printf("Creating new chart for %s between %s and %s\n",
-			  stk_name, sd, ed);
+        System.err.printf("Creating new chart for %s between %s and %s\n",
+                          stk_name, sd, ed);
         ts= StxTS.loadEod( stk_name, null, null);
-	// System.err.printf("%s, found %d records\n", stk_name, ts.size());
+        // System.err.printf("%s, found %d records\n", stk_name, ts.size());
         start = ts.find( sd, 1); start0= start;
         end= ts.find( ed, -1);
-	this.ed = ed;
-	if(sss == null || sss.getStk() != stk_name)
-	    sss = new StxxSetups(stk_name);
-	setName(stk_name);
+        this.ed = ed;
+        if(sss == null || sss.getStk() != stk_name)
+            sss = new StxxSetups(stk_name);
+        setName(stk_name);
         repaint();
     }
 
@@ -78,9 +78,9 @@ public class Chart extends JPanel {
         this.jl1 = jl1;
         this.jl2 = jl2;
         this.jl3 = jl3;
-	this.invisible = invisible;
-	if(sss == null || sss.getStk() != stk_name)
-	    sss = new StxxSetups(stk_name);
+        this.invisible = invisible;
+        if(sss == null || sss.getStk() != stk_name)
+            sss = new StxxSetups(stk_name);
         repaint();
     }
 
@@ -100,7 +100,7 @@ public class Chart extends JPanel {
         setBackground( Color.black);
         g.setColor( getBackground());
         g.fillRect( 0, 0, d.width, d.height);
-	double d_height = 95.0 * d.height / 85.0;
+        double d_height = 95.0 * d.height / 85.0;
         float max_vol= 0, min_vol= 0, vol_rg= 0;
         float min_price= 1000000, max_price= 0, price_rg= 0;
         int ix;
@@ -119,7 +119,7 @@ public class Chart extends JPanel {
         double bar_height= 0.2* d_height, hh= 0;
         double yyp= 0.6* d_height, price_height= 0.5* d_height;
         double hho= 0, hhh= 0, hhl= 0, hhc= 0, eps= 4* bar_width/ 9;
-	double last_day_x = xx + day_width * (days + 0.25);
+        double last_day_x = xx + day_width * (days + 0.25);
 
         g2.setPaint( Color.darkGray);
         fm = g2.getFontMetrics();
@@ -156,7 +156,7 @@ public class Chart extends JPanel {
             g2.draw( new Line2D.Double( xx, step, d.width- 100+ day_width,
                                         step));
         }
-	List<Float> avg_volumes = avgVolumes(20);
+        List<Float> avg_volumes = avgVolumes(20);
         for( ix= start; ix<= end; ix++) {
             if( labels.get( ix)!= null) {
                 g2.setPaint( Color.darkGray);
@@ -187,236 +187,236 @@ public class Chart extends JPanel {
             g2.draw( new Line2D.Double( xx+ eps, hhl, xx+ eps, hhh));
             hh= yy- bar_height* ( r.v- min_vol)/vol_rg;
             g2.draw( new Line2D.Double( xx+ eps, hh, xx+ eps, yy));
-	    if(ix > start) {
-		g2.setPaint(Color.lightGray);
-		double av1 = yy - bar_height *
-		    (avg_volumes.get(ix - start - 1) - min_vol) / vol_rg;
-		double av2 = yy - bar_height *
-		    (avg_volumes.get(ix - start) - min_vol) / vol_rg;
-		// System.err.printf("Drawing line: %.2f, %.2f, %.2f, %.2f\n",
-		// 		  xx + eps - day_width, av1, xx + eps, av2);
-		g2.draw(new Line2D.Double(xx + eps - day_width, av1,
-					  xx + eps, av2));
-	    }
+            if(ix > start) {
+                g2.setPaint(Color.lightGray);
+                double av1 = yy - bar_height *
+                    (avg_volumes.get(ix - start - 1) - min_vol) / vol_rg;
+                double av2 = yy - bar_height *
+                    (avg_volumes.get(ix - start) - min_vol) / vol_rg;
+                // System.err.printf("Drawing line: %.2f, %.2f, %.2f, %.2f\n",
+                //                xx + eps - day_width, av1, xx + eps, av2);
+                g2.draw(new Line2D.Double(xx + eps - day_width, av1,
+                                          xx + eps, av2));
+            }
             xx+= day_width;
         }
         g2.setFont( new Font("Monospaced", Font.PLAIN, 14));
-	
-	int avg_vol_sz = avg_volumes.size();
-	float last_avg_volume = (avg_vol_sz > 0)?
-	    avg_volumes.get(avg_vol_sz - 1): 0;
-	if(jl1 != null) {
-// 	    System.err.printf("Before getChannel(), %s, %s\n", stk_name, ed);
-	    List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
-					  price_height, min_price, price_rg);
-// 	    System.err.printf("After getChannel(), %s, %s\n", stk_name, ed);
-	    if(pts != null) {
-		g2.setPaint( Color.yellow);
-		g2.draw(new Line2D.Double(pts.get(0), pts.get(1),
-					  pts.get(2), pts.get(3)));
-		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
-					  pts.get(6), pts.get(7)));
-	    }
-// 	    System.err.printf("Before getOBV(), %s, %s\n", stk_name, ed);
-	    String obv_str = getOBV(jl1, last_avg_volume);
-// 	    System.err.printf("After getOBV(), %s, %s\n", stk_name, ed);
-	    g2.drawString(obv_str, d.width / 2 - 350, 15);
-	    g2.setPaint( Color.darkGray);
-	}
-	if(jl2 != null) {
-	    List<Double> pts = getChannel(jl2, last_day_x, day_width, yyp,
-					  price_height, min_price, price_rg);
-	    if(pts != null) {
-		g2.setPaint( Color.cyan);
-		g2.draw(new Line2D.Double(pts.get(0), pts.get(1),
-					  pts.get(2), pts.get(3)));
-		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
-					  pts.get(6), pts.get(7)));
-	    }
-	    String obv_str = getOBV(jl2, last_avg_volume);
-	    g2.drawString(obv_str, d.width / 2 - 350, 35);
-	    g2.setPaint( Color.darkGray);
-	}
-	if(jl3 != null) {
-	    List<Double> pts = getChannel(jl3, last_day_x, day_width, yyp,
-					  price_height, min_price, price_rg);
-	    if(pts != null) {
-		g2.setPaint( Color.white);
-		g2.draw(new Line2D.Double(pts.get(0), pts.get(1),
-					  pts.get(2), pts.get(3)));
-		g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
-					  pts.get(6), pts.get(7)));
-	    }
-	    String obv_str = getOBV(jl3, last_avg_volume);
-	    g2.drawString(obv_str, d.width / 2 - 350, 55);
-	    g2.setPaint( Color.darkGray);
-	}
-	String cndls = sss.getSetups(ts.get(end).date);
-	String[] candles = cndls.split("\n");
-	if(candles.length == 3) {
-	    g2.setPaint(Color.white);
-	    for(int x = 0; x < 3; x++)
-		g2.drawString(candles[x], d.width / 2 + 150, 15 + 20 * x);
-	}
+        
+        int avg_vol_sz = avg_volumes.size();
+        float last_avg_volume = (avg_vol_sz > 0)?
+            avg_volumes.get(avg_vol_sz - 1): 0;
+        if(jl1 != null) {
+//          System.err.printf("Before getChannel(), %s, %s\n", stk_name, ed);
+            List<Double> pts = getChannel(jl1, last_day_x, day_width, yyp,
+                                          price_height, min_price, price_rg);
+//          System.err.printf("After getChannel(), %s, %s\n", stk_name, ed);
+            if(pts != null) {
+                g2.setPaint( Color.yellow);
+                g2.draw(new Line2D.Double(pts.get(0), pts.get(1),
+                                          pts.get(2), pts.get(3)));
+                g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
+                                          pts.get(6), pts.get(7)));
+            }
+//          System.err.printf("Before getOBV(), %s, %s\n", stk_name, ed);
+            String obv_str = getOBV(jl1, last_avg_volume);
+//          System.err.printf("After getOBV(), %s, %s\n", stk_name, ed);
+            g2.drawString(obv_str, d.width / 2 - 350, 15);
+            g2.setPaint( Color.darkGray);
+        }
+        if(jl2 != null) {
+            List<Double> pts = getChannel(jl2, last_day_x, day_width, yyp,
+                                          price_height, min_price, price_rg);
+            if(pts != null) {
+                g2.setPaint( Color.cyan);
+                g2.draw(new Line2D.Double(pts.get(0), pts.get(1),
+                                          pts.get(2), pts.get(3)));
+                g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
+                                          pts.get(6), pts.get(7)));
+            }
+            String obv_str = getOBV(jl2, last_avg_volume);
+            g2.drawString(obv_str, d.width / 2 - 350, 35);
+            g2.setPaint( Color.darkGray);
+        }
+        if(jl3 != null) {
+            List<Double> pts = getChannel(jl3, last_day_x, day_width, yyp,
+                                          price_height, min_price, price_rg);
+            if(pts != null) {
+                g2.setPaint( Color.white);
+                g2.draw(new Line2D.Double(pts.get(0), pts.get(1),
+                                          pts.get(2), pts.get(3)));
+                g2.draw(new Line2D.Double(pts.get(4), pts.get(5),
+                                          pts.get(6), pts.get(7)));
+            }
+            String obv_str = getOBV(jl3, last_avg_volume);
+            g2.drawString(obv_str, d.width / 2 - 350, 55);
+            g2.setPaint( Color.darkGray);
+        }
+        String cndls = sss.getSetups(ts.get(end).date);
+        String[] candles = cndls.split("\n");
+        if(candles.length == 3) {
+            g2.setPaint(Color.white);
+            for(int x = 0; x < 3; x++)
+                g2.drawString(candles[x], d.width / 2 + 150, 15 + 20 * x);
+        }
         g2.setPaint(Color.lightGray);
-	if(!invisible)
-	    g2.drawString(stk_name.toUpperCase(), 50, 15);         
+        if(!invisible)
+            g2.drawString(stk_name.toUpperCase(), 50, 15);         
     }
 
     String getOBV(StxxJL jl, float last_avg_volume) {
-	StxOBV obv = new StxOBV(ts, jl);
-	List<Integer> pivots = jl.pivots(4, true);
-	StringBuffer udv_sb = new StringBuffer("");
-// 	System.err.printf("%.1f: found %d pivots\n", jl.getFactor(), 
-// 			  pivots.size());
-	if(pivots.size() >= 4) {
-	    int ixx = 0;
-	    int udv_end = ts.currentPosition();
-	    for(int piv: pivots) {
-		if(ixx == 0) {
-		    ixx++;
-		    continue;
-		}
-		int abs_piv = Math.abs(piv);
-		StxJL rec = jl.data(abs_piv);
-		float res = obv.obv(piv, udv_end);
-		udv_sb.append(" P").append(ixx).append(": ");
-		udv_sb.append(String.format("%7.2f [%4.1f]", 
-					    (piv < 0)? rec.c2: rec.c, res));
-		ixx++;
-	    }
-	}
-	return udv_sb.toString();
+        StxOBV obv = new StxOBV(ts, jl);
+        List<Integer> pivots = jl.pivots(4, true);
+        StringBuffer udv_sb = new StringBuffer("");
+//      System.err.printf("%.1f: found %d pivots\n", jl.getFactor(), 
+//                        pivots.size());
+        if(pivots.size() >= 4) {
+            int ixx = 0;
+            int udv_end = ts.currentPosition();
+            for(int piv: pivots) {
+                if(ixx == 0) {
+                    ixx++;
+                    continue;
+                }
+                int abs_piv = Math.abs(piv);
+                StxJL rec = jl.data(abs_piv);
+                float res = obv.obv(piv, udv_end);
+                udv_sb.append(" P").append(ixx).append(": ");
+                udv_sb.append(String.format("%7.2f [%4.1f]", 
+                                            (piv < 0)? rec.c2: rec.c, res));
+                ixx++;
+            }
+        }
+        return udv_sb.toString();
     }
 
     String getUDV(StxxJL jl, StxUDV udv, float last_avg_volume) {
-	List<Integer> pivots = jl.pivots(4, true);
-	StringBuffer udv_sb = new StringBuffer("");
-	// System.err.printf("GetUDV, factor = %.2f\n", jl.getFactor());
-	// System.err.printf("Got the following pivots:\n");
-	if(pivots.size() >= 5) {
-	    StxJL piv_0 = jl.data(pivots.get(0));
-	    // System.err.printf("P0.date = %s\n", piv_0.date);
-	    int ixx = 0;
-	    int udv_end = ts.currentPosition();
-	    for(int piv: pivots) {
-		if(ixx == 0) {
-		    ixx++;
-		    continue;
-		}
-		StxJL rec = jl.data(piv);
-		// System.err.printf("P%d date: %s\n", ixx, rec.date);
-		int udv_start = ts.find(rec.date, 0);
-		if (udv_start < udv_end)
-		    udv_start++;
-		List<Float> res = udv.udv(udv_start, udv_end);
+        List<Integer> pivots = jl.pivots(4, true);
+        StringBuffer udv_sb = new StringBuffer("");
+        // System.err.printf("GetUDV, factor = %.2f\n", jl.getFactor());
+        // System.err.printf("Got the following pivots:\n");
+        if(pivots.size() >= 5) {
+            StxJL piv_0 = jl.data(pivots.get(0));
+            // System.err.printf("P0.date = %s\n", piv_0.date);
+            int ixx = 0;
+            int udv_end = ts.currentPosition();
+            for(int piv: pivots) {
+                if(ixx == 0) {
+                    ixx++;
+                    continue;
+                }
+                StxJL rec = jl.data(piv);
+                // System.err.printf("P%d date: %s\n", ixx, rec.date);
+                int udv_start = ts.find(rec.date, 0);
+                if (udv_start < udv_end)
+                    udv_start++;
+                List<Float> res = udv.udv(udv_start, udv_end);
 
-		udv_sb.append(" P").append(ixx).append(": ");
-		udv_sb.append(String.format("%7.2f [%4.1f]", rec.c,
-					    -res.get(2) / last_avg_volume));
-		ixx++;
-		if(rec.p2) {
-		    udv_sb.append(" P").append(ixx).append(": ");
-		    udv_sb.append(String.format("%7.2f [%4.1f]", rec.c2,
-						res.get(2) / last_avg_volume));
-		    ixx++;
-		}
-	    }
-	}
-	return udv_sb.toString();
+                udv_sb.append(" P").append(ixx).append(": ");
+                udv_sb.append(String.format("%7.2f [%4.1f]", rec.c,
+                                            -res.get(2) / last_avg_volume));
+                ixx++;
+                if(rec.p2) {
+                    udv_sb.append(" P").append(ixx).append(": ");
+                    udv_sb.append(String.format("%7.2f [%4.1f]", rec.c2,
+                                                res.get(2) / last_avg_volume));
+                    ixx++;
+                }
+            }
+        }
+        return udv_sb.toString();
     }
 
     String getUDVOld(StxxJL jl, StxUDV udv, float last_avg_volume) {
-	List<Integer> pivots = jl.pivots(4, true);
-	StringBuffer udv_sb = new StringBuffer("");
-	// System.err.printf("GetUDV, factor = %.2f\n", jl.getFactor());
-	// System.err.printf("Got the following pivots:\n");
-	if(pivots.size() >= 5) {
-	    StxJL piv_0 = jl.data(pivots.get(0));
-	    // System.err.printf("P0.date = %s\n", piv_0.date);
-	    int ixx = 0, start = ts.find(piv_0.date, 0);
-	    for(int piv: pivots) {
-		if(ixx == 0) {
-		    ixx++;
-		    continue;
-		}
-		StxJL rec = jl.data(piv);
-		// System.err.printf("P%d date: %s\n", ixx, rec.date);
-		int udv_end = ts.find(rec.date, 0);
-		List<Float> res = udv.udv(start, udv_end);
-		udv_sb.append(" P").append(ixx).append(": ");
-		udv_sb.append(String.format("%7.2f [%4.1f]", rec.c,
-					    res.get(2) / last_avg_volume));
-		ixx++;
-		if(rec.p2) {
-		    udv_sb.append(" P").append(ixx).append(": ");
-		    udv_sb.append(String.format("%7.2f [%4.1f]", rec.c2,
-						res.get(2) / last_avg_volume));
-		    ixx++;
-		}
-	    }
-	}
-	return udv_sb.toString();
+        List<Integer> pivots = jl.pivots(4, true);
+        StringBuffer udv_sb = new StringBuffer("");
+        // System.err.printf("GetUDV, factor = %.2f\n", jl.getFactor());
+        // System.err.printf("Got the following pivots:\n");
+        if(pivots.size() >= 5) {
+            StxJL piv_0 = jl.data(pivots.get(0));
+            // System.err.printf("P0.date = %s\n", piv_0.date);
+            int ixx = 0, start = ts.find(piv_0.date, 0);
+            for(int piv: pivots) {
+                if(ixx == 0) {
+                    ixx++;
+                    continue;
+                }
+                StxJL rec = jl.data(piv);
+                // System.err.printf("P%d date: %s\n", ixx, rec.date);
+                int udv_end = ts.find(rec.date, 0);
+                List<Float> res = udv.udv(start, udv_end);
+                udv_sb.append(" P").append(ixx).append(": ");
+                udv_sb.append(String.format("%7.2f [%4.1f]", rec.c,
+                                            res.get(2) / last_avg_volume));
+                ixx++;
+                if(rec.p2) {
+                    udv_sb.append(" P").append(ixx).append(": ");
+                    udv_sb.append(String.format("%7.2f [%4.1f]", rec.c2,
+                                                res.get(2) / last_avg_volume));
+                    ixx++;
+                }
+            }
+        }
+        return udv_sb.toString();
     }
 
     List<Double> getChannel(StxxJL jl1, double last_day_x, double day_width,
-			    double yyp, double price_height,
-			    float min_price, float price_rg) {
-	List<Double> x_lst = new ArrayList<Double>();
-	List<Double> y_lst = new ArrayList<Double>();
-	List<Integer> pivots = jl1.pivots(4, false);
-	for(int piv: pivots) {
-	    int abs_piv = Math.abs(piv);
-	    StxJL rec = jl1.data(abs_piv);
-	    if (piv > 0) {
-		x_lst.add(last_day_x - day_width * (jl1.size() - abs_piv - 1));
-		y_lst.add(yyp - price_height * (rec.c - min_price) / price_rg);
-	    } else {
-		x_lst.add(last_day_x - day_width * (jl1.size() - abs_piv - 1));
-		y_lst.add(yyp - price_height * (rec.c2 - min_price) / 
-			  price_rg);
-	    }
-	}
-	if(x_lst.size() < 4)
-	    return null;
-	List<Double> res = new ArrayList<Double>();
-	double x1 = x_lst.get(0), y1 = y_lst.get(0), a, b;
-	double x2 = x_lst.get(2), y2 = y_lst.get(2);
-	a = (y1 - y2) / (x1 - x2);
-	b = (x1 * y2 - x2 * y1) / (x1 - x2);
-	double last_day_y = a * last_day_x + b;
-	res.add(x1);
-	res.add(y1);
-	res.add(last_day_x);
-	res.add(last_day_y);
+                            double yyp, double price_height,
+                            float min_price, float price_rg) {
+        List<Double> x_lst = new ArrayList<Double>();
+        List<Double> y_lst = new ArrayList<Double>();
+        List<Integer> pivots = jl1.pivots(4, false);
+        for(int piv: pivots) {
+            int abs_piv = Math.abs(piv);
+            StxJL rec = jl1.data(abs_piv);
+            if (piv > 0) {
+                x_lst.add(last_day_x - day_width * (jl1.size() - abs_piv - 1));
+                y_lst.add(yyp - price_height * (rec.c - min_price) / price_rg);
+            } else {
+                x_lst.add(last_day_x - day_width * (jl1.size() - abs_piv - 1));
+                y_lst.add(yyp - price_height * (rec.c2 - min_price) / 
+                          price_rg);
+            }
+        }
+        if(x_lst.size() < 4)
+            return null;
+        List<Double> res = new ArrayList<Double>();
+        double x1 = x_lst.get(0), y1 = y_lst.get(0), a, b;
+        double x2 = x_lst.get(2), y2 = y_lst.get(2);
+        a = (y1 - y2) / (x1 - x2);
+        b = (x1 * y2 - x2 * y1) / (x1 - x2);
+        double last_day_y = a * last_day_x + b;
+        res.add(x1);
+        res.add(y1);
+        res.add(last_day_x);
+        res.add(last_day_y);
 
-	x1 = x_lst.get(1);
-	y1 = y_lst.get(1);
-	x2 = x_lst.get(3);
-	y2 = y_lst.get(3);
-	a = (y1 - y2) / (x1 - x2);
-	b = (x1 * y2 - x2 * y1) / (x1 - x2);
-	last_day_y = a * last_day_x + b;
-	res.add(x1);
-	res.add(y1);
-	res.add(last_day_x);
-	res.add(last_day_y);
+        x1 = x_lst.get(1);
+        y1 = y_lst.get(1);
+        x2 = x_lst.get(3);
+        y2 = y_lst.get(3);
+        a = (y1 - y2) / (x1 - x2);
+        b = (x1 * y2 - x2 * y1) / (x1 - x2);
+        last_day_y = a * last_day_x + b;
+        res.add(x1);
+        res.add(y1);
+        res.add(last_day_x);
+        res.add(last_day_y);
 
-	return res;
+        return res;
     }
 
     public List<Float> avgVolumes(int w) {
-	List<Float> res = new ArrayList<Float>();
-	for(int ix = start; ix <= end; ++ix) {
-	    float avg_vol = 0;
-	    int s = ix - w + 1;
-	    if(s < 0)
-		s = 0;
-	    int ww =  ix - s + 1;
-	    for(int ixx = s; ixx <= ix; ++ixx)
-		avg_vol += ts.get(ixx).v;
-	    res.add(avg_vol / ww);
-	}
+        List<Float> res = new ArrayList<Float>();
+        for(int ix = start; ix <= end; ++ix) {
+            float avg_vol = 0;
+            int s = ix - w + 1;
+            if(s < 0)
+                s = 0;
+            int ww =  ix - s + 1;
+            for(int ixx = s; ixx <= ix; ++ixx)
+                avg_vol += ts.get(ixx).v;
+            res.add(avg_vol / ww);
+        }
         return res;
     }
 
@@ -450,8 +450,8 @@ public class Chart extends JPanel {
             if((ix > 0) && (StxCal.month(ts.get(ix - 1).date) != mm)) {
                 if( mm== 1)
                     lbls.put(ix, (invisible? "Month":
-				  new Integer(StxCal.year(ts.get(ix).date)).
-				  toString()));
+                                  new Integer(StxCal.year(ts.get(ix).date)).
+                                  toString()));
                 else
                     lbls.put(ix, invisible? "Month": months.get(mm));
             }
@@ -465,8 +465,8 @@ public class Chart extends JPanel {
             int mm = StxCal.month(ts.get(ix).date);
             if((mm == 1) && (StxCal.month(ts.get(ix - 1).date) != mm))
                 lbls.put(ix, (invisible? "Year":
-			      new Integer(StxCal.year(ts.get(ix).date)).
-			      toString()));
+                              new Integer(StxCal.year(ts.get(ix).date)).
+                              toString()));
         }
         return lbls;
     }
@@ -507,7 +507,7 @@ public class Chart extends JPanel {
 
     String rewind() {
         StxRec res = ts.get(90);
-	ts.setDay(res.date, 0, 1);
+        ts.setDay(res.date, 0, 1);
         return res.date;
     }
     
