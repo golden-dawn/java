@@ -6,3 +6,7 @@
 
 # Ignore output directory
 output
+
+# Ignore VSCode folder
+.vscode/
+
