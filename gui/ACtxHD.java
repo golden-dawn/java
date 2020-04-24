@@ -754,7 +754,7 @@ public class ACtxHD implements KeyListener, ActionListener {
         StringBuilder q = new StringBuilder("SELECT DISTINCT stk FROM ");
         q.append("trades WHERE in_dt='").append(dt).append("' AND tag='").
             append(wl_tag.getText()).append("'");
-        System.err.println("getTradeStocks: q = " + q.toString());
+//         System.err.println("getTradeStocks: q = " + q.toString());
         try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet sret = sdb.get1(q.toString());
