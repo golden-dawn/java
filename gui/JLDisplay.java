@@ -47,7 +47,7 @@ public class JLDisplay extends JScrollPane {
         jtp.setBackground(Color.black); 
         a= new SimpleAttributeSet(); this.setViewportView( jtp);
         setPreferredSize( new Dimension( w, h));
-	this.invisible = invisible;
+        this.invisible = invisible;
     }
     public JLDisplay( int w, int h, int fsz, String name){ 
         super(); jtp= new JTextPane(); jtp.setDocument( d); 
@@ -57,7 +57,7 @@ public class JLDisplay extends JScrollPane {
         setPreferredSize( new Dimension( w, h));
     }
     public void append( String s, Color cf, Color cb, boolean bul, 
-			boolean bb) {
+                        boolean bb) {
         try {
             StyleConstants.setForeground( a, cf);
             StyleConstants.setBackground( a, cb);
@@ -152,16 +152,16 @@ public class JLDisplay extends JScrollPane {
     }
     public void printRec(StxJL jlr) {
         if (jlr.s == StxJL.None) 
-	    return;
-	append( String.format( "%10s|", invisible? String.valueOf
-			       (StxCal.numBusDays(first_date, jlr.date)): 
-			       jlr.date));
-	printRecBody(jlr);
-	append("\n");             
-	if (jlr.c2 != 0) {
+            return;
+        append( String.format( "%10s|", invisible? String.valueOf
+                               (StxCal.numBusDays(first_date, jlr.date)): 
+                               jlr.date));
+        printRecBody(jlr);
+        append("\n");             
+        if (jlr.c2 != 0) {
             append(String.format("%10s|", invisible? String.valueOf
-				 (StxCal.numBusDays(first_date, jlr.date)): 
-				 jlr.date));
+                                 (StxCal.numBusDays(first_date, jlr.date)): 
+                                 jlr.date));
             printRecBody2(jlr);
             append("\n");
         }
@@ -169,19 +169,19 @@ public class JLDisplay extends JScrollPane {
 
     public void printRecOBV(StxJL jlr, float obv1, float obv2) {
         if (jlr.s == StxJL.None)
-	    return;
-	append( String.format( "%10s|", invisible? String.valueOf
-			       (StxCal.numBusDays(first_date, jlr.date)): 
-			       jlr.date));
-	printRecBody(jlr);
-	append(String.format("%6.1f", obv1));
-	append("\n");
-	if (jlr.c2 != 0) {
+            return;
+        append( String.format( "%10s|", invisible? String.valueOf
+                               (StxCal.numBusDays(first_date, jlr.date)): 
+                               jlr.date));
+        printRecBody(jlr);
+        append(String.format("%6.1f", obv1));
+        append("\n");
+        if (jlr.c2 != 0) {
             append(String.format("%10s|", invisible? String.valueOf
-				 (StxCal.numBusDays(first_date, jlr.date)): 
-				 jlr.date));
+                                 (StxCal.numBusDays(first_date, jlr.date)): 
+                                 jlr.date));
             printRecBody2(jlr);
-	    append(String.format("%6.1f", obv2));
+            append(String.format("%6.1f", obv2));
             append("\n");
         }
     }
@@ -266,11 +266,11 @@ public class JLDisplay extends JScrollPane {
     }
     
     public void printLastLine(StxRec r, double f) {
-	String r_date = r.date;
-	if (invisible)
-	    r_date = String.valueOf(StxCal.numBusDays(first_date, r.date));
+        String r_date = r.date;
+        if (invisible)
+            r_date = String.valueOf(StxCal.numBusDays(first_date, r.date));
         append(String.format("%10s %.2f %.2f %.2f %.2f %,.0f  %.2f",
-			     r_date, r.o, r.h, r.l, r.c, r.v, f));
+                             r_date, r.o, r.h, r.l, r.c, r.v, f));
     }
 
     public void newSize( int w, int h) {
@@ -281,31 +281,31 @@ public class JLDisplay extends JScrollPane {
     }
     public void setTextPanelBackground( Color col) { jtp.setBackground( col);}
     public StxxJL runJL(String stk, String sd, String ed, float ff, int w, 
-			 int pivs, String eod_tbl, String split_tbl) {
+                         int pivs, String eod_tbl, String split_tbl) {
         clear();
         int vw = 1;              
         StxxJL sjl = new StxxJL(stk, sd, ed, ff, w, vw, eod_tbl, split_tbl);
         sjl.jl(ed);
-	StxOBV obv = new StxOBV(sjl);
-	int obv_end = sjl.stk_data().currentPosition();
-	float obv1 = 0, obv2 = 0;
-	first_date = sjl.data(0).date;
+        StxOBV obv = new StxOBV(sjl);
+        int obv_end = sjl.stk_data().currentPosition();
+        float obv1 = 0, obv2 = 0;
+        first_date = sjl.data(0).date;
         List<Integer> pivots = sjl.pivots(pivs, false);
         for(int piv: pivots) {
-	    if (piv < 0) {
-		obv2 = obv.obv(piv, obv_end);
-		continue;
-	    }
-	    obv1 = obv.obv(piv, obv_end);
+            if (piv < 0) {
+                obv2 = obv.obv(piv, obv_end);
+                continue;
+            }
+            obv1 = obv.obv(piv, obv_end);
             printRecOBV(sjl.data(piv), obv1, obv2);
-	}
-	int start = pivots.get(pivots.size() - 1);
-	if (start < 0)
-	    start *= -1;
+        }
+        int start = pivots.get(pivots.size() - 1);
+        if (start < 0)
+            start *= -1;
         for(int ix = start + 1; ix < sjl.size(); ++ix)
             printRec(sjl.data(ix));
         printLastLine(sjl.lastDay(), sjl.avgRg());
-	append("\n");
-	return sjl;
+        append("\n");
+        return sjl;
     }
 }
