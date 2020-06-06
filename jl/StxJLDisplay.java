@@ -49,7 +49,8 @@ public class StxJLDisplay extends JScrollPane {
         a= new SimpleAttributeSet(); this.setViewportView( jtp);
         setPreferredSize( new Dimension( w, h));
     }
-    public void append( String s, Color cf, Color cb, boolean bul, boolean bb) {
+    public void append(String s, Color cf, Color cb, boolean bul,
+                       boolean bb) {
         try {
             StyleConstants.setForeground( a, cf);
             StyleConstants.setBackground( a, cb);
