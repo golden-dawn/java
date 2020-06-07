@@ -189,7 +189,7 @@ public class StxCal {
     }
     static public int numBusDaysExpiry( String s_date, String exp_date) {
         int res = numBusDays(s_date, exp_date);
-	return (StxCal.cmp(exp_date, "2015-01-17") > 0)? res - 1: res;	
+        return (StxCal.cmp(exp_date, "2015-01-17") > 0)? res - 1: res;
     }
     private void addHol( int y, String md, String des, int dw, int wn) {
         StringBuilder sb= new StringBuilder(); sb.append( y).append( md);
@@ -251,7 +251,7 @@ public class StxCal {
             addHol( y, "-10-29", "Frankenstorm 1");
             addHol( y, "-10-30", "Frankenstorm 2");
         }
-	if( y== 2018) addHol( y, "-12-05", "George H.W. Bush funeral");
+        if( y== 2018) addHol( y, "-12-05", "George H.W. Bush funeral");
 
     }
     public void printHolidays() {
@@ -451,10 +451,10 @@ public class StxCal {
             exp_date= moveWeekDays( exp_date, 10);
         }
         if( cmp( exp_date, "2015-01-17")>= 0)
-	    exp_date= moveDays( exp_date, 1);
-	else {
-            if( !isBusDay( exp_date)) exp_date= prevBusDay( exp_date);	    
-	}
+            exp_date= moveDays( exp_date, 1);
+        else {
+            if( !isBusDay( exp_date)) exp_date= prevBusDay( exp_date);
+        }
         return exp_date;
     }
     static public String getMonthlyExpiration(String date, int num_months) {
@@ -462,7 +462,7 @@ public class StxCal {
         boolean one_month = ( num_months == 1);
         while(num_months > 1) {
             exp_date = moveWeekDays(exp_date, 10);
-	    exp_date = getMonthlyExpiration(exp_date);
+            exp_date = getMonthlyExpiration(exp_date);
             --num_months;
         }
         // if(one_month == false && (cmp(exp_date, "2015-01-17") >= 0))
@@ -507,8 +507,8 @@ public class StxCal {
 
     static public List<String> expiries(String dt, int m) {
         List<String> res = new ArrayList<String>();
-	for(int ix = 0; ix < m; ix++)
-	    res.add(getMonthlyExpiration(dt, ix + 1));
+        for(int ix = 0; ix < m; ix++)
+            res.add(getMonthlyExpiration(dt, ix + 1));
         return res;
     }
 
