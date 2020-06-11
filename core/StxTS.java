@@ -213,31 +213,31 @@ public class StxTS<T extends StxRecord> {
         return Arrays.asList( end_dates);
     }
     public List<String> getLastSeries() {
-	Map.Entry<Integer, Integer> last_gap = gaps.lastEntry();
-	ArrayList<String> start_end = new ArrayList<String>();
-	if(last_gap == null) {
-	    start_end.add(data.get(start).date);
-	    start_end.add(data.get(l - 1).date);
-	} else {
-	    start_end.add(data.get(last_gap.getKey()).date);
-	    start_end.add(data.get(last_gap.getValue()).date);
-	}
-	return start_end;
+        Map.Entry<Integer, Integer> last_gap = gaps.lastEntry();
+        ArrayList<String> start_end = new ArrayList<String>();
+        if(last_gap == null) {
+            start_end.add(data.get(start).date);
+            start_end.add(data.get(l - 1).date);
+        } else {
+            start_end.add(data.get(last_gap.getKey()).date);
+            start_end.add(data.get(last_gap.getValue()).date);
+        }
+        return start_end;
     }
     public List<String> getSeries(String date) {
-	int ix = find(date, 0);
-	if(ix == -1)
-	    return null;
-	Map.Entry<Integer, Integer> last_gap = gaps.floorEntry(ix);
-	ArrayList<String> start_end = new ArrayList<String>();
-	if(last_gap == null) {
-	    start_end.add(data.get(start).date);
-	    start_end.add(data.get(l - 1).date);
-	} else {
-	    start_end.add(data.get(last_gap.getKey()).date);
-	    start_end.add(data.get(last_gap.getValue()).date);
-	}
-	return start_end;
+        int ix = find(date, 0);
+        if(ix == -1)
+            return null;
+        Map.Entry<Integer, Integer> last_gap = gaps.floorEntry(ix);
+        ArrayList<String> start_end = new ArrayList<String>();
+        if(last_gap == null) {
+            start_end.add(data.get(start).date);
+            start_end.add(data.get(l - 1).date);
+        } else {
+            start_end.add(data.get(last_gap.getKey()).date);
+            start_end.add(data.get(last_gap.getValue()).date);
+        }
+        return start_end;
     }
 
     public T last() { return ( l<= 0)? null: data.get( l- 1); }
@@ -292,7 +292,7 @@ public class StxTS<T extends StxRecord> {
             else
                 q.append( " AND dt>='1901-01-02'");
             if( ed!= null) q.append( " AND dt<='"+ ed+ "'");
-	    q.append(" ORDER BY dt");
+            q.append(" ORDER BY dt");
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet rset = sdb.get(q.toString());
             int s_gap= 0, l_gap= 0, ix= 0;
