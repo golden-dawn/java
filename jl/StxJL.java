@@ -41,13 +41,13 @@ public class StxJL extends StxRecord {
         c2= r.c2; s2= r.s2; p2= r.p2; this.arg= r.arg;
     }
     public void split(float s) {
-	c *= s;
-	c2 *= s;
-	vr /= s;
-	obv1 /= s;
-	obv2 /= s;
-	obv3 /= s;
-	arg *= s;
+        c *= s;
+        c2 *= s;
+        vr /= s;
+        obv1 /= s;
+        obv2 /= s;
+        obv3 /= s;
+        arg *= s;
     }
     public void dividend( float d) { c-= d; c2-= d; }
 
@@ -138,13 +138,13 @@ public class StxJL extends StxRecord {
     // d. obv{1,2,3} are the signed ratios multiplied by the total
     // volume for the day.
     public void setOBV(StxRec sr, float prev_c) {
-	boolean hb4l = sr.hiB4Lo();
-	float e1 = hb4l? sr.h: sr.l, e2 = hb4l? sr.l: sr.h;
-	float diff1 = e1 - prev_c, diff2 = e2 - e1, diff3 = sr.c - e2;
-	float sum = Math.abs(diff1) + Math.abs(diff2) + Math.abs(diff3);
-	this.obv1 = sr.v * diff1 / sum;
-	this.obv2 = sr.v * diff2 / sum;
-	this.obv3 = sr.v * diff3 / sum;
+        boolean hb4l = sr.hiB4Lo();
+        float e1 = hb4l? sr.h: sr.l, e2 = hb4l? sr.l: sr.h;
+        float diff1 = e1 - prev_c, diff2 = e2 - e1, diff3 = sr.c - e2;
+        float sum = Math.abs(diff1) + Math.abs(diff2) + Math.abs(diff3);
+        this.obv1 = sr.v * diff1 / sum;
+        this.obv2 = sr.v * diff2 / sum;
+        this.obv3 = sr.v * diff3 / sum;
     }
 
     public static void main( String[] args) {
