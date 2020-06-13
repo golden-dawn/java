@@ -56,22 +56,22 @@ public class StxxJL {
 
     public float avgRange(List<StxRec> data, int ix, int w) {
         float res = 0; 
-	int s = ix - w + 1; 
-	if (s < 0) 
-	    s = 0;
-	int ww = ix - s + 1;
+        int s = ix - w + 1; 
+        if (s < 0) 
+            s = 0;
+        int ww = ix - s + 1;
         for(int ixx = s; ixx <= ix; ++ixx)
             res += data.get(ixx).trueRange((ixx == 0)? null: 
-					   data.get(ixx - 1));
+                                           data.get(ixx - 1));
         return res / ww;
     }
 
     public float avgVolume(List<StxRec> data, int ix, int w) {
         float res = 0;
-	int s = ix - w + 1; 
-	if (s < 0) 
-	    s = 0;
-	int ww = ix - s + 1;
+        int s = ix - w + 1; 
+        if (s < 0) 
+            s = 0;
+        int ww = ix - s + 1;
         for(int ixx = s; ixx <= ix; ++ixx)
             res += data.get(ixx).v;
         return res / ww;
@@ -79,31 +79,31 @@ public class StxxJL {
 
     public void next(int ix) {
         _f = f * avg_rg;
-	data.nextDay(1);
+        data.nextDay(1);
         Float ratio = data.getSplit(data.rel(0).date);
         if (ratio != null) {
-	    adjustForSplits(ratio.floatValue());
-	    adjustRecordsForSplit(ix, ratio.floatValue());
-	}
+            adjustForSplits(ratio.floatValue());
+            adjustRecordsForSplit(ix, ratio.floatValue());
+        }
         switch(ls.s()) {
         case StxJL.SRa: 
-	    sRa(ix, _f); 
-	    break; 
-	case StxJL.NRa: 
-	    nRa(ix, _f);
-	    break;
+            sRa(ix, _f); 
+            break; 
+        case StxJL.NRa: 
+            nRa(ix, _f);
+            break;
         case StxJL.UT:
-	    uT(ix, _f);
-	    break;
-	case StxJL.DT:
-	    dT( ix, _f);
-	    break;
+            uT(ix, _f);
+            break;
+        case StxJL.DT:
+            dT( ix, _f);
+            break;
         case StxJL.NRe:
-	    nRe( ix, _f);
-	    break;
-	case StxJL.SRe:
-	    sRe( ix, _f);
-	    break;
+            nRe( ix, _f);
+            break;
+        case StxJL.SRe:
+            sRe( ix, _f);
+            break;
         };
         avg_rg = avgRange(data.data(), ix, w);
         vi = avgVolume(data.data(), ix, w);
@@ -118,9 +118,9 @@ public class StxxJL {
     private void recDay(int ix, int sh, int sl) {
         StxRec sr = data.get(ix);
         StxJL jlr= new StxJL( sr.date, avg_rg, vi, recs.size());
-	float prev_c = (ix == 0)? sr.o: data.get(ix - 1).c;
-	jlr.setOBV(sr, prev_c); 
-	recs.add(jlr);
+        float prev_c = (ix == 0)? sr.o: data.get(ix - 1).c;
+        jlr.setOBV(sr, prev_c); 
+        recs.add(jlr);
         if(( sh!= StxJL.None)&& ( sl!= StxJL.None)) {
             if( sr.hiB4Lo()){ r( jlr, sr, sh); r( jlr, sr, sl);}
             else{ r( jlr, sr, sl); r( jlr, sr, sh);}
@@ -260,8 +260,8 @@ public class StxxJL {
         StringBuilder sb= new StringBuilder();
         StxRec r= data.get( data.size()- 1);
         sb.append( String.format( "%s %.2f %.2f %.2f %.2f %.1f [ %.2f]", 
-				  r.date, r.o, r.h, r.l, r.c, vi, 
-				  factorPrice()));
+                                  r.date, r.o, r.h, r.l, r.c, vi, 
+                                  factorPrice()));
         return  sb.toString();
     }
     public StxJL last() { return  recs.last();}
@@ -276,43 +276,43 @@ public class StxxJL {
             List<Integer> rec_pivs = rec.pxx();
             Integer rec_p = rec_pivs.get(0), rec_p2 = rec_pivs.get(1);
             if ((rec_p2 != null) && (rec_p2 <= xx)) {
-// 		System.err.printf("P2: %.1f: adding %d to pivs\n", f, -ixx);
+//              System.err.printf("P2: %.1f: adding %d to pivs\n", f, -ixx);
                 piv.add(0, -ixx); 
-		if (++ix >= num)
-		    break;
+                if (++ix >= num)
+                    break;
             }
             if ((rec_p != null) && (rec_p <= xx)) {
-		ix++;
-		piv.add(0, ixx);
-// 		System.err.printf("P1: %.1f: adding %d to pivs\n", f, ixx);
-	    }
+                ix++;
+                piv.add(0, ixx);
+//              System.err.printf("P1: %.1f: adding %d to pivs\n", f, ixx);
+            }
             --ixx;
         }
         return piv;
     }
 
     public ArrayList<Integer> pivots(int num) { 
-	return pivots(num, false);
+        return pivots(num, false);
     }
 
     public ArrayList<Integer> pivots(int num, boolean include_lns) {
         ArrayList<Integer> piv = new ArrayList<Integer>(num);
         int ix= 0, ixx= recs.size();
         while((ix < num) && (ixx > 0)) {
-	    if (recs.get(--ixx).p2) {
-		ix++;
-		piv.add(0, -ixx);
-// 		System.err.printf("P2: %.1f: adding %d to pivs\n", f, -ixx);
+            if (recs.get(--ixx).p2) {
+                ix++;
+                piv.add(0, -ixx);
+//              System.err.printf("P2: %.1f: adding %d to pivs\n", f, -ixx);
             }
             if (recs.get(ixx).p) {
                 ix++; 
-		piv.add(0, ixx); 
-// 		System.err.printf("P1: %.1f: adding %d to pivs\n", f, ixx);
-	    }
+                piv.add(0, ixx); 
+//              System.err.printf("P1: %.1f: adding %d to pivs\n", f, ixx);
+            }
         }
         if (include_lns) {
             int lns_ix = recs.find(lns.date, 0);
-	    piv.add(lns_ix * (lns.p? -1: 1));
+            piv.add(lns_ix * (lns.p? -1: 1));
         }
         return piv;
     }
@@ -323,12 +323,12 @@ public class StxxJL {
 
     private void adjustRecordsForSplit(int ix, float split_ratio) {
         for(int ixx = 0; ixx < ix; ixx++)
-	    recs.get(ixx).split(split_ratio);
+            recs.get(ixx).split(split_ratio);
     }
 
     public void setFactor( float f) { this.f= f; }
     public float getFactor() {
-	return f;
+        return f;
     }
 
     public static void main( String [] args) throws Exception {
