@@ -1,4 +1,4 @@
-package indicators;
+package jl;
 
 import core.StxTS;
 import core.StxRec;
