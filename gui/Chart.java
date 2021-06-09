@@ -3,7 +3,7 @@ package gui;
 import core.StxCal;
 import core.StxRec;
 import core.StxTS;
-import indicators.StxOBV;
+import jl.StxOBV;
 import indicators.StxUDV;
 import indicators.StxxSetups;
 import jl.StxJL;
