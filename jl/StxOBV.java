@@ -2,8 +2,6 @@ package jl;
 
 import core.StxTS;
 import core.StxRec;
-import StxJL;
-import StxxJL;
 
 import java.lang.Math;
 import java.util.ArrayList;
