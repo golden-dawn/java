@@ -262,8 +262,8 @@ public class ACtxHD implements KeyListener, ActionListener {
         addC(jp_trd, capital, 645, 0, 80, 20);
         addC(jp_trd, trade_status, 765, 5, 550, 15);
         addC(jp_trd, opts, 5, 20, 505, 155);
-        addC(jp_trd, trades, 510, 20, 655, 155);
-        addC(jp_trd, setups, 1170, 20, 200, 155);
+        addC(jp_trd, trades, 510, 20, 630, 155);
+        addC(jp_trd, setups, 1140, 20, 120, 155);
         addC(jp_trd, wl_add, 5, 185, 90, 20);
         addC(jp_trd, wl_trg, 95, 185, 90, 20);
         addC(jp_trd, wl_mark, 185, 185, 100, 20);
