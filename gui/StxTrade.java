@@ -105,12 +105,13 @@ public class StxTrade {
         StringBuilder sb = 
             new StringBuilder(String.format("%s %5s ", active? " ": "#", und));
         sb.append(cp.equals("c")? "C ": " P ").
-            append(String.format("%6.2f age %2d exp %2d ", strike,
+            append(String.format("%6.2f %3d AE: %2d/ %2d ",
+				 strike, num_contracts,
                                  StxCal.numBusDays(in_date, crt_date),
                                  StxCal.numBusDaysExpiry(crt_date, expiry))).
-            append(String.format("S: %6.2f=>%6.2f, ", in_spot, crt_spot)).
-            append(String.format("O: %5.2f=>(B:%5.2f, A:%5.2f), PL:%6.0f\n",
-                                 in_ask, crt_bid, crt_ask,
+            append(String.format("S: %6.2f[%6.2f] ", crt_spot, in_spot)).
+            append(String.format("O: %5.2f/%5.2f[%5.2f], PL:%6.0f\n",
+                                 crt_bid, crt_ask, in_ask,
                                  100 * num_contracts * (crt_bid - in_ask)));
         return sb.toString();
     }
