@@ -1,4 +1,5 @@
 #!/bin/bash
+source ${HOME}/.env_vars
 cd output
-java -cp .:postgresql-42.2.21.jar gui.ACtxHD
+java -cp .:postgresql-${POSTGRES_JDBC_VERSION}.jar gui.ACtxHD
 cd ..
