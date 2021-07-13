@@ -48,7 +48,10 @@ public class StxTrade {
         }
         crt_bid = in_bid;
         crt_ask = in_ask;
-        num_contracts = (int) (0.01 * capital.floatValue() / in_ask);
+	if (in_ask > 0)
+	    num_contracts = (int) (0.01 * capital.floatValue() / in_ask);
+	else
+	    num_contracts = 0;
         // System.err.printf("Ctor: num_contracts = %d\n", num_contracts);
         crt_date = in_date;
         active = true;
@@ -104,7 +107,7 @@ public class StxTrade {
         int sgn = cp.equals("c")? 1: -1;
         StringBuilder sb = 
             new StringBuilder(String.format("%s %5s ", active? " ": "#", und));
-        sb.append(cp.equals("c")? "C ": " P ").
+        sb.append(cp.equals("c")? "C ": "P ").
             append(String.format("%6.2f %3d AE: %2d/ %2d ",
 				 strike, num_contracts,
                                  StxCal.numBusDays(in_date, crt_date),
