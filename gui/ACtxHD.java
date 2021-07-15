@@ -329,7 +329,7 @@ public class ACtxHD implements KeyListener, ActionListener {
             // F11 = 122
             // F12 = 123
             int cd= e.getKeyCode(); String src= e.getComponent().getName();
-	    //          System.err.printf("cd = %d, src = %s\n", cd, src);
+            //          System.err.printf("cd = %d, src = %s\n", cd, src);
             if( src.equals( "ETF")) {
                 String ed= etf.getText();
                 if (cd == 38) 
@@ -449,7 +449,7 @@ public class ACtxHD implements KeyListener, ActionListener {
         case "1M":
         case "3M":
             last_scale = "1M";
-	    break;
+            break;
         case "6M":
             last_scale = "3M";
             break;
@@ -500,7 +500,7 @@ public class ACtxHD implements KeyListener, ActionListener {
         case "5Y":
         case "All":
             last_scale = "All";
-	    break;
+            break;
         }
     }
 
@@ -686,15 +686,15 @@ public class ACtxHD implements KeyListener, ActionListener {
         if (ae.getSource() == wl_add) {
             String table_name = setups_or_trades.getSelectedItem().toString().
                 toLowerCase();
-	    List<String> stx = null;
-	    if (table_name.equals("jl_setups"))
-		stx = getJLSetupStocks();
-	    else if (table_name.equals("scored_setups"))
-		stx = getScoredSetupStocks();
-	    else if (table_name.equals("setups"))
-		stx = getSetupStocks();
-	    else
-		stx = getTradeStocks();
+            List<String> stx = null;
+            if (table_name.equals("jl_setups"))
+                stx = getJLSetupStocks();
+            else if (table_name.equals("scored_setups"))
+                stx = getScoredSetupStocks();
+            else if (table_name.equals("setups"))
+                stx = getSetupStocks();
+            else
+                stx = getTradeStocks();
             for(String stk: stx) {
                 ntf.setText(stk);
                 etf.setText(wl_date.getText());
@@ -763,7 +763,7 @@ public class ACtxHD implements KeyListener, ActionListener {
         stk_list.append(":");
         q.append("trades WHERE in_dt='").append(dt).append("' AND tag='").
             append(wl_tag.getText()).append("'");
-	//         System.err.println("getTradeStocks: q = " + q.toString());
+        //         System.err.println("getTradeStocks: q = " + q.toString());
         try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet sret = sdb.get1(q.toString());
@@ -785,13 +785,13 @@ public class ACtxHD implements KeyListener, ActionListener {
     }
 
     private List<String> getJLSetupStocks() {
-	String dt = wl_date.getText();
-	String exp = StxCal.getMonthlyExpiration(StxCal.nextBusDay(dt));
+        String dt = wl_date.getText();
+        String exp = StxCal.getMonthlyExpiration(StxCal.nextBusDay(dt));
         int num_stks = Integer.parseInt(wl_setups.getText());
         List<String> res = new ArrayList<String>();
 
         StringBuilder q =
-	    new StringBuilder("SELECT distinct stk FROM jl_setups ");
+            new StringBuilder("SELECT distinct stk FROM jl_setups ");
         q.append("WHERE stk IN (SELECT stk FROM leaders WHERE expiry='").
             append(exp).append("' AND opt_spread <= ").
             append(wl_spread.getText()).append(") AND dt='").append(dt).
@@ -800,8 +800,8 @@ public class ACtxHD implements KeyListener, ActionListener {
         try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet sret = sdb.get1(q.toString());
-	    while(sret.next())
-		res.add(sret.getString(1));
+            while(sret.next())
+                res.add(sret.getString(1));
         } catch( Exception ex) {
             System.err.println("Failed to get scored setups: ");
             ex.printStackTrace(System.err);
@@ -810,8 +810,8 @@ public class ACtxHD implements KeyListener, ActionListener {
     }
 
     private List<String> getScoredSetupStocks() {
-	String dt = wl_date.getText();
-	String exp = StxCal.getMonthlyExpiration(StxCal.nextBusDay(dt));
+        String dt = wl_date.getText();
+        String exp = StxCal.getMonthlyExpiration(StxCal.nextBusDay(dt));
         int num_stks = Integer.parseInt(wl_setups.getText());
         List<String> res = new ArrayList<String>();
         StringBuilder q = new StringBuilder("SELECT stk FROM setup_scores ");
@@ -819,13 +819,13 @@ public class ACtxHD implements KeyListener, ActionListener {
             append(exp).append("' AND opt_spread <= ").
             append(wl_spread.getText()).append(") AND dt='").append(dt).
             append("' AND trigger_score != 0 ORDER BY ABS(trigger_score+").
-	    append("trend_score) DESC LIMIT ").append(num_stks);
+            append("trend_score) DESC LIMIT ").append(num_stks);
         System.err.println("getScoredSetupStocks: q = " + q.toString());
         try {
             StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
             ResultSet sret = sdb.get1(q.toString());
-	    while(sret.next())
-		res.add(sret.getString(1));
+            while(sret.next())
+                res.add(sret.getString(1));
         } catch( Exception ex) {
             System.err.println("Failed to get scored setups: ");
             ex.printStackTrace(System.err);
@@ -949,7 +949,7 @@ public class ACtxHD implements KeyListener, ActionListener {
             StringBuilder q = new StringBuilder("SELECT * FROM setups WHERE ");
             q.append("stk='").append(stk).append("' AND dt BETWEEN '").
                 append(sdt).append("' AND '").append(edt).
-		append("' AND setup ").
+                append("' AND setup ").
                 append("IN ('GAP_HV', 'STRONG_CLOSE') ORDER BY dt");
             try {
                 StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
@@ -975,28 +975,36 @@ public class ACtxHD implements KeyListener, ActionListener {
             q2.append("WHERE stk='").append(stk).append("' AND dt ").
                 append("BETWEEN '").append(sdt).append("' AND '").
                 append(edt).append("' ORDER BY dt");
+            StringBuilder q3 = new StringBuilder();
+            q3.append("SELECT indicators->>'rs_rank' FROM indicators ").
+                append("WHERE stk='").append(stk).append("' AND dt ='").
+                append(edt).append("'");
             try {
                 StxDB sdb = new StxDB(System.getenv("POSTGRES_DB"));
+                ResultSet rset_rs = sdb.get1(q3.toString());
+                int rs = 0;
+                while(rset_rs.next())
+                    rs = rset_rs.getInt(1);
                 ResultSet rset = sdb.get1(q1.toString());
-		String stk_summary = "";
+                String stk_summary = "";
                 while(rset.next())
                     stk_summary = String.format("%s %4d %4d\n",
-						rset.getString(2),
-						rset.getInt(3),
-						rset.getInt(4));
+                                                rset.getString(2),
+                                                rs,
+                                                rset.getInt(4));
                 ResultSet sret = sdb.get(q2.toString());
                 while(sret.next()) {
                     int num_days = StxCal.numBusDays(sret.getString(1), edt);
                     String setup_name = sret.getString(3).toUpperCase();
                     String stp_name = (setup_name.length() > 4)?
-			setup_name.substring(0, 4): setup_name;
+                        setup_name.substring(0, 4): setup_name;
                     String stp = String.format("D_%d %4s %4d\n", num_days, 
-					       stp_name, sret.getInt(7));
+                                               stp_name, sret.getInt(7));
                     setups.append(stp, 
-				  sret.getString(5).equals("U")? Color.green:
-				  Color.red);
+                                  sret.getString(5).equals("U")? Color.green:
+                                  Color.red);
                 }
-		setups.append(stk_summary, Color.white);
+                setups.append(stk_summary, Color.white);
             } catch( Exception ex) {
                 System.err.println("Failed to get setups: ");
                 ex.printStackTrace(System.err);
