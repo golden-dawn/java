@@ -80,7 +80,8 @@ public class ACtxHD implements KeyListener, ActionListener {
         this.crt_date = d;
         if( StxCal.isBusDay( d)== false)
             d= StxCal.prevBusDay( d);
-        log_fname = String.format("../trades/%s.txt", d);
+        log_fname = String.format("%s/reports/trades/%s.txt",
+                                  System.getenv("HOME"), d);
         jf= new JFrame( "ACTX");
         etf= new JTextField( d); etf.setCaretColor( Color.white);
         etf.setName( "ETF"); etf.addKeyListener( this);
